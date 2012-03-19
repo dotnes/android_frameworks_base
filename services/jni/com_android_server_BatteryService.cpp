@@ -90,6 +90,12 @@ struct PowerSupplyPaths {
     String8 batteryVoltagePath;
     String8 batteryTemperaturePath;
     String8 batteryTechnologyPath;
+
+#ifdef HAS_DOCK_BATTERY
+    char* dockbatteryStatusPath;
+    char* dockbatteryCapacityPath;
+    char* dockbatteryPresentPath;
+#endif
 };
 static PowerSupplyPaths gPaths;
 
@@ -273,7 +279,7 @@ static void android_server_BatteryService_update(JNIEnv* env, jobject obj)
     setIntField(env, obj, gPaths.dockbatteryCapacityPath, gFieldIds.mDockBatteryLevel);
 #endif
 
-    setIntFieldMax(env, obj, gPaths.batteryCapacityPath, gFieldIds.mBatteryLevel, 100);
+    setIntField(env, obj, gPaths.batteryCapacityPath, gFieldIds.mBatteryLevel);
     setVoltageField(env, obj, gPaths.batteryVoltagePath, gFieldIds.mBatteryVoltage);
     setIntField(env, obj, gPaths.batteryTemperaturePath, gFieldIds.mBatteryTemperature);
 
@@ -293,7 +299,6 @@ static void android_server_BatteryService_update(JNIEnv* env, jobject obj)
         env->SetIntField(obj, gFieldIds.mDockBatteryStatus,
                          gConstants.dockstatusUndocked);
 #endif
-
     if (readFromFile(gPaths.batteryHealthPath, buf, SIZE) > 0)
         env->SetIntField(obj, gFieldIds.mBatteryHealth, getBatteryHealth(buf));
 
@@ -439,6 +444,20 @@ int register_android_server_BatteryService(JNIEnv* env)
                 if (access(path, R_OK) == 0)
                     gPaths.batteryTechnologyPath = path;
                 break;
+
+#ifdef HAS_DOCK_BATTERY
+                else if(strcmp(buf, "DockBattery") == 0) {
+                    snprintf(path, sizeof(path), "%s/%s/status", POWER_SUPPLY_PATH, name);
+                    if (access(path, R_OK) == 0)
+                        gPaths.dockbatteryStatusPath = strdup(path);
+                    snprintf(path, sizeof(path), "%s/%s/capacity", POWER_SUPPLY_PATH, name);
+                    if (access(path, R_OK) == 0)
+                        gPaths.dockbatteryCapacityPath = strdup(path);
+                    snprintf(path, sizeof(path), "%s/%s/device/ec_dock", POWER_SUPPLY_PATH, name);
+                    if (access(path, R_OK) == 0)
+                        gPaths.dockbatteryPresentPath = strdup(path);
+                }
+#endif
             }
         }
         closedir(dir);
