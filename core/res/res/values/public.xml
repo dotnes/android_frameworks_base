@@ -2112,4 +2112,9 @@
   <java-symbol type="drawable" name="weather_47" />
   <public type="drawable" name="weather_condition" />
 
+  <!-- Custom Vibrations -->
+  <java-symbol type="string" name="vibration_picker_title"/>
+  <java-symbol type="string" name="vibration_picker_del_title"/>
+  <java-symbol type="layout" name="vibration_picker_dialog"/>
+
 </resources>
