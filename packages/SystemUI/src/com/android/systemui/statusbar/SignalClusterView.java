@@ -1,6 +1,9 @@
 /*
  * Copyright (C) 2011 The Android Open Source Project
  * This code has been modified. Portions copyright (C) 2012, ParanoidAndroid Project.
+ * Copyright (c) 2012-2013 The Linux Foundation. All rights reserved.
+ *
+ * Not a Contribution.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,7 +55,8 @@ public class SignalClusterView
     private boolean mWifiVisible = false;
     private int mWifiStrengthId = 0, mWifiActivityId = 0;
     private boolean mMobileVisible = false;
-    private int mMobileStrengthId = 0, mMobileActivityId = 0, mMobileTypeId = 0;
+    private int mMobileStrengthId = 0, mMobileActivityId = 0;
+    private int mMobileTypeId = 0, mNoSimIconId = 0;
     private boolean mIsAirplaneMode = false;
     private int mAirplaneIconId = 0;
     private String mWifiDescription, mMobileDescription, mMobileTypeDescription;
@@ -65,11 +69,7 @@ public class SignalClusterView
     private boolean showingAltCluster = false;
 
     ViewGroup mWifiGroup, mMobileGroup;
-<<<<<<< HEAD
-    ImageView mWifi, mMobile, mWifiActivity, mMobileActivity, mMobileType, mAirplane, mEther;
-=======
     ImageView mWifi, mMobile, mWifiActivity, mMobileActivity, mMobileType, mAirplane, mNoSimSlot;
->>>>>>> parent of f279646... revert my revert
     TextView mMobileText,mWiFiText;
     View mSpacer;
 
@@ -110,6 +110,7 @@ public class SignalClusterView
         mMobileActivity = (ImageView) findViewById(R.id.mobile_inout);
         mMobileType     = (ImageView) findViewById(R.id.mobile_type);
         mMobileText     = (TextView)  findViewById(R.id.signal_text);
+        mNoSimSlot      = (ImageView) findViewById(R.id.no_sim);
         mWiFiText       = (TextView)  findViewById(R.id.wifi_signal_text);
         mSpacer         =             findViewById(R.id.spacer);
         mAirplane       = (ImageView) findViewById(R.id.airplane);
@@ -130,6 +131,7 @@ public class SignalClusterView
         mMobile         = null;
         mMobileActivity = null;
         mMobileType     = null;
+        mNoSimSlot      = null;
         mMobileText     = null;
         mWiFiText       = null;
         mSpacer         = null;
@@ -153,13 +155,15 @@ public class SignalClusterView
 
     @Override
     public void setMobileDataIndicators(boolean visible, int strengthIcon, int activityIcon,
-            int typeIcon, String contentDescription, String typeContentDescription) {
+            int typeIcon, String contentDescription, String typeContentDescription,
+            int noSimIcon) {
         mMobileVisible = visible;
         mMobileStrengthId = strengthIcon;
         mMobileActivityId = activityIcon;
         mMobileTypeId = typeIcon;
         mMobileDescription = contentDescription;
         mMobileTypeDescription = typeContentDescription;
+        mNoSimIconId = noSimIcon;
 
         apply();
     }
@@ -284,6 +288,7 @@ public class SignalClusterView
             mMobileType.setImageResource(mMobileTypeId);
 
             mMobileGroup.setContentDescription(mMobileTypeDescription + " " + mMobileDescription);
+            mNoSimSlot.setImageResource(mNoSimIconId);
             if (showingSignalText && !mIsAirplaneMode) {
                 mMobile.setVisibility(View.GONE);
                 mMobileText.setVisibility(View.VISIBLE);
@@ -312,20 +317,8 @@ public class SignalClusterView
             mAirplane.setVisibility(View.GONE);
         }
 
-<<<<<<< HEAD
-        if (mEtherVisible) {
-            mEther.setVisibility(View.VISIBLE);
-            mEther.setImageResource(mEtherIconId);
-            mEther.setContentDescription(mEtherDescription);
-        } else {
-            mEther.setVisibility(View.GONE);
-        }
-
-        if (mMobileVisible && mWifiVisible && mIsAirplaneMode) {
-=======
         if (mMobileVisible && mWifiVisible &&
                 ((mIsAirplaneMode) || (mNoSimIconId != 0))) {
->>>>>>> parent of f279646... revert my revert
             mSpacer.setVisibility(View.INVISIBLE);
         } else {
             mSpacer.setVisibility(View.GONE);
