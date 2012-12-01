@@ -4967,6 +4967,13 @@ public final class Settings {
         public static final String LOCKSCREEN_LONGPRESS_CHALLENGE = "lockscreen_longpress_challenge";
 
         /**
+         * NFC polling mode configuration key
+         *
+         * @hide
+         */
+        public static final String NFC_POLLING_MODE = "nfc_polling_mode";
+
+        /**
          * enable and disable fast toggle in settings
          *
          * @hide
