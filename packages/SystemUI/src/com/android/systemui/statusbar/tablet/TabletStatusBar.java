@@ -164,10 +164,10 @@ public class TabletStatusBar extends BaseStatusBar implements
     int mIconSize = -1;
     int mIconHPadding = -1;
     int mNavIconWidth = -1;
+    int mMenuNavIconWidth = -1;
     int mNumberOfButtons = 3;
     float mWidthLand = 0f;
     float mWidthPort = 0f;
-    int mMenuNavIconWidth = -1;
     private int mMaxNotificationIcons = 5;
 
     TabletStatusBarView mStatusBarView;
@@ -246,38 +246,6 @@ public class TabletStatusBar extends BaseStatusBar implements
     public Context getContext() { return mContext; }
 
     private Drawable mBackIcon, mBackAltIcon, mRecentsIcon, mRecentsAltIcon;
-
-    private boolean isLandscape () {
-        Configuration config = mContext.getResources().getConfiguration();
-        return (config.orientation == Configuration.ORIENTATION_LANDSCAPE);
-    }
-
-    private final class SettingsObserver extends ContentObserver {
-        SettingsObserver(Handler handler) {
-            super(handler);
-        }
-
-        void observe() {
-            ContentResolver resolver = mContext.getContentResolver();
-            resolver.registerContentObserver(Settings.System.getUriFor(
-                    Settings.System.MAX_NOTIFICATION_ICONS), false, this);
-            resolver.registerContentObserver(Settings.System.getUriFor(
-                    Settings.System.NAVIGATION_BAR_BUTTONS_QTY), false, this);
-            resolver.registerContentObserver(Settings.System.getUriFor(
-                    Settings.System.STATUSBAR_WEATHER_STYLE), false, this);
-            resolver.registerContentObserver(Settings.System.getUriFor(
-                    Settings.System.USE_WEATHER), false, this);
-            resolver.registerContentObserver(Settings.System.getUriFor(
-                    Settings.System.WEATHER_PANEL_SHORTCLICK), false, this);
-            resolver.registerContentObserver(Settings.System.getUriFor(
-                    Settings.System.WEATHER_PANEL_LONGCLICK), false, this);
-        }
-
-        @Override
-        public void onChange(boolean selfChange) {
-            updateSettings();
-        }
-    }
 
     @Override
     protected void createAndAddWindows() {
@@ -748,6 +716,8 @@ public class TabletStatusBar extends BaseStatusBar implements
         filter.addAction(Intent.ACTION_SCREEN_OFF);
         context.registerReceiver(mBroadcastReceiver, filter);
 
+        SettingsObserver settingsObserver = new SettingsObserver(new Handler());
+        settingsObserver.observe();
         updateSettings();
         return sb;
     }
@@ -889,8 +859,8 @@ public class TabletStatusBar extends BaseStatusBar implements
         }
         if (lp.height != height) {
             lp.height = height;
-           mWindowManager.updateViewLayout(mStatusBarView, lp);
-           mStatusBarView.invalidate();
+            mWindowManager.updateViewLayout(mStatusBarView, lp);
+            mStatusBarView.invalidate();
         }
     }
 
@@ -1485,7 +1455,6 @@ public class TabletStatusBar extends BaseStatusBar implements
         }
 
         public boolean onTouch(View v, MotionEvent event) {
-
             if ((mDisabled & StatusBarManager.DISABLE_EXPAND) != 0) {
                 return true;
             }
@@ -1849,12 +1818,44 @@ public class TabletStatusBar extends BaseStatusBar implements
         return mNotificationPanel.getVisibility() == View.VISIBLE;
     }
 
-   protected void updateSettings() {
-       ContentResolver cr = mContext.getContentResolver();
+    private boolean isLandscape () {
+        Configuration config = mContext.getResources().getConfiguration();
+        return (config.orientation == Configuration.ORIENTATION_LANDSCAPE);
+    }
 
-       onBarHeightChanged(getStatusBarHeight());
-       mNumberOfButtons = Settings.System.getInt(cr, Settings.System.NAVIGATION_BAR_BUTTONS_QTY, 3);
-       UpdateWeights(isLandscape());
+    private final class SettingsObserver extends ContentObserver {
+        SettingsObserver(Handler handler) {
+            super(handler);
+        }
+
+        void observe() {
+            ContentResolver resolver = mContext.getContentResolver();
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.MAX_NOTIFICATION_ICONS), false, this);
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.NAVIGATION_BAR_BUTTONS_QTY), false, this);
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.NAVIGATION_BAR_WIDTH_LAND), false, this);
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.NAVIGATION_BAR_WIDTH_PORT), false, this);
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.STATUSBAR_WEATHER_STYLE), false, this);
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.USE_WEATHER), false, this);
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.WEATHER_PANEL_SHORTCLICK), false, this);
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.WEATHER_PANEL_LONGCLICK), false, this);
+        }
+
+        @Override
+        public void onChange(boolean selfChange) {
+            updateSettings();
+        }
+    }
+
+    protected void updateSettings() {
+        ContentResolver cr = mContext.getContentResolver();
 
         mWeatherPanelEnabled = (Settings.System.getInt(cr,
                 Settings.System.STATUSBAR_WEATHER_STYLE, 2) == 1)
@@ -1877,7 +1878,11 @@ public class TabletStatusBar extends BaseStatusBar implements
         if (mWeatherPanel != null) {
             mWeatherPanel.setVisibility(mWeatherPanelEnabled ? View.VISIBLE : View.GONE);
         }
+
+        onBarHeightChanged(getStatusBarHeight());
+        mNumberOfButtons = Settings.System.getInt(cr, Settings.System.NAVIGATION_BAR_BUTTONS_QTY, 3);
+        mWidthLand = Settings.System.getFloat(cr, Settings.System.NAVIGATION_BAR_WIDTH_LAND, 0f);
+        mWidthPort = Settings.System.getFloat(cr, Settings.System.NAVIGATION_BAR_WIDTH_PORT, 0f);
+        UpdateWeights(isLandscape());
     }
 }
-
-
