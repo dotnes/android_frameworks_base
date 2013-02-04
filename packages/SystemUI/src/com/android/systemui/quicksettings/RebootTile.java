@@ -26,6 +26,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnLongClickListener;
 
+import java.io.DataOutputStream;
+import java.io.IOException;
+
 import com.android.systemui.R;
 import com.android.systemui.statusbar.phone.QuickSettingsController;
 import com.android.systemui.statusbar.phone.QuickSettingsContainerView;
@@ -46,14 +49,21 @@ public class RebootTile extends QuickSettingsTile {
         mOnClick = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-		RunAsRoot(reboot);
-		return true;
+		try {
+			RunAsRoot(reboot);
+		} catch (IOException e) {
+                        e.printStackTrace();
+                }
             }
         };
         mOnLongClick = new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
-		RunAsRoot(rebootr);
+                try {
+                        RunAsRoot(rebootr);
+                } catch (IOException e) {
+                        e.printStackTrace();
+                }
                 return true;
             }
         };
