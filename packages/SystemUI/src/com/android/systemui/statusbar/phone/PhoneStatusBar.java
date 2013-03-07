@@ -41,6 +41,9 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.database.ContentObserver;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.Canvas;
 import android.graphics.ColorFilter;
 import android.graphics.drawable.ColorDrawable;
@@ -136,6 +139,7 @@ import com.android.systemui.aokp.AokpSwipeRibbon;
 
 import java.io.FileDescriptor;
 import java.io.IOException;
+import java.io.File;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
@@ -189,6 +193,8 @@ public class PhoneStatusBar extends BaseStatusBar {
 
     private float mFlingGestureMaxOutputVelocityPx; // how fast can it really go? (should be a little
                                                     // faster than mSelfCollapseVelocityPx)
+
+    private final String NOTIF_WALLPAPER_IMAGE_PATH = "/data/data/com.android.settings/files/notification_wallpaper.jpg";
 
     PhoneStatusBarPolicy mIconPolicy;
 
@@ -258,6 +264,7 @@ public class PhoneStatusBar extends BaseStatusBar {
     QuickSettingsContainerView mSettingsContainer;
     int mSettingsPanelGravity;
     private TilesChangedObserver mTilesChangedObserver;
+    private NotifChangedObserver mNotifChangedObserver;
 
     // top bar
     View mNotificationPanelHeader;
@@ -784,6 +791,9 @@ public class PhoneStatusBar extends BaseStatusBar {
             });
         }
 
+        // Set notification background
+        setNotificationWallpaperHelper();
+
         // Quick Settings (where available, some restrictions apply)
         if (mHasSettingsPanel) {
             // first, figure out where quick settings should be inflated
@@ -842,11 +852,16 @@ public class PhoneStatusBar extends BaseStatusBar {
             }
         }
 
+        // Start observing for changes on Notification Drawer (Background & Alpha)
+        mNotifChangedObserver = new NotifChangedObserver(mHandler);
+        mNotifChangedObserver.startObserving();
+
         // Start observing for changes on QuickSettings (needed here for enable/hide qs)
         mTilesChangedObserver = new TilesChangedObserver(mHandler);
         mTilesChangedObserver.startObserving();
 
         mClingShown = ! (DEBUG_CLINGS
+
             || !Prefs.read(mContext).getBoolean(Prefs.SHOWN_QUICK_SETTINGS_HELP, false));
 
         if (!ENABLE_NOTIFICATION_PANEL_CLING || ActivityManager.isRunningInTestHarness()) {
@@ -1487,6 +1502,8 @@ public class PhoneStatusBar extends BaseStatusBar {
             mPile.removeView(remove);
         }
 
+        //set alpha for notification pile before it is added
+        setNotificationAlphaHelper();
         for (int i=0; i<toShow.size(); i++) {
             View v = toShow.get(i);
             if (v.getParent() == null) {
@@ -3409,6 +3426,8 @@ public class PhoneStatusBar extends BaseStatusBar {
         }
     }
 
+
+
     /**
      *  ContentObserver to watch for Quick Settings tiles changes
      * @author dvtonder
@@ -3416,7 +3435,8 @@ public class PhoneStatusBar extends BaseStatusBar {
      */
     private class TilesChangedObserver extends ContentObserver {
         public TilesChangedObserver(Handler handler) {
-            super(handler);
+	        super(handler);
+                setNotificationWallpaperHelper();
         }
 
         @Override
@@ -3485,10 +3505,14 @@ public class PhoneStatusBar extends BaseStatusBar {
             cr.registerContentObserver(
                     Settings.System.getUriFor(Settings.System.QUICK_TILES_TEXT_COLOR),
                     false, this);
+
+            cr.registerContentObserver(
+                    Settings.System.getUriFor(Settings.System.NOTIF_WALLPAPER_ALPHA),
+                    false, this);
         }
     }
 
-   /**
+    /**
      * ContentObserver to watch for Notification background/alpha
      * @author dvtonder
      * @author kufikugel
@@ -3506,10 +3530,6 @@ public class PhoneStatusBar extends BaseStatusBar {
 
         public void startObserving() {
             final ContentResolver cr = mContext.getContentResolver();
-
-            cr.registerContentObserver(
-                    Settings.Secure.getUriFor(Settings.Secure.UI_MODE_IS_TOGGLED),
-                    false, this);
 
             cr.registerContentObserver(
                     Settings.System.getUriFor(Settings.System.NOTIF_WALLPAPER_ALPHA),
@@ -3674,4 +3694,21 @@ public class PhoneStatusBar extends BaseStatusBar {
             return true;
         return false;
     }
+
+    private void setNotificationWallpaperHelper() {
+        float wallpaperAlpha = Settings.System.getFloat(mContext.getContentResolver(), Settings.System.NOTIF_WALLPAPER_ALPHA, 0.1f);
+        String notifiBack = Settings.System.getString(mContext.getContentResolver(), Settings.System.NOTIFICATION_BACKGROUND);
+        File file = new File(NOTIF_WALLPAPER_IMAGE_PATH);
+        mNotificationPanel.setBackgroundResource(0);
+        mNotificationPanel.setBackgroundResource(R.drawable.notification_panel_bg);
+        Drawable background = mNotificationPanel.getBackground();
+        background.setAlpha(0);
+        if (!file.exists()) {
+            if (notifiBack != null && !notifiBack.isEmpty()) {
+                background.setColorFilter(Integer.parseInt(notifiBack), Mode.SRC_ATOP);
+            }
+         background.setAlpha((int) ((1-wallpaperAlpha) * 255));
+        }
+    }
+
 }
