@@ -2113,6 +2113,8 @@
   <java-symbol type="string" name="action_ribbon"/>
   <java-symbol type="string" name="action_widgets"/>
   <java-symbol type="string" name="action_app_window"/>
+  <java-symbol type="string" name="action_null"/>
+  <java-symbol type="string" name="action_app"/>
 
   <!--  Animations -->
   <java-symbol type="string" name="animation_fade"/>
@@ -2174,5 +2176,4 @@
 
   <!-- Screenshort Trash -->
   <java-symbol type="string" name="trash" />
-
 </resources>
