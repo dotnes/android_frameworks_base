@@ -14,41 +14,26 @@
      limitations under the License.
 -->
 <LinearLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_gravity="top"
-        android:orientation="vertical">
-
-    <LinearLayout
-        android:layout_marginTop="@dimen/qs_tile_margin_above_icon"
-        android:layout_marginBottom="@dimen/qs_tile_margin_below_icon"
-        android:layout_width="wrap_content"
-        android:layout_height="@dimen/qs_tile_icon_size"
-        android:layout_gravity="top|center_horizontal"
-        android:orientation="vertical">
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center"
+    android:gravity="center"
+    android:orientation="vertical">
 
     <TextView
         style="@style/TextAppearance.QuickSettings.TileView"
-        android:id="@+id/hybrid_status1"
+        android:id="@+id/hybrid_status"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:textSize="8dp"/>
-
-    <TextView
-        style="@style/TextAppearance.QuickSettings.TileView"
-        android:id="@+id/hybrid_status2"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="2dp"
-        android:layout_gravity="center"
-        android:textSize="8dp"/>
+        android:gravity="center"/>
 
     <LinearLayout
+        android:layout_marginTop="5dp"
+        android:layout_marginBottom="5dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
         android:orientation="horizontal">
 
         <RelativeLayout
@@ -107,15 +92,14 @@
         </RelativeLayout>
 
     </LinearLayout>
-    </LinearLayout>
 
     <TextView
         style="@style/TextAppearance.QuickSettings.TileView"
         android:id="@+id/hybrid_app"
-        android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="top|center_horizontal"
-            android:gravity="top|center_horizontal"
-            />
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:gravity="center"
+        />
 
 </LinearLayout>

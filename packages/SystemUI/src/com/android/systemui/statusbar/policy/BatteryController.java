@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2010 The Android Open Source Project
- * This code has been modified. Portions copyright (C) 2012, ParanoidAndroid Project.
+ *
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ package com.android.systemui.statusbar.policy;
 
 import java.util.ArrayList;
 
-import android.bluetooth.BluetoothAdapter.BluetoothStateChangeCallback;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -83,6 +82,10 @@ public class BatteryController extends BroadcastReceiver {
         mChangeCallbacks.add(cb);
     }
 
+    public void removeStateChangedCallback(BatteryStateChangeCallback cb) {
+        mChangeCallbacks.remove(cb);
+    }
+
     // For Halo Mods
     public void addStateChangedCallbackHalo(BatteryStateChangeCallbackHalo cb_Halo) {
         mChangeCallbacksHalo.add(cb_Halo);
@@ -91,7 +94,7 @@ public class BatteryController extends BroadcastReceiver {
     // For Halo Mods
     public void removeStateChangedCallbackHalo(BatteryStateChangeCallbackHalo cb_Halo) {
         mChangeCallbacksHalo.remove(cb_Halo);
-    }	
+    }
 
     public void setColor(ColorUtils.ColorSettingInfo colorInfo) {
         mColorInfo = colorInfo;

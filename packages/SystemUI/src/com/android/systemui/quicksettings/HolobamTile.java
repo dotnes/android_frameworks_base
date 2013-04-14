@@ -18,15 +18,18 @@ import com.android.systemui.statusbar.phone.QuickSettingsContainerView;
 
 public class HolobamTile extends QuickSettingsTile {
 
-    public HolobamTile(Context context, LayoutInflater inflater,
-            QuickSettingsContainerView container, QuickSettingsController qsc, Handler handler) {
-        super(context, inflater, container, qsc);
+    public HolobamTile(Context context,
+            QuickSettingsController qsc, Handler handler) {
+        super(context, qsc);
 
         mOnClick = new OnClickListener() {
             @Override
             public void onClick(View v) {
 		Settings.Secure.putInt(mContext.getContentResolver(),
                         Settings.Secure.UI_INVERTED_MODE, !getHoloBamState() ? 2 : 1);
+                if (isFlipTilesEnabled()) {
+                    flipTile(0);
+                }
             }
         };
 

@@ -3535,7 +3535,7 @@ public class PhoneStatusBar extends BaseStatusBar {
     /**
      *  ContentObserver to watch for Quick Settings tiles changes
      * @author dvtonder
-     * @author kufikugel
+     *
      */
     private class TilesChangedObserver extends ContentObserver {
         public TilesChangedObserver(Handler handler) {
@@ -3567,7 +3567,7 @@ public class PhoneStatusBar extends BaseStatusBar {
                     false, this);
 
             cr.registerContentObserver(
-                    Settings.System.getUriFor(Settings.System.QUICK_SETTINGS),
+                    Settings.System.getUriFor(Settings.System.QUICK_SETTINGS_TILES),
                     false, this);
 
             cr.registerContentObserver(
