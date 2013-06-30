@@ -3076,6 +3076,7 @@ public final class Settings {
          */
         public static final String FULLSCREEN_STATUSBAR_TIMEOUT = "fullscreen_statusbar_timeout";
 
+
         /**
          * Whether to link ringtone and notification volumes
          * The value is boolean (1 or 0).
