@@ -1680,8 +1680,10 @@ public class PhoneStatusBar extends BaseStatusBar {
                 .start();
         }
 
-        updateCarrierAndWifiLabelVisibility(false);
         if (mNotificationData.size() < 2) updateStatusBarVisibility();
+
+        updateCarrierAndWifiLabelVisibility(false);
+
     }
 
     /**
@@ -3584,6 +3586,7 @@ public class PhoneStatusBar extends BaseStatusBar {
             if (mCarrierLabel != null) {
                 toggleCarrierAndWifiLabelVisibility();
             }
+            updateStatusBarVisibility();
         }
     }
 
