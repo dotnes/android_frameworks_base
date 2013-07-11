@@ -604,4 +604,6 @@
     <string name="quick_settings_holobam_on">HoloBam On</string>
     <string name="quick_settings_holobam_off">HoloBam Off</string>
 
+    <string name="halo_dismiss">Dismiss notification</string>
+    <string name="halo_hide">Hide HALO</string>
 </resources>
