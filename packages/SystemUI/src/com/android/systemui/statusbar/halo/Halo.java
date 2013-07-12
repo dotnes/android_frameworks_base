@@ -122,7 +122,6 @@ public class Halo extends FrameLayout implements Ticker.TickerCallback {
 
     private Context mContext;
     private PackageManager mPm;
-
     private Handler mHandler;
     private BaseStatusBar mBar;
     private WindowManager mWindowManager;
@@ -132,6 +131,7 @@ public class Halo extends FrameLayout implements Ticker.TickerCallback {
     private INotificationManager mNotificationManager;
     private SettingsObserver mSettingsObserver;
     private GestureDetector mGestureDetector;
+    private KeyguardManager mKeyguardManager;
 
     private HaloEffect mEffect;
     private WindowManager.LayoutParams mTriggerPos;
@@ -177,6 +177,7 @@ public class Halo extends FrameLayout implements Ticker.TickerCallback {
     SharedPreferences preferences;
     private String KEY_HALO_POSITION_Y = "halo_position_y";
     private String KEY_HALO_POSITION_X = "halo_position_x";
+
 
     private final class SettingsObserver extends ContentObserver {
         SettingsObserver(Handler handler) {
@@ -260,6 +261,7 @@ public class Halo extends FrameLayout implements Ticker.TickerCallback {
         mGestureDetector = new GestureDetector(mContext, new GestureListener());
         mHandler = new Handler();
         mRoot = this;
+        mKeyguardManager = (KeyguardManager) mContext.getSystemService(Context.KEYGUARD_SERVICE);
 
         // Init variables
         BitmapDrawable bd = (BitmapDrawable) mContext.getResources().getDrawable(R.drawable.halo_bg);
@@ -269,7 +271,7 @@ public class Halo extends FrameLayout implements Ticker.TickerCallback {
         mTriggerPos = getWMParams();
 
         // Init colors
-        int color = Settings.System.getInt(mContext.getContentResolver(), 
+        int color = Settings.System.getInt(mContext.getContentResolver(),
                Settings.System.HALO_EFFECT_COLOR, 0xFF33B5E5);
 
         mPaintHolo.setAntiAlias(true);
@@ -407,8 +409,8 @@ public class Halo extends FrameLayout implements Ticker.TickerCallback {
 
     void launchTask(NotificationClicker intent) {
 
-        // Do not launch tasks in hidden state
-        if (mState == State.HIDDEN) return;
+        // Do not launch tasks in hidden state or protected lock screen
+        if (mState == State.HIDDEN || (mKeyguardManager.isKeyguardLocked() && mKeyguardManager.isKeyguardSecure())) return;
 
         try {
             ActivityManagerNative.getDefault().resumeAppSwitches();
@@ -735,17 +737,18 @@ public class Halo extends FrameLayout implements Ticker.TickerCallback {
                         // Make a tiny pop if not so many icons are present
                         if (mHapticFeedback && mNotificationData.size() < 10) mVibrator.vibrate(1);
 
-                    try {
-                        if (mMarkerIndex == -1) {
-                            mTaskIntent = null;
-                            resetIcons();
-                            tick(mLastNotificationEntry, gestureText, 0, 250);
+                        try {
+                            if (mMarkerIndex == -1) {
+                                mTaskIntent = null;
+                                resetIcons();
+                                tick(mLastNotificationEntry, gestureText, 0, 250);
 
-                            // Ping to notify the user we're back where we started
+                                // Ping to notify the user we're back where we started
                             if (mEnableColor) {
                                 mEffect.ping(mPaintHolo, 0);
                             } else {
                                 mEffect.ping(mPaintHoloBlue, 0);
+                            }
                             } else {
                                 setIcon(mMarkerIndex);
 
