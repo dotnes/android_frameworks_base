@@ -32,6 +32,9 @@ import com.android.systemui.statusbar.phone.QuickSettingsContainerView;
 
 public class RebootTile extends QuickSettingsTile {
 
+    final String[] reboot = {"reboot"};
+    final String[] rebootr = {"reboot recovery"};
+
     public RebootTile(Context context, LayoutInflater inflater,
             QuickSettingsContainerView container,
             final QuickSettingsController qsc, Handler handler) {
@@ -43,18 +46,27 @@ public class RebootTile extends QuickSettingsTile {
         mOnClick = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-               PowerManager pm = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
-               pm.reboot("");
+		RunAsRoot(reboot);
+		return true;
             }
         };
         mOnLongClick = new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
-                PowerManager pm = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
-                pm.reboot("recovery");
+		RunAsRoot(rebootr);
                 return true;
             }
         };
+    }
+
+    public void RunAsRoot(String[] cmds) throws IOException {
+        Process p = Runtime.getRuntime().exec("su");
+        DataOutputStream os = new DataOutputStream(p.getOutputStream());
+        for (String tmpCmd : cmds) {
+            os.writeBytes(tmpCmd + "\n");
+        }
+        os.writeBytes("exit\n");
+        os.flush();
     }
 
 }
