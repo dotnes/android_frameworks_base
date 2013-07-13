@@ -1716,7 +1716,7 @@ public class NotificationManagerService extends INotificationManager.Stub
         throw new SecurityException("Disallowed call for uid " + uid);
     }
 
-    void checkCallerIsSystemOrSameApp(String pkg) {
+    void checkCallerCanCancelNotification(String pkg) {
         if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.CANCEL_NOTIFICATIONS)
                 == PackageManager.PERMISSION_GRANTED) {
             return;
