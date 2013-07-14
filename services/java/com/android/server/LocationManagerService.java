@@ -59,11 +59,13 @@ import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.WorkSource;
 import android.provider.Settings;
+import android.text.TextUtils;
 import android.util.Log;
 import android.util.Slog;
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.location.ProviderProperties;
 import com.android.internal.location.ProviderRequest;
+import com.android.server.location.BtGpsLocationProvider;
 import com.android.server.location.GeocoderProxy;
 import com.android.server.location.GeofenceProxy;
 import com.android.server.location.GeofenceManager;
@@ -195,6 +197,9 @@ public class LocationManagerService extends ILocationManager.Stub {
 
     // current active user on the device - other users are denied location data
     private int mCurrentUserId = UserHandle.USER_OWNER;
+
+    // reference for original internal gps location provider
+    private GpsLocationProvider mInternalGpsLocationProvider;
 
     public LocationManagerService(Context context) {
         super();
@@ -339,6 +344,37 @@ public class LocationManagerService extends ILocationManager.Stub {
                 + "partition. The fallback must also be marked coreApp=\"true\" in the manifest");
     }
 
+    public void setGpsSource(String device) {
+        synchronized (mLock) {
+            LocationProviderInterface gpsLocationProvider = mRealProviders.get(LocationManager.GPS_PROVIDER);
+            if (gpsLocationProvider != null && mProvidersByName.containsKey(gpsLocationProvider.getName())) {
+                Slog.i(TAG, "Disable and removing provider " + gpsLocationProvider.getName());
+                Settings.Secure.setLocationProviderEnabled(mContext.getContentResolver(), LocationManager.GPS_PROVIDER, false);
+                removeProviderLocked(gpsLocationProvider);
+                mRealProviders.put(LocationManager.GPS_PROVIDER, null);
+            }
+
+            if ("0".equals(device)) {
+                if (!GpsLocationProvider.isSupported())
+                    return;
+
+                GpsLocationProvider gpsProvider = mInternalGpsLocationProvider;
+
+                mGpsStatusProvider = gpsProvider.getGpsStatusProvider();
+                mNetInitiatedListener = gpsProvider.getNetInitiatedListener();
+                addProviderLocked(gpsProvider);
+                mRealProviders.put(LocationManager.GPS_PROVIDER, gpsProvider);
+            } else {
+                BtGpsLocationProvider gpsProvider = new BtGpsLocationProvider(mContext, this);
+                mGpsStatusProvider = gpsProvider.getGpsStatusProvider();
+                mNetInitiatedListener = gpsProvider.getNetInitiatedListener();
+                addProviderLocked(gpsProvider);
+                mRealProviders.put(LocationManager.GPS_PROVIDER, gpsProvider);
+            }
+            updateProvidersLocked();
+        }
+    }
+
     private void loadProvidersLocked() {
         // create a passive location provider, which is always enabled
         PassiveProvider passiveProvider = new PassiveProvider(this);
@@ -350,11 +386,19 @@ public class LocationManagerService extends ILocationManager.Stub {
                 mLocationHandler.getLooper());
 
         if (GpsLocationProvider.isSupported()) {
-            mGpsStatusProvider = gpsProvider.getGpsStatusProvider();
-            mNetInitiatedListener = gpsProvider.getNetInitiatedListener();
-            addProviderLocked(gpsProvider);
-            mRealProviders.put(LocationManager.GPS_PROVIDER, gpsProvider);
+            mInternalGpsLocationProvider = new GpsLocationProvider(mContext, this);
         }
+
+        // Create a gps location provider based on the setting EXTERNAL_GPS_BT_DEVICE
+        String btDevice = Settings.System.getString(mContext.getContentResolver(),
+                Settings.Secure.EXTERNAL_GPS_BT_DEVICE);
+        if (TextUtils.isEmpty(btDevice)) {
+            // default option
+            btDevice = "0";
+            Settings.System.putString(mContext.getContentResolver(),
+                    Settings.Secure.EXTERNAL_GPS_BT_DEVICE, btDevice);
+	}
+        setGpsSource(btDevice);
 
         /*
         Load package name(s) containing location provider support.
