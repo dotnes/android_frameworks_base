@@ -172,13 +172,6 @@ public abstract class BaseStatusBar extends SystemUI implements
 
     protected FrameLayout mStatusBarContainer;
 
-    private Runnable mPanelCollapseRunnable = new Runnable() {
-        @Override
-        public void run() {
-            animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_NONE);
-        }
-    };
-
     // Pie controls
     public PieControlPanel mPieControlPanel;
     public View mPieControlsTrigger;
@@ -217,6 +210,13 @@ public abstract class BaseStatusBar extends SystemUI implements
     public ColorUtils.ColorSettingInfo mLastBackgroundColor;
     protected int mClockColor = com.android.internal.R.color.holo_blue_light;
     public int mSystemUiLayout = ExtendedPropertiesUtils.getActualProperty("com.android.systemui.layout");
+
+    private Runnable mPanelCollapseRunnable = new Runnable() {
+        @Override
+        public void run() {
+            animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_NONE);
+        }
+    };
 
     protected int mLayoutDirection;
     private Locale mLocale;
