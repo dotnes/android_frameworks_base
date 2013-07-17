@@ -154,6 +154,7 @@ public class HaloProperties extends FrameLayout {
         mHaloTextViewL.setTextSize(TypedValue.COMPLEX_UNIT_PX, newSpeechTextSize);
 
         updateResources();
+        updateColorView();
     }
 
     @Override
