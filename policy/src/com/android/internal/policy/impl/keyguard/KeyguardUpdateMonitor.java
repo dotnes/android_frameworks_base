@@ -755,11 +755,17 @@ public class KeyguardUpdateMonitor {
 
         if (DEBUG) {
             Log.d(TAG, "handleSimStateChange: intentValue = " + simArgs + " "
-                    + "state resolved to " + state.toString());
+                    + "state resolved to " + state.toString() + " "
+                    + "subscription =" + subscription);
         }
 
-        if (state != IccCardConstants.State.UNKNOWN && state != mSimState) {
-            mSimState = state;
+        //Incase of MultiSim,unconfigured app state APPSTATE_DETECTED is reported as UNKNOWN.
+        //UNKNOWN state is captured to get correct number of cards configured based on state.
+        mSimState[subscription] = state;
+        if (state != IccCardConstants.State.UNKNOWN && state != mSimState[subscription]) {
+            if (DEBUG_SIM_STATES) Log.v(TAG, "dispatching state: " + state
+                    + "subscription: " + subscription);
+
             for (int i = 0; i < mCallbacks.size(); i++) {
                 KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
                 if (cb != null) {
@@ -990,7 +996,13 @@ public class KeyguardUpdateMonitor {
      * through mHandler, this *must* be called from the UI thread.
      */
     public void reportSimUnlocked() {
-        handleSimStateChange(new SimArgs(IccCardConstants.State.READY));
+        reportSimUnlocked(MSimTelephonyManager.getDefault().getDefaultSubscription());
+    }
+
+    public void reportSimUnlocked(int subscription) {
+        if (DEBUG) Log.d(TAG, "--msim--: reportSimUnlocked(" + subscription + ")");
+        mSimState[subscription] = IccCardConstants.State.READY;
+        handleSimStateChange(new SimArgs(mSimState[subscription], subscription));
     }
 
     public CharSequence getTelephonyPlmn() {
