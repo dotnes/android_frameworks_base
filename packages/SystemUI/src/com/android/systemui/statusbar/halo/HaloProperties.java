@@ -175,6 +175,7 @@ public class HaloProperties extends FrameLayout {
             mContext.getContentResolver().unregisterContentObserver(mSettingsObserver);
             mAttached = false;
         }
+    }
 
     public void setHaloX(int value) {
         mHaloX = value;
@@ -185,7 +186,7 @@ public class HaloProperties extends FrameLayout {
     }
 
     public int getHaloX() {
-        return mHaloX; 
+        return mHaloX;
     }
 
     public int getHaloY() {
