@@ -108,8 +108,7 @@ public class SignalClusterView
         mAirplane       = (ImageView) findViewById(R.id.airplane);
 
         mHandler = new Handler();
-
-        mSettingsObserver.observe();
+        SettingsObserver settingsObserver = new SettingsObserver (mHandler);
 
         apply();
     }
@@ -127,8 +126,6 @@ public class SignalClusterView
         mWiFiText       = null;
         mSpacer         = null;
         mAirplane       = null;
-
-        mContext.getContentResolver().unregisterContentObserver(mSettingsObserver);
 
         super.onDetachedFromWindow();
     }
