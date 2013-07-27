@@ -940,6 +940,7 @@ public class PhoneStatusBar extends BaseStatusBar {
 
     @Override
     protected WindowManager.LayoutParams getSearchLayoutParams(LayoutParams layoutParams) {
+        boolean opaque = false;
         WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
                 LayoutParams.MATCH_PARENT,
                 LayoutParams.MATCH_PARENT,
