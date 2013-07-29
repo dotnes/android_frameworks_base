@@ -250,8 +250,8 @@ public class QuickSettingsController {
                 qs = new RebootTile(mContext, inflater, mContainerView, this, mHandler);
             } else if (tile.equals(TILE_HOLOBAM)) {
                 qs = new HolobamTile(mContext, inflater, mContainerView, this, mHandler);
-            } else if (tile.equals(TILE_NETWORKMODE) && telephonySupported) {
-                qs = new MobileNetworkTypeTile(mContext, inflater, mContainerView, this);
+           } else if (tile.equals(TILE_NETWORKMODE) && mobileDataSupported) {
+                qs = new MobileNetworkTypeTile(mContext, inflater, mContainerView, this, mStatusBarService.mNetworkController);
             } else if (tile.equals(TILE_BAMCONTROL)) {
                 qs = new BamcontrolTile(mContext, inflater, mContainerView, this);
             }
