@@ -85,10 +85,10 @@ import android.widget.TextView;
 import android.service.notification.StatusBarNotification;
 
 import android.service.notification.StatusBarNotification;
+
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.statusbar.StatusBarIconList;
-import com.android.internal.statusbar.StatusBarNotification;
 import com.android.internal.widget.SizeAdaptiveLayout;
 import com.android.systemui.aokp.AokpSwipeRibbon;
 import com.android.systemui.R;
@@ -829,6 +829,7 @@ public abstract class BaseStatusBar extends SystemUI implements
             mLayoutDirection = TextUtils.getLayoutDirectionFromLocale(mLocale);
             refreshLayout(mLayoutDirection);
         }
+        if (mPieControlPanel != null) mPieControlPanel.bumpConfiguration();
     }
 
     protected View updateNotificationVetoButton(View row, StatusBarNotification n) {
@@ -1524,7 +1525,6 @@ public abstract class BaseStatusBar extends SystemUI implements
     }
 
     private Bitmap createRoundIcon(StatusBarNotification notification) {
-
         Notification notif = notification.getNotification();
 
         // Construct the round icon
@@ -1550,7 +1550,7 @@ public abstract class BaseStatusBar extends SystemUI implements
             smoothingPaint.setXfermode(new PorterDuffXfermode(Mode.SRC_IN));
             final int newWidth = iconSize;
             final int newHeight = largeIconWidth / largeIconHeight * iconSize;
-            Bitmap scaledBitmap = Bitmap.createScaledBitmap(notification.notification.largeIcon, newWidth, newHeight, true);
+           Bitmap scaledBitmap = Bitmap.createScaledBitmap(notif.largeIcon, newWidth, newHeight, true);
             canvas.drawBitmap(scaledBitmap, null, new Rect(0, 0,
                     iconSize, iconSize), smoothingPaint);
         } else {
@@ -1598,7 +1598,7 @@ public abstract class BaseStatusBar extends SystemUI implements
         final PendingIntent contentIntent = notification.getNotification().contentIntent;
         if (contentIntent != null) {
             entry.floatingIntent = makeClicker(contentIntent,
-                    notification.getPackageName(), notification.getTag(), notification.getId());
+                   notification.getPackageName(), notification.getTag(), notification.getId());
             entry.floatingIntent.makeFloating(true);
         }
 
