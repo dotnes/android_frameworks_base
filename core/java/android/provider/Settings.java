@@ -6645,6 +6645,14 @@ public final class Settings {
         public static final String SCREENSAVER_DEFAULT_COMPONENT = "screensaver_default_component";
 
         /**
+         * Name of a package that the current user has explicitly allowed to see all of that
+         * user's notifications.
+         *
+         * @hide
+         */
+        public static final String ENABLED_NOTIFICATION_LISTENERS = "enabled_notification_listeners";
+
+        /**
          * Whether or not to enable the dial pad autocomplete functionality.
          *
          * @hide
@@ -7498,6 +7506,13 @@ public final class Settings {
         * Whether the Wi-Fi should be on.  Only the Wi-Fi service should touch this.
         */
        public static final String WIFI_ON = "wifi_on";
+
+       /**
+        * Setting to allow scans to be enabled even wifi is turned off for connectivity.
+        * @hide
+        */
+       public static final String WIFI_SCAN_ALWAYS_AVAILABLE =
+                "wifi_scan_always_enabled";
 
        /**
         * Used to save the Wifi_ON state prior to tethering.
