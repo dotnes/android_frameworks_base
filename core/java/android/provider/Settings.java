@@ -658,6 +658,22 @@ public final class Settings {
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_DREAM_SETTINGS = "android.settings.DREAM_SETTINGS";
 
+    /**
+     * Activity Action: Show Notification listener settings.
+     * <p>
+     * In some cases, a matching Activity may not exist, so ensure you
+     * safeguard against this.
+     * <p>
+     * Input: Nothing.
+     * <p>
+     * Output: Nothing.
+     * @see android.service.notification.NotificationListenerService
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_NOTIFICATION_LISTENER_SETTINGS
+            = "android.settings.NOTIFICATION_LISTENER_SETTINGS";
+
     // End of Intent actions for Settings
 
     /**
@@ -6637,6 +6653,13 @@ public final class Settings {
         public static final String ENABLED_NOTIFICATION_LISTENERS = "enabled_notification_listeners";
 
         /**
+         * Whether or not to enable the dial pad autocomplete functionality.
+         *
+         * @hide
+         */
+        public static final String DIALPAD_AUTOCOMPLETE = "dialpad_autocomplete";
+
+        /**
          * If screensavers are enabled, whether the screensaver should be automatically launched
          * when charging wirelessly.
          */
@@ -7050,6 +7073,14 @@ public final class Settings {
         * Whether or not data roaming is enabled. (0 = false, 1 = true)
         */
        public static final String DATA_ROAMING = "data_roaming";
+
+       /**
+        * The value passed to a Mobile DataConnection via bringUp which defines the
+        * number of retries to preform when setting up the initial connection. The default
+        * value defined in DataConnectionTrackerBase#DEFAULT_MDC_INITIAL_RETRY is currently 1.
+        * @hide
+        */
+       public static final String MDC_INITIAL_MAX_RETRY = "mdc_initial_max_retry";
 
        /**
         * Whether user has enabled development settings.
@@ -7558,6 +7589,12 @@ public final class Settings {
        public static final String WIFI_P2P_DEVICE_NAME = "wifi_p2p_device_name";
 
        /**
+        * The min time between wifi disable and wifi enable
+        * @hide
+        */
+       public static final String WIFI_REENABLE_DELAY_MS = "wifi_reenable_delay";
+
+       /**
         * The number of milliseconds to delay when checking for data stalls during
         * non-aggressive detection. (screen is turned off.)
         * @hide
@@ -8015,6 +8052,12 @@ public final class Settings {
          * @hide
          */
         public static final String AUDIO_SAFE_VOLUME_STATE = "audio_safe_volume_state";
+
+        /**
+         * SELinux enforcement status. If 0, permissive; if 1, enforcing.
+         * @hide
+         */
+        public static final String SELINUX_STATUS = "selinux_status";
 
         /**
          * Settings to backup. This is here so that it's in the same place as the settings
