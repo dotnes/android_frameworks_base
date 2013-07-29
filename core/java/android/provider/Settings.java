@@ -4810,7 +4810,7 @@ public final class Settings {
             NAV_BUTTON_COLOR,
             NAV_GLOW_COLOR,
             STATUS_BAR_COLOR,
-            STATUS_ICON_COLOR
+            STATUS_ICON_COLOR,
             PHONE_BLACKLIST_ENABLED,
             PHONE_BLACKLIST_NOTIFY_ENABLED,
             PHONE_BLACKLIST_PRIVATE_NUMBER_MODE,
