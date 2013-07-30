@@ -3241,6 +3241,12 @@ public final class Settings {
          */
         public static final String PIE_CENTER = "pie_center";
 
+        /**
+         * Restart Launcher
+         * @hide
+         */
+        public static final String EXPANDED_DESKTOP_RESTART_LAUNCHER = "expanded_desktop_restart_launcher";
+
        // PIE COLORS EVERYWHERE! //
 
         /**
