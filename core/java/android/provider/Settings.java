@@ -4620,7 +4620,7 @@ public final class Settings {
          */
         public static final String MMS_BREATH = "mms_breath";
 
-        /**	
+        /**
          * Give MMS Notifications a breathing effect
          * @hide
          */
@@ -4645,6 +4645,14 @@ public final class Settings {
          * @hide
          */
         public static final String KG_ALL_WIDGETS = "kg_all_widgets";
+
+        /**
+         * Whether to allow notification vibration while notification alerts are disabled
+         * (e.g. during phone calls). The vibration pattern to be used will be a subtle one;
+         * custom vibration is disabled at that point.
+         * @hide
+         */
+        public static final String NOTIFICATION_VIBRATE_DURING_ALERTS_DISABLED = "vibrate_while_no_alerts";
 
         /**
          * Settings to backup. This is here so that it's in the same place as the settings
@@ -4713,6 +4721,7 @@ public final class Settings {
             LOCKSCREEN_SOUNDS_ENABLED,
             SHOW_WEB_SUGGESTIONS,
             NOTIFICATION_LIGHT_PULSE,
+            NOTIFICATION_VIBRATE_DURING_ALERTS_DISABLED,
             SIP_CALL_OPTIONS,
             SIP_RECEIVE_CALLS,
             POINTER_SPEED,
@@ -4998,7 +5007,7 @@ public final class Settings {
          *  we always vibrate, even if no vibration was specified
          */
         public static final String NOTIFICATION_CONVERT_SOUND_TO_VIBRATION = "convert_sound_to_vibration";
-        
+
         /**
          * Whether to enable notification shortcuts (toggle)
          *
