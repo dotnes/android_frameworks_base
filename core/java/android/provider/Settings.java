@@ -3099,10 +3099,28 @@ public final class Settings {
         public static final String PIE_SEARCH = "pie_search";
 
         /**
+         * Pie kill task, default to 0 (off)
+         * @hide
+         */
+        public static final String PIE_KILL_TASK = "pie_kill_task";
+
+        /**
+         * Pie app window, default to 0 (off)
+         * @hide
+         */
+        public static final String PIE_APP_WINDOW = "pie_app_window";
+
+        /**
          * Pie will not rotate. Should default to 0 (no, rotate)
          * @hide
          */
         public static final String PIE_STICK = "pie_stick";
+
+        /**
+         * Pie power, should default to 0 (no, show only when needed)
+         * @hide
+         */
+        public static final String PIE_POWER = "pie_power";
 
         /**
          * Pie gap angle, should default to 2
