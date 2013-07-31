@@ -212,9 +212,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private static final int KEY_ACTION_KILL_APP = 11;
     private static final int KEY_ACTION_LAST_APP = 12;
     private static final int KEY_ACTION_CUSTOM_APP = 13;
-    // private static final int KEY_ACTION_WIDGETS = 14;
-    // private static final int KEY_ACTION_QS = 15;
-    private static final int KEY_ACTION_CAMERA = 16;
+    private static final int KEY_ACTION_TORCH = 14;
+    private static final int KEY_ACTION_CAMERA = 15;
 
     // Masks for checking presence of hardware keys.
     // Must match values in core/res/res/values/config.xml
@@ -584,10 +583,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private boolean mIsLongPress;
     private KeyguardManager mKeyguardManager;
 
-	// HW overlays state
-	int mDisableOverlays = 0;
+    // HW overlays state
+    int mDisableOverlays = 0;
 
-	private int mSystemDpi = 0;
+    boolean mHideStatusBar;
+
+    private int mSystemDpi = 0;
     private int mSystemUiDpi = 0;
     private int mSystemUiLayout = 0;
     private int mNavigationBarDpi = 0;
@@ -1131,6 +1132,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     PowerManager pm = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
                     pm.goToSleep(SystemClock.uptimeMillis());
                     break;
+                case KEY_ACTION_TORCH:
+                    Intent i = new Intent("net.cactii.flash2.TOGGLE_FLASHLIGHT");
+                    i.putExtra("bright", false);
+                    mContext.sendBroadcast(i);
                 case KEY_ACTION_NOTIFICATIONS:
                     try {
                         IStatusBarService statusbar = getStatusBarService();
@@ -1585,6 +1590,17 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
     }
 
+    public String getDefString(ContentResolver resolver, String key, int def) {
+        String value = Settings.System.getStringForUser(resolver, key, UserHandle.USER_CURRENT);
+        if (value == null)
+            value = Integer.toString(def);
+        return value;
+    }
+
+    public String getStr(int str) {
+        return Integer.toString(str);
+    }
+
     private void update(boolean updateUi) {
         if (updateUi) updateHybridLayout();
 
@@ -1608,17 +1624,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         int mStatusBarPercent = Integer.parseInt(ExtendedPropertiesUtils.getProperty("com.android.systemui.statusbar.dpi", "100"));
         mStatusBarDpi = mStatusBarPercent * mSystemUiDpi / 100;
         return oldSystemUiLayout;
-    }
-
-    public String getDefString(ContentResolver resolver, String key, int def) {
-        String value = Settings.System.getStringForUser(resolver, key, UserHandle.USER_CURRENT);
-        if (value == null)
-            value = Integer.toString(def);
-        return value;
-    }
-
-    public String getStr(int str) {
-        return Integer.toString(str);
     }
 
     public void updateSettings() {
@@ -2659,22 +2664,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             }
         }
 
-        if (keyCode == KeyEvent.KEYCODE_BACK && !down) {
-            mHandler.removeCallbacks(mKillTask);
-        }
-
-        // Specific device key handling
-        if (mDeviceKeyHandler != null) {
-            try {
-                // The device only should consume known keys.
-                if (mDeviceKeyHandler.handleKeyEvent(event)) {
-                    return -1;
-                }
-            } catch (Exception e) {
-                Slog.w(TAG, "Could not dispatch event to device key handler", e);
-            }
-        }
-
         // First we always handle the home key here, so applications
         // can never break it, although if keyguard is on, we do let
         // it handle it, because that gives us the correct 5 second
@@ -2768,6 +2757,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     preloadRecentApps();
                 }
                 if (repeatCount == 0) {
+                    mHomePressed = true;
                     mHomeLongPressed = false;
                 } else if (longPress) {
                     if (!keyguardOn && !mLongPressOnHomeBehavior.equals(getStr(KEY_ACTION_NOTHING))) {
@@ -3145,6 +3135,18 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         if (mGlobalKeyManager.handleGlobalKey(mContext, keyCode, event)) {
             return -1;
+        }
+
+        // Specific device key handling
+        if (mDeviceKeyHandler != null) {
+            try {
+                // The device only should consume known keys.
+                if (mDeviceKeyHandler.handleKeyEvent(event)) {
+                    return -1;
+                }
+            } catch (Exception e) {
+                Slog.w(TAG, "Could not dispatch event to device key handler", e);
+            }
         }
 
         // Let the application handle the key.
