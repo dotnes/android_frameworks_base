@@ -291,11 +291,24 @@ public abstract class BaseStatusBar extends SystemUI implements
                     Settings.System.PIE_TRIGGER), false, this);
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.EXPANDED_DESKTOP_STATE), false, this);
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.STATUS_BAR_COLLAPSE_ON_DISMISS), false, this);
+
+	    update();
+
         }
 
         @Override
         public void onChange(boolean selfChange) {
             updatePieControls();
+	    update();
+        }
+
+        private void update() {
+            ContentResolver resolver = mContext.getContentResolver();
+            mAutoCollapseBehaviour = Settings.System.getIntForUser(resolver,
+                    Settings.System.STATUS_BAR_COLLAPSE_ON_DISMISS,
+                    Settings.System.STATUS_BAR_COLLAPSE_IF_NO_CLEARABLE, UserHandle.USER_CURRENT);
         }
     }
 
@@ -308,31 +321,6 @@ public abstract class BaseStatusBar extends SystemUI implements
                 mDeviceProvisioned = provisioned;
                 updateNotificationIcons();
             }
-        }
-    };
-
-    private class SettingsObserver extends ContentObserver {
-        public SettingsObserver(Handler handler) {
-            super(handler);
-        }
-
-        public void observe() {
-            ContentResolver resolver = mContext.getContentResolver();
-            resolver.registerContentObserver(Settings.System.getUriFor(
-                    Settings.System.STATUS_BAR_COLLAPSE_ON_DISMISS), false, this);
-            update();
-        }
-
-        @Override
-        public void onChange(boolean selfChange) {
-            update();
-        }
-
-        private void update() {
-            ContentResolver resolver = mContext.getContentResolver();
-            mAutoCollapseBehaviour = Settings.System.getIntForUser(resolver,
-                    Settings.System.STATUS_BAR_COLLAPSE_ON_DISMISS,
-                    Settings.System.STATUS_BAR_COLLAPSE_IF_NO_CLEARABLE, UserHandle.USER_CURRENT);
         }
     };
 
