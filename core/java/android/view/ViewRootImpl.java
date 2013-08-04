@@ -6445,4 +6445,9 @@ public final class ViewRootImpl implements ViewParent,
             }
         }
     }
+
+    public void setProcessPositionEvents(boolean b){
+        if (mView != null)
+            mView.setProcessGenericMotionAsPointer(b);
+    }
 }
