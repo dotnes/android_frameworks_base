@@ -54,7 +54,7 @@
                     android:singleLine="false"
                     android:textAppearance="@style/TextAppearance.StatusBar.Expanded.Date"
                     android:layout_toRightOf="@id/clock"
-                    android:layout_centerVertical="true"
+                    android:layout_alignBaseline="@id/clock"
                     />
             </RelativeLayout>
 
