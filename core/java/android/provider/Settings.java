@@ -57,6 +57,7 @@ import android.util.Log;
 import com.android.internal.widget.ILockSettings;
 
 import java.net.URISyntaxException;
+import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
