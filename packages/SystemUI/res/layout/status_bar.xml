@@ -122,7 +122,7 @@
                 android:layout_height="match_parent"
                 android:singleLine="true"
                 android:paddingStart="1dip"
-                android:gravity="center_vertical|start"
+                android:gravity="center_vertical|left"
                 />
         </LinearLayout>
     </LinearLayout>
