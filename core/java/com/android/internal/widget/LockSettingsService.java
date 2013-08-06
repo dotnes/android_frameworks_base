@@ -504,6 +504,13 @@ public class LockSettingsService extends ILockSettings.Stub {
         Secure.LOCK_PATTERN_VISIBLE,
         Secure.LOCK_PATTERN_TACTILE_FEEDBACK_ENABLED,
         Secure.LOCK_SHOW_ERROR_PATH,
-        Secure.LOCK_DOTS_VISIBLE
-        };
+        Secure.LOCK_DOTS_VISIBLE,
+        Secure.LOCK_SYNC_ENCRYPTION_PASSWORD
+    };
+
+    // These are protected with a read permission
+    private static final String[] READ_PROFILE_PROTECTED_SETTINGS = new String[] {
+        Secure.LOCK_SCREEN_OWNER_INFO_ENABLED,
+        Secure.LOCK_SCREEN_OWNER_INFO
+    };
 }
