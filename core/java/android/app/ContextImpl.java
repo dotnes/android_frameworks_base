@@ -118,6 +118,9 @@ import android.app.admin.DevicePolicyManager;
 import com.android.internal.app.IAppOpsService;
 import com.android.internal.os.IDropBoxManagerService;
 
+import android.os.IHybridService;
+import com.android.internal.os.HybridManager;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -579,10 +582,17 @@ class ContextImpl extends Context {
                 }});
 
         registerService(IRDA_SERVICE, new StaticServiceFetcher() {
-                public Object createStaticService() {
-                    IBinder b = ServiceManager.getService(IRDA_SERVICE);
-                    IIrdaManager service = IIrdaManager.Stub.asInterface(b);
-                    return new IrdaManager(service);
+            public Object createStaticService() {
+                IBinder b = ServiceManager.getService(IRDA_SERVICE);
+                IIrdaManager service = IIrdaManager.Stub.asInterface(b);
+                return new IrdaManager(service);
+            }});
+
+        registerService(HYBRID_MANAGER, new ServiceFetcher() {
+            public Object createService(ContextImpl ctx) {
+                IBinder b = ServiceManager.getService(HYBRID_SERVICE);
+                IHybridService service = IHybridService.Stub.asInterface(b);
+                return new HybridManager(ctx, service);
                 }});
     }
 

@@ -2320,6 +2320,30 @@ public abstract class Context {
     public abstract boolean isHwuiDisabled();
 
     /**
+     * Use with {@link #getSystemService} to retrieve a
+     * {@link android.os.HybridService} for changing application display properties
+     * on the device.
+     *
+     * @see #getSystemService
+     * @see android.os.HybirdManager
+     *
+     * @hide
+     */
+    public static final String HYBRID_MANAGER = "hybrid";
+
+    /**
+     * Use with {@link #getSystemService} to retrieve a
+     * {@link android.os.HybridService} for changing application display properties
+     * on the device.
+     *
+     * @see #getSystemService
+     * @see android.os.HybirdManager
+     *
+     * @hide
+     */
+    public static final String HYBRID_SERVICE = "hybridservice";
+
+    /**
      * Determine whether the given permission is allowed for a particular
      * process and user ID running in the system.
      *
