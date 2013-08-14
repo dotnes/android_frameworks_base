@@ -875,9 +875,6 @@ public class Halo extends FrameLayout implements Ticker.TickerCallback, TabletTi
                                     mEffect.ping(mPaintHolo, 0);
                                 }
 
-                                final int c = getHaloMsgCount()-getHidden() < 0 ? 0 : getHaloMsgCount()-getHidden();
-                                mEffect.setHaloMessageNumber(0, c, false, 1000, null);
-
                             } else {
                                 setIcon(iconIndex);
                                 NotificationData.Entry entry = mNotificationData.get(iconIndex);
