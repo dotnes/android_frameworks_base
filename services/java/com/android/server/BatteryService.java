@@ -531,6 +531,7 @@ public final class BatteryService extends Binder {
         if (mHasDockBattery){
             intent.putExtra(BatteryManager.EXTRA_DOCK_STATUS, mDockBatteryStatus);
             intent.putExtra(BatteryManager.EXTRA_DOCK_LEVEL, mDockBatteryLevel);
+            intent.putExtra(BatteryManager.EXTRA_DOCK_AC_ONLINE, false);
         }
 
         if (false) {
