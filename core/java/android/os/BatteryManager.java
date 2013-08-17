@@ -47,6 +47,12 @@ public class BatteryManager {
     public static final String EXTRA_LEVEL = "level";
 
     /**
+     * Boolean field containing the current dock battery AC status.
+     * @hide
+     */
+    public static final String EXTRA_DOCK_AC_ONLINE = "dock_ac_online";
+
+    /**
      * Extra for {@link android.content.Intent#ACTION_BATTERY_CHANGED}:
      * integer containing the maximum battery level.
      */
