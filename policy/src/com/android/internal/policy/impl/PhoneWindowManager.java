@@ -588,8 +588,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     // HW overlays state
     int mDisableOverlays = 0;
 
-    boolean mHideStatusBar;
-
     private int mSystemDpi = 0;
     private int mSystemUiDpi = 0;
     private int mSystemUiLayout = 0;
