@@ -451,21 +451,6 @@ public class HaloProperties extends FrameLayout {
                 MeasureSpec.getSize(mHaloNumberView.getMeasuredHeight()));
         mHaloNumberView.layout(0, 0, 0, 0);
 
-        // Maximal stretch for speech bubble
-        final int iconSize = (int)(mContext.getResources().getDimensionPixelSize(R.dimen.halo_bubble_size) * mFraction);
-        final int maximumWidth = (int)(getWidth() * 0.95f) - iconSize;
-
-        if (mHaloTickerWrapper.getMeasuredWidth() > maximumWidth) {
-            final int optimalWidth = iconSize * 5;
-            final int newSize = maximumWidth > optimalWidth ? optimalWidth : maximumWidth;
-            layoutParams = new LinearLayout.LayoutParams(newSize, mHaloContentHeight);
-            mHaloTickerWrapper.setLayoutParams(layoutParams);
-
-            mHaloContentView.measure(MeasureSpec.getSize(mHaloContentView.getMeasuredWidth()),
-                    MeasureSpec.getSize(mHaloContentView.getMeasuredHeight()));
-            mHaloContentView.layout(0, 0, 0, 0);
-        }
-
         mLastContentStateLeft = contentLeft;
     }
 
