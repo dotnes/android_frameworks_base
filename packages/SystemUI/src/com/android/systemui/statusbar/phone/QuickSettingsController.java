@@ -159,12 +159,15 @@ public class QuickSettingsController {
     private BroadcastReceiver mReceiver;
     private ContentObserver mObserver;
     public BaseStatusBar mStatusBarService;
+    private final String mSettingsString;
+    private boolean mHideLiveTiles;
+    private boolean mHideLiveTileLabels;
 
     private InputMethodTile mIMETile;
 
     private static final int MSG_UPDATE_TILES = 1000;
 
-    public QuickSettingsController(Context context, QuickSettingsContainerView container, BaseStatusBar statusBarService) {
+    public QuickSettingsController(Context context, QuickSettingsContainerView container, BaseStatusBar statusBarService, String settings) {
         mContext = context;
         mContainerView = container;
         mHandler = new Handler() {
@@ -181,6 +184,7 @@ public class QuickSettingsController {
         };
         mStatusBarService = statusBarService;
         mQuickSettingsTiles = new ArrayList<QuickSettingsTile>();
+        mSettingsString = settings;
     }
 
     void loadTiles() {
@@ -211,8 +215,7 @@ public class QuickSettingsController {
         ContentResolver resolver = mContext.getContentResolver();
         LayoutInflater inflater = LayoutInflater.from(mContext);
         String tiles = Settings.System.getStringForUser(resolver,
-                Settings.System.QUICK_SETTINGS_TILES, UserHandle.USER_CURRENT);
-
+                mSettingsString, UserHandle.USER_CURRENT);
         if (tiles == null) {
             Log.i(TAG, "Default tiles being loaded");
             tiles = TextUtils.join(TILE_DELIMITER, TILES_DEFAULT);
@@ -302,6 +305,10 @@ public class QuickSettingsController {
             }
         }
 
+        if (mHideLiveTiles) {
+            return;
+        }
+
         // Load the dynamic tiles
         // These toggles must be the last ones added to the view, as they will show
         // only when they are needed
@@ -356,6 +363,11 @@ public class QuickSettingsController {
         loadTiles();
         setupBroadcastReceiver();
         setupContentObserver();
+        if (mHideLiveTileLabels) {
+            for (QuickSettingsTile t : mQuickSettingsTiles) {
+                t.setLabelVisibility(false);
+            }
+        }
     }
 
     void setupContentObserver() {
@@ -479,4 +491,11 @@ public class QuickSettingsController {
         return tileTextColor;
     }
 
+    public void hideLiveTileLabels(boolean hide) {
+        mHideLiveTileLabels = hide;
+    }
+
+    public void hideLiveTiles(boolean hide) {
+        mHideLiveTiles = hide;
+    }
 }
