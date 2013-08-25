@@ -51,30 +51,60 @@
         android:layout_gravity="center"
         android:orientation="horizontal">
 
+        <RelativeLayout
+            android:background="#AAA"
+            android:layout_width="12dp"
+            android:layout_height="15dp"
+            android:gravity="center" >
             <View
                 android:id="@+id/hybrid_swatch1"
-                android:layout_width="8dp"
-                android:layout_height="10dp"/>
-
+                android:layout_width="10dp"
+                android:layout_height="13dp"/>
+        </RelativeLayout>
+        <RelativeLayout
+            android:background="#AAA"
+            android:layout_width="12dp"
+            android:layout_height="15dp"
+            android:layout_marginLeft="1dp"
+            android:gravity="center" >
             <View
                 android:id="@+id/hybrid_swatch2"
-                android:layout_width="8dp"
-                android:layout_height="10dp"/>
-
+                android:layout_width="10dp"
+                android:layout_height="13dp"/>
+        </RelativeLayout>
+        <RelativeLayout
+            android:background="#AAA"
+            android:layout_width="12dp"
+            android:layout_height="15dp"
+            android:layout_marginLeft="1dp"
+            android:gravity="center" >
             <View
                 android:id="@+id/hybrid_swatch3"
-                android:layout_width="8dp"
-                android:layout_height="10dp"/>
-
+                android:layout_width="10dp"
+                android:layout_height="13dp"/>
+        </RelativeLayout>
+        <RelativeLayout
+            android:background="#AAA"
+            android:layout_width="12dp"
+            android:layout_height="15dp"
+            android:layout_marginLeft="1dp"
+            android:gravity="center" >
             <View
                 android:id="@+id/hybrid_swatch4"
-                android:layout_width="8dp"
-                android:layout_height="10dp"/>
-
+                android:layout_width="10dp"
+                android:layout_height="13dp"/>
+        </RelativeLayout>
+        <RelativeLayout
+            android:background="#AAA"
+            android:layout_width="12dp"
+            android:layout_height="15dp"
+            android:layout_marginLeft="1dp"
+            android:gravity="center" >
             <View
                 android:id="@+id/hybrid_swatch5"
-                android:layout_width="8dp"
-                android:layout_height="10dp"/>
+                android:layout_width="10dp"
+                android:layout_height="13dp"/>
+        </RelativeLayout>
 
     </LinearLayout>
     </LinearLayout>
