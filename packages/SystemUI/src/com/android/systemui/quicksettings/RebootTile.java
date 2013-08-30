@@ -60,6 +60,7 @@ public class RebootTile extends QuickSettingsTile {
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
+		return true;
             }
         };
     }
