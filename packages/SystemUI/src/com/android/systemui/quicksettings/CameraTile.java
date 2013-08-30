@@ -126,13 +126,11 @@ public class CameraTile extends QuickSettingsTile {
             mCamera.setParameters(mParams);
             updateOrientation();
 
-            final PanelView panel = getContainingPanel();
-            final View parent = (View) mContainer.getParent();
-
             mHandler.postDelayed(new Runnable() {
                 @Override
                 public void run() {
-                    if (panel.isFullyExpanded() && parent.getScaleX() == 1) {
+                    final PanelView panel = getContainingPanel();
+                    if (panel != null && panel.isFullyExpanded()) {
                         mHandler.postDelayed(this, 100);
                     } else {
                         mHandler.post(mReleaseCameraRunnable);
