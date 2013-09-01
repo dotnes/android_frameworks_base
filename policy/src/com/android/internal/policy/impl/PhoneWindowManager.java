@@ -361,6 +361,15 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     // Behavior of home wake
     boolean mHomeWakeScreen;
 
+    // Behavior of volume wake
+    boolean mVolumeWakeScreen;
+
+    // Behavior of volbtn music controls
+    boolean mVolBtnMusicControls;
+    boolean mIsLongPress;
+    private boolean mAnimatingWindows;
+    private boolean mNeedUpdateSettings;
+
     private static final class PointerLocationInputEventReceiver extends InputEventReceiver {
         private final PointerLocationView mView;
 
@@ -554,9 +563,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private boolean mVolumeUpKeyTriggered;
     private boolean mPowerKeyTriggered;
     private long mPowerKeyTime;
-    private boolean mVolumeWakeScreen;
-    private boolean mVolBtnMusicControls;
-    private boolean mIsLongPress;
     private KeyguardManager mKeyguardManager;
 
     // HW overlays state
@@ -702,6 +708,15 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         @Override
         public void onChange(boolean selfChange) {
             update(false);
+
+            // A settings update potentially means triggering a configuration change,
+            // which we don't want to do during a window animation
+            if (mAnimatingWindows) {
+                mNeedUpdateSettings = true;
+            } else {
+                updateSettings();
+                updateRotation(false);
+            }
         }
     }
 
@@ -5942,6 +5957,21 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             return (windowType == WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG);
         }
         return true;
+    }
+
+    @Override
+    public void windowAnimationStarted() {
+        mAnimatingWindows = true;
+    }
+
+    @Override
+    public void windowAnimationFinished() {
+        mAnimatingWindows = false;
+        if (mNeedUpdateSettings) {
+            updateSettings();
+            updateRotation(false);
+            mNeedUpdateSettings = false;
+        }
     }
 
     @Override
