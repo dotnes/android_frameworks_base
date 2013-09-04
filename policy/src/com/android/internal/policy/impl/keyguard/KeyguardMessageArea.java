@@ -167,6 +167,13 @@ class KeyguardMessageArea extends TextView {
             mBatteryLevel = status.level;
             mBatteryCharged = status.isCharged();
             mBatteryIsLow = status.isBatteryLow();
+            mAlwaysShowBattery = KeyguardUpdateMonitor.shouldAlwaysShowBatteryInfo(getContext());
+            if (KeyguardUpdateMonitor.shouldNeverShowBatteryInfo(getContext())) {
+                mShowingBatteryInfo = false;
+            } else {
+                mShowingBatteryInfo = status.isPluggedIn()
+                        || status.isBatteryLow() || mAlwaysShowBattery;
+            }
             update();
         }
     };

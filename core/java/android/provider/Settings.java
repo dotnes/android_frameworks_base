@@ -3369,6 +3369,15 @@ public final class Settings {
          */
         public static final String PIE_STICK = "pie_stick";
 
+         /**
+          * Lockscreen battery status visibility mode
+          * 0 = show if charging
+          * 1 = always show
+          * 2 = never show
+          * @hide
+          */
+        public static final String LOCKSCREEN_BATTERY_VISIBILITY = "lockscreen_always_show_battery";
+
         /**
          * Pie power, should default to 0 (no, show only when needed)
          * @hide
@@ -5183,6 +5192,8 @@ public final class Settings {
             POWER_MENU_SOUND_ENABLED,
             POWER_MENU_USER_ENABLED,
             LOCKSCREEN_VIBRATE_ENABLED,
+            LOCKSCREEN_BATTERY_VISIBILITY,
+
         };
 
         /**
