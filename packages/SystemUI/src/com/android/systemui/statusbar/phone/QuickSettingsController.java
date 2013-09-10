@@ -44,6 +44,7 @@ import static com.android.internal.util.cm.QSConstants.TILE_TORCH;
 import static com.android.internal.util.cm.QSConstants.TILE_USER;
 import static com.android.internal.util.cm.QSConstants.TILE_VOLUME;
 import static com.android.internal.util.cm.QSConstants.TILE_WIFI;
+import static com.android.internal.util.cm.QSConstants.TILE_WIFIADB;
 import static com.android.internal.util.cm.QSConstants.TILE_WIFIAP;
 import static com.android.internal.util.cm.QSConstants.TILE_DESKTOPMODE;
 import static com.android.internal.util.cm.QSConstants.TILE_HYBRID;
@@ -100,6 +101,7 @@ import com.android.systemui.quicksettings.TorchTile;
 import com.android.systemui.quicksettings.UsbTetherTile;
 import com.android.systemui.quicksettings.UserTile;
 import com.android.systemui.quicksettings.VolumeTile;
+import com.android.systemui.quicksettings.WiFiADBTile;
 import com.android.systemui.quicksettings.WiFiDisplayTile;
 import com.android.systemui.quicksettings.WiFiTile;
 import com.android.systemui.quicksettings.WifiAPTile;
@@ -254,6 +256,11 @@ public class QuickSettingsController {
                 qs = new MobileNetworkTypeTile(mContext, inflater, mContainerView, this, mStatusBarService.mNetworkController);
             } else if (tile.equals(TILE_BAMCONTROL)) {
                 qs = new BamcontrolTile(mContext, inflater, mContainerView, this);
+            } else if (tile.equals(TILE_WIFIADB)) {
+                mTileStatusUris.add(Settings.Global.getUriFor(Settings.Global.ADB_ENABLED));
+                if (QSUtils.adbEnabled(resolver)) {
+                    qs = new WiFiADBTile(mContext, this);
+                }
             }
             if (qs != null) {
                 qs.setupQuickSettingsTile();
