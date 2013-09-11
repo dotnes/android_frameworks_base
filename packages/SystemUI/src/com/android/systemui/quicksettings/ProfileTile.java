@@ -88,7 +88,7 @@ public class ProfileTile extends QuickSettingsTile {
                 mIsRegistered = true;
 
                 IntentFilter filter = new IntentFilter();
-                filter.addAction(ProfileManagerService.INTENT_ACTION_PROFILE_SELECTED);
+                filter.addAction(ProfileManager.INTENT_ACTION_PROFILE_SELECTED);
                 mContext.registerReceiver(mProfileReceiver, filter);
             }
         }
