@@ -106,6 +106,7 @@ import com.android.systemui.quicksettings.VolumeTile;
 import com.android.systemui.quicksettings.WiFiADBTile;
 import com.android.systemui.quicksettings.WiFiDisplayTile;
 import com.android.systemui.quicksettings.WiFiTile;
+import com.android.systemui.quicksettings.WiFiADBTile;
 import com.android.systemui.quicksettings.WifiAPTile;
 import com.android.systemui.quicksettings.DesktopModeTile;
 import com.android.systemui.quicksettings.HybridTile;
@@ -263,7 +264,7 @@ public class QuickSettingsController {
             } else if (tile.equals(TILE_WIFIADB)) {
                 mTileStatusUris.add(Settings.Global.getUriFor(Settings.Global.ADB_ENABLED));
                 if (QSUtils.adbEnabled(resolver)) {
-                    qs = new WiFiADBTile(mContext, inflater, mContainerView, this);
+                    qs = new WiFiADBTile(mContext, inflater, mContainerView, this, mHandler);
                 }
             }
             if (qs != null) {
