@@ -36,6 +36,7 @@ import static com.android.internal.util.cm.QSConstants.TILE_NFC;
 import static com.android.internal.util.cm.QSConstants.TILE_PROFILE;
 import static com.android.internal.util.cm.QSConstants.TILE_QUIETHOURS;
 import static com.android.internal.util.cm.QSConstants.TILE_RINGER;
+import static com.android.internal.util.cm.QSConstants.TILE_ROCKETLAUNCHER;
 import static com.android.internal.util.cm.QSConstants.TILE_SCREENTIMEOUT;
 import static com.android.internal.util.cm.QSConstants.TILE_SETTINGS;
 import static com.android.internal.util.cm.QSConstants.TILE_SLEEP;
@@ -93,6 +94,7 @@ import com.android.systemui.quicksettings.ProfileTile;
 import com.android.systemui.quicksettings.QuickSettingsTile;
 import com.android.systemui.quicksettings.QuietHoursTile;
 import com.android.systemui.quicksettings.RingerModeTile;
+import com.android.systemui.quicksettings.RocketLauncherTile;
 import com.android.systemui.quicksettings.ScreenTimeoutTile;
 import com.android.systemui.quicksettings.SleepScreenTile;
 import com.android.systemui.quicksettings.SyncTile;
@@ -204,9 +206,11 @@ public class QuickSettingsController {
             } else if (tile.equals(TILE_BRIGHTNESS)) {
                 qs = new BrightnessTile(mContext, inflater, mContainerView, this);
 	    } else if (tile.equals(TILE_CAMERA) && cameraSupported) {
-                qs = new CameraTile(mContext, inflater, mContainerView, this, mHandler);			
+                qs = new CameraTile(mContext, inflater, mContainerView, this, mHandler);
             } else if (tile.equals(TILE_RINGER)) {
                 qs = new RingerModeTile(mContext, inflater, mContainerView, this);
+            } else if (tile.equals(TILE_ROCKETLAUNCHER)) {
+                qs = new RocketLauncherTile(mContext, inflater, mContainerView, this);
             } else if (tile.equals(TILE_SYNC)) {
                 qs = new SyncTile(mContext, inflater, mContainerView, this);
             } else if (tile.equals(TILE_WIFIAP) && mobileDataSupported) {

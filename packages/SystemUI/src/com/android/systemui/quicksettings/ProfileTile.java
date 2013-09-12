@@ -28,7 +28,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
 
-import com.android.server.ProfileManagerService;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.phone.QuickSettingsContainerView;
 import com.android.systemui.statusbar.phone.QuickSettingsController;
@@ -45,7 +44,8 @@ public class ProfileTile extends QuickSettingsTile {
             final QuickSettingsController qsc) {
         super(context, inflater, container, qsc);
 
-        qsc.registerAction(ProfileManagerService.INTENT_ACTION_PROFILE_UPDATED, this);
+        qsc.registerAction(ProfileManager.INTENT_ACTION_PROFILE_SELECTED, this);
+        qsc.registerAction(ProfileManager.INTENT_ACTION_PROFILE_UPDATED, this);
 
         mProfileReceiver = new ProfileReceiver();
         mProfileReceiver.registerSelf();
@@ -88,7 +88,7 @@ public class ProfileTile extends QuickSettingsTile {
                 mIsRegistered = true;
 
                 IntentFilter filter = new IntentFilter();
-                filter.addAction(ProfileManagerService.INTENT_ACTION_PROFILE_SELECTED);
+                filter.addAction(ProfileManager.INTENT_ACTION_PROFILE_SELECTED);
                 mContext.registerReceiver(mProfileReceiver, filter);
             }
         }
