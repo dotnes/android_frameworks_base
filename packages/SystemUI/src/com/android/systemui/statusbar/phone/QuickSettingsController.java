@@ -263,7 +263,7 @@ public class QuickSettingsController {
             } else if (tile.equals(TILE_WIFIADB)) {
                 mTileStatusUris.add(Settings.Global.getUriFor(Settings.Global.ADB_ENABLED));
                 if (QSUtils.adbEnabled(resolver)) {
-                    qs = new WiFiADBTile(mContext, this);
+                    qs = new WiFiADBTile(mContext, inflater, mContainerView, this);
                 }
             }
             if (qs != null) {
