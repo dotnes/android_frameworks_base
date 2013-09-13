@@ -131,8 +131,6 @@ public abstract class PreferenceDrawerActivity extends ListActivity implements
         PreferenceManager.OnPreferenceTreeClickListener,
         PreferenceFragment.OnPreferenceStartFragmentCallback {
 
-    private boolean mDoubleBack = false;
-
     // Constants for state save/restore
     private static final String HEADERS_TAG = ":android:headers";
     private static final String CUR_HEADER_TAG = ":android:cur_header";
@@ -687,24 +685,13 @@ public abstract class PreferenceDrawerActivity extends ListActivity implements
     @Override
     public void onBackPressed() {
 
-    	if (mDoubleBack) {
-            super.onBackPressed();
+        if (mDrawerLayout != null && mDrawerLayout.isDrawerOpen(mDrawer)) {
+                super.onBackPressed();
+	    } else {
+                mDrawerLayout.openDrawer(mDrawer);
             return;
     	}
-    	this.mDoubleBack = true;
-        mDrawerLayout.openDrawer(mDrawer);
 
-        new Handler().postDelayed(new Runnable() {
-
-            @Override
-            public void run() {
-             mDoubleBack = false;
-
-            }
-        }, 5000);
-
-        if (mDrawerLayout != null && mDrawerLayout.isDrawerOpen(mDrawer))
-            mDrawerLayout.closeDrawer(mDrawer);
     }
 
     private void loadDrawerDrawables() {
