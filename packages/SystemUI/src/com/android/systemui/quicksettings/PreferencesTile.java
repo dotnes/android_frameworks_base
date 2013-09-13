@@ -1,6 +1,7 @@
 package com.android.systemui.quicksettings;
 
 import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 
@@ -18,7 +19,9 @@ public class PreferencesTile extends QuickSettingsTile{
 
             @Override
             public void onClick(View v) {
-                startSettingsActivity(android.provider.Settings.ACTION_SETTINGS);
+		Intent settings = getPackageManager().getLaunchIntentForPackage("com.android.settings");
+                startActivity(settings);
+
             }
         };
     }
