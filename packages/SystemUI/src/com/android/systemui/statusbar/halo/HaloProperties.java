@@ -676,7 +676,7 @@ public class HaloProperties extends FrameLayout implements BatteryStateChangeCal
                 ? mobileSignalIconId
                 : R.drawable.ic_qs_signal_no_signal;
 
-        dataContentDescription = enabled && (dataTypeContentDescriptionId != null) && mCm.getMobileDataEnabled()
+        dataContentDescription = enabled && (dataTypeContentDescriptionId != null)
                 ? dataTypeContentDescriptionId
                 : mContext.getResources().getString(R.string.accessibility_no_data);
         mLabel = enabled
