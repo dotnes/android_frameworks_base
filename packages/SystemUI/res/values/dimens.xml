@@ -341,4 +341,5 @@
     <dimen name="notification_panel_width">400dp</dimen>
     <!-- The minimum height of the notification panel window -->
     <dimen name="notification_panel_min_height">320dp</dimen>
+
 </resources>

@@ -361,6 +361,7 @@
     <!-- Left padding of num pad key on keyguard -->
     <dimen name="kg_num_pad_key_padding_left">10dp</dimen>
 
+<<<<<<< HEAD
     <dimen name="icon_size_20">20.0dip</dimen>
     <dimen name="icon_size_15">15.0dip</dimen>
     <dimen name="notification_ribbon_padding">16dp</dimen>
@@ -369,6 +370,8 @@
     <!-- Dummy dimen to make d2s buildable again -->
     <dimen name="pie_trigger_thickness">10dp</dimen>
 
+=======
+>>>>>>> 0e846d1... Add active display to ChameleonOS [1/2]
     <!-- Font size for notification text -->
     <dimen name="glowpad_notification_font_size">12dp</dimen>
 

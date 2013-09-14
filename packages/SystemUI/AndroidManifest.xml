@@ -398,9 +398,12 @@
             </intent-filter>
         </activity>
 
+<<<<<<< HEAD
         <activity android:name="com.android.systemui.Transparent"
             android:theme="@android:style/Theme.Translucent.NoTitleBar" />
 
+=======
+>>>>>>> 0e846d1... Add active display to ChameleonOS [1/2]
         <activity android:name=".statusbar.policy.activedisplay.DummyActivity"
                   android:label=""
                   android:taskAffinity=""

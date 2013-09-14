@@ -97,9 +97,10 @@ import android.view.animation.DecelerateInterpolator;
 import android.widget.FrameLayout;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
-import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
+import android.widget.TabHost;
+import android.widget.TabHost.TabSpec;
 import android.widget.TextView;
 
 import android.service.notification.StatusBarNotification;
@@ -602,6 +603,14 @@ public class PhoneStatusBar extends BaseStatusBar {
 
         // set recents activity navigation bar view
         RecentsActivity.addNavigationCallback(mNavigationBarView);
+
+        if (mRecreating) {
+            removeSidebarView();
+        } else {
+            addActiveDisplayView();
+        }
+
+        addSidebarView();
 
         // figure out which pixel-format to use for the status bar.
         mPixelFormat = PixelFormat.TRANSLUCENT;
@@ -2846,6 +2855,7 @@ public class PhoneStatusBar extends BaseStatusBar {
         mNavigationBarView.setLowProfile(!on, true, force);
     }
 
+    @Override
     public void topAppWindowChanged(boolean showMenu) {
         if (mPieControlPanel != null)
             mPieControlPanel.setMenu(showMenu);
