@@ -685,12 +685,12 @@ public abstract class PreferenceDrawerActivity extends ListActivity implements
     @Override
     public void onBackPressed() {
 
-        if (mDrawerLayout != null && mDrawerLayout.isDrawerOpen(mDrawer)) {
-                super.onBackPressed();
-	    } else {
-                mDrawerLayout.openDrawer(mDrawer);
-            return;
-    	}
+        if (mDrawerLayout.isDrawerOpen(mDrawer)) {
+            super.onBackPressed();
+	} else {
+           mDrawerLayout.openDrawer(mDrawer);
+        }
+        return;
 
     }
 
