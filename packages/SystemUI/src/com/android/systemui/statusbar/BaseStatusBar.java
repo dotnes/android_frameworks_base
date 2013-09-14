@@ -114,6 +114,8 @@ import com.android.systemui.statusbar.view.PieExpandPanel;
 import com.android.systemui.statusbar.WidgetView;
 import com.android.systemui.aokp.AppWindow;
 
+import com.android.systemui.statusbar.policy.porn.PornView;
+
 import java.util.ArrayList;
 import java.math.BigInteger;
 import java.util.Locale;
@@ -271,6 +273,8 @@ public abstract class BaseStatusBar extends SystemUI implements
     public NotificationRowLayout getNotificationRowLayout() {
         return mPile;
     }
+
+    protected PornView mPornView;
 
     public IStatusBarService getStatusBarService() {
         return mBarService;
@@ -2031,5 +2035,34 @@ public abstract class BaseStatusBar extends SystemUI implements
         }
         if(mClock != null) mClock.setTextColor(mClockColor);
         if(mCClock != null) mCClock.setTextColor(mClockColor);
+    }
+
+    protected void addPornView() {
+        mPornView = (PornView)View.inflate(mContext, R.layout.porn_notification_view, null);
+        mWindowManager.addView(mPornView, getPornViewLayoutParams());
+        mPornView.setStatusBar(this);
+    }
+
+    protected void removePornView() {
+        if (mPornView != null)
+            mWindowManager.removeView(mPornView);
+    }
+
+    protected WindowManager.LayoutParams getPornViewLayoutParams() {
+        WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
+                LayoutParams.MATCH_PARENT,
+                LayoutParams.MATCH_PARENT,
+                WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL,
+                0
+                        | WindowManager.LayoutParams.FLAG_TOUCHABLE_WHEN_WAKING
+                        | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+                        | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
+                        | WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
+                        | WindowManager.LayoutParams.FLAG_SPLIT_TOUCH,
+                PixelFormat.TRANSLUCENT);
+        lp.gravity = Gravity.TOP | Gravity.FILL_VERTICAL | Gravity.FILL_HORIZONTAL;
+        lp.setTitle("PornView");
+
+        return lp;
     }
 }

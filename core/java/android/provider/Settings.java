@@ -2633,6 +2633,30 @@ public final class Settings {
         public static final String LOCKSCREEN_TARGETS_USE_EIGHT = "lockscreen_targets_use_eight";
 
         /**
+         * Whether to display notifications on screen when screen is off
+         * @hide
+         */
+        public static final String ENABLE_PORN = "enable_porn";
+
+        /**
+         * Whether to display notification messages around ring
+         * @hide
+         */
+        public static final String PORN_TEXT = "porn_text";
+
+        /**
+         * Time to redisplay notifications on screen from when screen turns off, 0 = never redisplay
+         * @hide
+         */
+        public static final String PORN_REDISPLAY = "porn_redisplay";
+
+        /**
+         * Brightness of the display when displaying P.O.R.N.
+         * @hide
+         */
+        public static final String PORN_BRIGHTNESS = "porn_brightness";
+
+        /**
          * @deprecated Use {@link android.provider.Settings.Global#LOW_BATTERY_SOUND}
          * instead
          * @hide

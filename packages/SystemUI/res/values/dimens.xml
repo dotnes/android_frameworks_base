@@ -314,4 +314,19 @@
     <dimen name="folder_height">480dp</dimen>
     <dimen name="setup_sidebar_width">90dp</dimen>
 
+    <!-- Top margin for overflow notifications container shown in the P.O.R.N. view -->
+    <dimen name="glowpad_overflow_notifications_margin_top">64dp</dimen>
+
+    <!-- Top margin for overflow notifications container shown in the P.O.R.N. view -->
+    <dimen name="porn_clock_margin_bottom">60dp</dimen>
+
+    <!-- left/right margin for extra notifications in PornView -->
+    <dimen name="porn_notification_margin">4dp</dimen>
+
+    <!-- Overflow P.O.R.N. notification icon size -->
+    <dimen name="overflow_icon_size">28dp</dimen>
+
+    <!-- Overflow P.O.R.N. notification padding -->
+    <dimen name="overflow_icon_padding">2dp</dimen>
+
 </resources>
