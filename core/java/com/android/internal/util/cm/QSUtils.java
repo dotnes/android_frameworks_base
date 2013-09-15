@@ -38,7 +38,7 @@ public class QSUtils {
         public static boolean deviceSupportsBluetooth() {
             return (BluetoothAdapter.getDefaultAdapter() != null);
         }
-        
+
         public static boolean systemProfilesEnabled(ContentResolver resolver) {
             return (Settings.System.getInt(resolver, Settings.System.SYSTEM_PROFILES_ENABLED, 1) == 1);
         }
@@ -51,8 +51,12 @@ public class QSUtils {
             final TelephonyManager tm = (TelephonyManager) ctx.getSystemService(Context.TELEPHONY_SERVICE);
             return (tm.getLteOnCdmaMode() == PhoneConstants.LTE_ON_CDMA_TRUE) || tm.getLteOnGsmMode() != 0;
         }
-		
-		public static boolean deviceSupportsCamera() {
-		    return Camera.getNumberOfCameras() > 0;
-		}	
+
+	public static boolean deviceSupportsCamera() {
+	    return Camera.getNumberOfCameras() > 0;
+	}
+
+        public static boolean adbEnabled(ContentResolver resolver) {
+            return (Settings.Global.getInt(resolver, Settings.Global.ADB_ENABLED, 0)) == 1;
+        }
 }

@@ -682,6 +682,11 @@ public abstract class PreferenceDrawerActivity extends ListActivity implements
         return super.onOptionsItemSelected(item);
     }
 
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+    }
+
     private void loadDrawerDrawables() {
         TypedArray a = getTheme().obtainStyledAttributes(
                 new int[] {
