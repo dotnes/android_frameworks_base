@@ -19,9 +19,12 @@ package android.hardware.display;
 import android.hardware.display.WifiDisplayStatus;
 import android.hardware.display.IDisplayDevice;
 
+<<<<<<< HEAD
 /**
  * @hide
  */
+=======
+>>>>>>> 988a2bb... Remote display framework support.
 interface IRemoteDisplayAdapter {
     // No permissions required.
     oneway void scanRemoteDisplays();
