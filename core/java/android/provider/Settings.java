@@ -2680,6 +2680,12 @@ public final class Settings {
         public static final String PORN_POCKET_MODE = "porn_pocket_mode";
 
         /**
+         * Whether to include ongoing/non-clearable notifications
+         * @hide
+         */
+        public static final String PORN_ALL_NOTIFICATIONS = "porn_all_notifications";
+
+        /**
          * @deprecated Use {@link android.provider.Settings.Global#LOW_BATTERY_SOUND}
          * instead
          * @hide

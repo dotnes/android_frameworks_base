@@ -55,6 +55,7 @@ import android.os.UserHandle;
 import android.provider.Settings;
 import android.service.notification.INotificationListener;
 import android.service.notification.StatusBarNotification;
+import android.telephony.TelephonyManager;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.Gravity;
@@ -137,6 +138,7 @@ public class PornView extends FrameLayout {
     // user customizable settings
     private boolean mDisplayNotifications = false;
     private boolean mDisplayNotificationText = false;
+    private boolean mShowAllNotifications = false;
     private boolean mPocketModeEnabled = false;
     private long mRedisplayTimeout = 0;
     private float mInitialBrightness = 1f;
@@ -144,7 +146,7 @@ public class PornView extends FrameLayout {
     private class INotificationListenerWrapper extends INotificationListener.Stub {
         @Override
         public void onNotificationPosted(final StatusBarNotification sbn) {
-            if (shouldShowNotification() && sbn.isClearable()) {
+            if (shouldShowNotification() && isValidNotification(sbn)) {
                 // need to make sure either the screen is off or the user is currently
                 // viewing the notifications
                 if (PornView.this.getVisibility() == View.VISIBLE
@@ -249,6 +251,8 @@ public class PornView extends FrameLayout {
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.PORN_TEXT), false, this);
             resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.PORN_ALL_NOTIFICATIONS), false, this);
+            resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.PORN_POCKET_MODE), false, this);
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.PORN_REDISPLAY), false, this);
@@ -275,6 +279,8 @@ public class PornView extends FrameLayout {
                     resolver, Settings.System.ENABLE_PORN, 0) == 1;
             mDisplayNotificationText = Settings.System.getInt(
                     resolver, Settings.System.PORN_TEXT, 0) == 1;
+            mShowAllNotifications = Settings.System.getInt(
+                    resolver, Settings.System.PORN_ALL_NOTIFICATIONS, 0) == 1;
             mPocketModeEnabled = Settings.System.getInt(
                     resolver, Settings.System.PORN_POCKET_MODE, 0) == 1;
             mRedisplayTimeout = Settings.System.getLong(
@@ -416,14 +422,6 @@ public class PornView extends FrameLayout {
         states.addState(TargetDrawable.STATE_ACTIVE, activeLayerDrawable);
         states.addState(TargetDrawable.STATE_FOCUSED, activeLayerDrawable);
         return states;
-    }
-
-    public boolean isTargetPresent(int resId) {
-        return mGlowPadView.getTargetPosition(resId) != -1;
-    }
-
-    public void showUsabilityHint() {
-        mGlowPadView.ping();
     }
 
     private void updateTargets() {
@@ -643,7 +641,7 @@ public class PornView extends FrameLayout {
                     .getActiveNotificationsFromListener(mNotificationListener);
             if (sbns == null) return null;
             for (int i = sbns.length - 1; i >= 0; i--) {
-                if (shouldShowNotification() && sbns[i].isClearable()) {
+                if (shouldShowNotification() && isValidNotification(sbns[i])) {
                     return sbns[i];
                 }
             }
@@ -663,7 +661,7 @@ public class PornView extends FrameLayout {
                             .getActiveNotificationsFromListener(mNotificationListener);
                     mOverflowNotifications.removeAllViews();
                     for (int i = sbns.length - 1; i >= 0; i--) {
-                        if (sbns[i].isClearable()
+                        if (isValidNotification(sbns[i])
                                 && mOverflowNotifications.getChildCount() < MAX_OVERFLOW_ICONS) {
                             ImageView iv = new ImageView(mContext);
                             if (mOverflowNotifications.getChildCount() < (MAX_OVERFLOW_ICONS - 1)) {
@@ -737,6 +735,15 @@ public class PornView extends FrameLayout {
     private void swapNotification(StatusBarNotification sbn) {
         mNotification = sbn;
         setActiveNotification(sbn, false);
+    }
+
+    /**
+     * Determine if a given notification should be used.
+     * @param sbn StatusBarNotification to check.
+     * @return True if it should be used, false otherwise.
+     */
+    private boolean isValidNotification(StatusBarNotification sbn) {
+        return (sbn.isClearable() || mShowAllNotifications);
     }
 
     /**
@@ -829,7 +836,7 @@ public class PornView extends FrameLayout {
             if (event.sensor.equals(mProximitySensor)) {
                 if (value >= mProximitySensor.getMaximumRange()) {
                     mProximityIsFar = true;
-                    if (!mPM.isScreenOn() && mPocketModeEnabled) {
+                    if (!mPM.isScreenOn() && mPocketModeEnabled && !isOnCall()) {
                         mNotification = getNextAvailableNotification();
                         if (mNotification != null) showNotification(mNotification, true);
                     }
@@ -865,6 +872,11 @@ public class PornView extends FrameLayout {
             }
         }
     };
+
+    private boolean isOnCall() {
+        TelephonyManager tm = (TelephonyManager) mContext.getSystemService(Context.TELEPHONY_SERVICE);
+        return tm.getCallState() != TelephonyManager.CALL_STATE_IDLE;
+    }
 
     public void updateRedisplayTimer() {
         AlarmManager am = (AlarmManager)mContext.getSystemService(Context.ALARM_SERVICE);
