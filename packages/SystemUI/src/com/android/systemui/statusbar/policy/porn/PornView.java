@@ -78,8 +78,13 @@ import java.util.ArrayList;
 import java.util.Calendar;
 
 public class PornView extends FrameLayout {
-    private static final boolean DEBUG = true;
+    private static final boolean DEBUG = false;
     private static final String TAG = "PornView";
+
+    // the following is used for testing purposes
+    private static final String ACTION_FORCE_DISPLAY
+            = "com.android.systemui.FORCE_DISPLAY";
+
     private static final String ACTION_REDISPLAY_NOTIFICATION
             = "com.android.systemui.REDISPLAY_NOTIFICATION";
 
@@ -132,6 +137,7 @@ public class PornView extends FrameLayout {
     // user customizable settings
     private boolean mDisplayNotifications = false;
     private boolean mDisplayNotificationText = false;
+    private boolean mPocketModeEnabled = false;
     private long mRedisplayTimeout = 0;
     private float mInitialBrightness = 1f;
 
@@ -243,6 +249,8 @@ public class PornView extends FrameLayout {
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.PORN_TEXT), false, this);
             resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.PORN_POCKET_MODE), false, this);
+            resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.PORN_REDISPLAY), false, this);
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.PORN_BRIGHTNESS), false, this);
@@ -267,6 +275,8 @@ public class PornView extends FrameLayout {
                     resolver, Settings.System.ENABLE_PORN, 0) == 1;
             mDisplayNotificationText = Settings.System.getInt(
                     resolver, Settings.System.PORN_TEXT, 0) == 1;
+            mPocketModeEnabled = Settings.System.getInt(
+                    resolver, Settings.System.PORN_POCKET_MODE, 0) == 1;
             mRedisplayTimeout = Settings.System.getLong(
                     resolver, Settings.System.PORN_REDISPLAY, 0L);
             mInitialBrightness = Settings.System.getInt(
@@ -584,6 +594,8 @@ public class PornView extends FrameLayout {
         filter.addAction(ACTION_DISPLAY_TIMEOUT);
         filter.addAction(Intent.ACTION_SCREEN_OFF);
         filter.addAction(Intent.ACTION_SCREEN_ON);
+        // uncomment the line below for testing
+        filter.addAction(ACTION_FORCE_DISPLAY);
         mContext.registerReceiver(mBroadcastReceiver, filter);
     }
 
@@ -706,6 +718,8 @@ public class PornView extends FrameLayout {
                             } else {
                                 iv.setBackgroundResource(0);
                             }
+                        } else {
+                            iv.setBackgroundResource(R.drawable.porn_active_notification_background);
                         }
                     }
                     break;
@@ -815,6 +829,10 @@ public class PornView extends FrameLayout {
             if (event.sensor.equals(mProximitySensor)) {
                 if (value >= mProximitySensor.getMaximumRange()) {
                     mProximityIsFar = true;
+                    if (!mPM.isScreenOn() && mPocketModeEnabled) {
+                        mNotification = getNextAvailableNotification();
+                        if (mNotification != null) showNotification(mNotification, true);
+                    }
                 } else {
                     mProximityIsFar = false;
                 }
@@ -840,6 +858,10 @@ public class PornView extends FrameLayout {
                 onScreenTurnedOff();
             } else if (Intent.ACTION_SCREEN_ON.equals(action)) {
                 onScreenTurnedOn();
+            } else if (ACTION_FORCE_DISPLAY.equals(action)) {
+                mNotification = getNextAvailableNotification();
+                if (mNotification != null) showNotification(mNotification, true);
+                mVeil.setAlpha(0f);
             }
         }
     };

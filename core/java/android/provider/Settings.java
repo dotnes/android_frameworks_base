@@ -2674,6 +2674,12 @@ public final class Settings {
         public static final String PORN_BRIGHTNESS = "porn_brightness";
 
         /**
+         * Display P.O.R.N. when device comes out of the user's pocket, etc...
+         * @hide
+         */
+        public static final String PORN_POCKET_MODE = "porn_pocket_mode";
+
+        /**
          * @deprecated Use {@link android.provider.Settings.Global#LOW_BATTERY_SOUND}
          * instead
          * @hide
