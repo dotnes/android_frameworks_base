@@ -330,4 +330,12 @@
     <!-- Overflow P.O.R.N. notification padding -->
     <dimen name="overflow_icon_padding">2dp</dimen>
 
+    <!-- The width of the ticker, including the icon -->
+    <dimen name="notification_ticker_width">240dp</dimen>
+    <!-- Status bar panel bottom offset (height of status bar - overlap) -->
+    <dimen name="status_bar_panel_bottom_offset">36dp</dimen>
+    <!-- The width of the notification panel window -->
+    <dimen name="notification_panel_width">400dp</dimen>
+    <!-- The minimum height of the notification panel window -->
+    <dimen name="notification_panel_min_height">320dp</dimen>
 </resources>

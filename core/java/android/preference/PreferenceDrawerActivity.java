@@ -131,6 +131,8 @@ public abstract class PreferenceDrawerActivity extends ListActivity implements
         PreferenceManager.OnPreferenceTreeClickListener,
         PreferenceFragment.OnPreferenceStartFragmentCallback {
 
+    private boolean visible = false;
+
     // Constants for state save/restore
     private static final String HEADERS_TAG = ":android:headers";
     private static final String CUR_HEADER_TAG = ":android:cur_header";
@@ -1337,7 +1339,6 @@ public abstract class PreferenceDrawerActivity extends ListActivity implements
      */
     public void finishPreferencePanel(Fragment caller, int resultCode, Intent resultData) {
         // XXX be smarter about popping the stack.
-        onBackPressed();
         if (caller != null) {
             if (caller.getTargetFragment() != null) {
                 caller.getTargetFragment().onActivityResult(caller.getTargetRequestCode(),
