@@ -243,6 +243,10 @@ public class PornView extends FrameLayout {
 
         }
 
+        public void onTargetChange(View v, int target) {
+
+	}
+
     };
 
     /**

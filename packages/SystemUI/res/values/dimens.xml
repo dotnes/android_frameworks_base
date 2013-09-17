@@ -327,6 +327,9 @@
     <!-- P.O.R.N. overflow notification icon size -->
     <dimen name="overflow_icon_size">28dp</dimen>
 
+    <!-- P.O.R.N. Handle notification icon size -->
+    <dimen name="handle_icon_size">32dp</dimen>
+
     <!-- Overflow P.O.R.N. notification padding -->
     <dimen name="overflow_icon_padding">2dp</dimen>
 
