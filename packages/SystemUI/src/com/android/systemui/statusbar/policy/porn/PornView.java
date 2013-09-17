@@ -34,6 +34,11 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.database.ContentObserver;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.ColorMatrix;
+import android.graphics.ColorMatrixColorFilter;
+import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.InsetDrawable;
@@ -449,7 +454,6 @@ public class PornView extends FrameLayout {
         ArrayList<TargetDrawable> storedDraw = new ArrayList<TargetDrawable>();
         final Resources res = getResources();
         final int targetInset = res.getDimensionPixelSize(com.android.internal.R.dimen.lockscreen_target_inset);
-        final boolean isLandscape = mCreationOrientation == Configuration.ORIENTATION_LANDSCAPE;
         final Drawable blankActiveDrawable =
                 res.getDrawable(com.android.internal.R.drawable.ic_lockscreen_target_activated);
         final InsetDrawable activeBack = new InsetDrawable(blankActiveDrawable, 0, 0, 0, 0);
@@ -461,7 +465,7 @@ public class PornView extends FrameLayout {
             storedDraw.add(new TargetDrawable(res, null));
             storedDraw.add(new TargetDrawable(res, null));
             storedDraw.add(new TargetDrawable(res, getLayeredDrawable(activeBack,
-                    mNotificationDrawable, targetInset, true)));
+                    mNotificationDrawable, targetInset, false)));
             storedDraw.add(new TargetDrawable(res, null));
             storedDraw.add(new TargetDrawable(res, res.getDrawable(R.drawable.ic_pornview_dismiss_notification)));
         }
