@@ -324,7 +324,7 @@
     <!-- left/right margin for extra notifications in PornView -->
     <dimen name="porn_notification_margin">4dp</dimen>
 
-    <!-- Overflow P.O.R.N. notification icon size -->
+    <!-- P.O.R.N. overflow notification icon size -->
     <dimen name="overflow_icon_size">28dp</dimen>
 
     <!-- Overflow P.O.R.N. notification padding -->

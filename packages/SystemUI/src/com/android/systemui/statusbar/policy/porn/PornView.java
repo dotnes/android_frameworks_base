@@ -47,7 +47,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.os.PowerManager;
+import android.os.IPowerManager;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
@@ -94,7 +94,7 @@ public class PornView extends FrameLayout {
 
     private static final int MAX_OVERFLOW_ICONS = 8;
 
-    private static final long DISPLAY_TIMEOUT = 10000L;
+    private static final long DISPLAY_TIMEOUT = 8000L;
 
     // Targets
     private static final int UNLOCK_TARGET = 0;
@@ -109,16 +109,15 @@ public class PornView extends FrameLayout {
 
     private BaseStatusBar mBar;
     private GlowPadView mGlowPadView;
-    private View mVeil;
     private View mRemoteView;
     private View mClock;
+    private ImageView mCurrentNotificationIcon;
     private FrameLayout mContent;
     private ObjectAnimator mAnim;
-    private Drawable mEmptyHandleDrawable;
     private Drawable mNotificationDrawable;
     private int mCreationOrientation;
     private SettingsObserver mSettingsObserver;
-    private PowerManager mPM;
+    private IPowerManager mPM;
     private INotificationManager mNM;
     private INotificationListenerWrapper mNotificationListener;
     private StatusBarNotification mNotification;
@@ -142,7 +141,12 @@ public class PornView extends FrameLayout {
     private boolean mPocketModeEnabled = false;
     private long mRedisplayTimeout = 0;
     private float mInitialBrightness = 1f;
+    private int mBrightnessMode = -1;
+    private int mUserBrightnessLevel = -1;
 
+    /**
+     * Simple class that listens to changes in notifications
+     */
     private class INotificationListenerWrapper extends INotificationListener.Stub {
         @Override
         public void onNotificationPosted(final StatusBarNotification sbn) {
@@ -150,7 +154,7 @@ public class PornView extends FrameLayout {
                 // need to make sure either the screen is off or the user is currently
                 // viewing the notifications
                 if (PornView.this.getVisibility() == View.VISIBLE
-                        || !mPM.isScreenOn())
+                        || !isScreenOn())
                     showNotification(sbn, true);
             }
         }
@@ -204,6 +208,7 @@ public class PornView extends FrameLayout {
         }
 
         public void onReleased(final View v, final int handle) {
+            ObjectAnimator.ofFloat(mCurrentNotificationIcon, "alpha", 1f).start();
             doTransition(mOverflowNotifications, 1.0f, 0);
             if (mRemoteView != null) {
                 ObjectAnimator.ofFloat(mRemoteView, "alpha", 0f).start();
@@ -216,7 +221,8 @@ public class PornView extends FrameLayout {
         public void onGrabbed(final View v, final int handle) {
             // prevent the PornView from turning off while user is interacting with it
             cancelTimeoutTimer();
-            mVeil.setAlpha(0f);
+            restoreBrightness();
+            ObjectAnimator.ofFloat(mCurrentNotificationIcon, "alpha", 0f).start();
             doTransition(mOverflowNotifications, 0.0f, 0);
             if (mRemoteView != null) {
                 ObjectAnimator.ofFloat(mRemoteView, "alpha", 1f).start();
@@ -232,12 +238,11 @@ public class PornView extends FrameLayout {
 
         }
 
-        public void onTargetChange(View v, int target) {
-
-	}
-
     };
 
+    /**
+     * Class used to listen for changes to P.O.R.N. related settings
+     */
     class SettingsObserver extends ContentObserver {
         SettingsObserver(Handler handler) {
             super(handler);
@@ -258,6 +263,8 @@ public class PornView extends FrameLayout {
                     Settings.System.PORN_REDISPLAY), false, this);
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.PORN_BRIGHTNESS), false, this);
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.SCREEN_BRIGHTNESS_MODE), false, this);
             update();
         }
 
@@ -287,6 +294,13 @@ public class PornView extends FrameLayout {
                     resolver, Settings.System.PORN_REDISPLAY, 0L);
             mInitialBrightness = Settings.System.getInt(
                     resolver, Settings.System.PORN_BRIGHTNESS, 100) / 100f;
+
+            int brightnessMode = Settings.System.getInt(
+                    resolver, Settings.System.SCREEN_BRIGHTNESS_MODE, -1);
+            if (mBrightnessMode != brightnessMode) {
+                mBrightnessMode = brightnessMode;
+                mUserBrightnessLevel = -1;
+            }
 
             if (!mDisplayNotifications || mRedisplayTimeout <= 0) {
                 cancelRedisplayTimer();
@@ -329,7 +343,7 @@ public class PornView extends FrameLayout {
         // uncomment once we figure out if and when we are going to use the light sensor
         //mLightSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_LIGHT);
 
-        mPM = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
+        mPM = IPowerManager.Stub.asInterface(ServiceManager.getService(Context.POWER_SERVICE));
         mNM = INotificationManager.Stub.asInterface(
                 ServiceManager.getService(Context.NOTIFICATION_SERVICE));
         mNotificationListener = new INotificationListenerWrapper();
@@ -354,14 +368,17 @@ public class PornView extends FrameLayout {
         mGlowPadView = (GlowPadView) findViewById(R.id.glow_pad_view);
         mGlowPadView.setOnTriggerListener(mOnTriggerListener);
         mGlowPadView.setDrawOuterRing(false);
+        TargetDrawable nDrawable = new TargetDrawable(getResources(),
+                createLockHandle( getResources().getDrawable(R.drawable.ic_handle_notification_normal)));
+        mGlowPadView.setHandleDrawable(nDrawable);
+
         mContent = (FrameLayout) findViewById(R.id.content);
-        mVeil = findViewById(R.id.veil);
         mClock = findViewById(R.id.clock_view);
+        mCurrentNotificationIcon = (ImageView) findViewById(R.id.current_notification_icon);
 
         mOverflowNotifications = (LinearLayout) findViewById(R.id.keyguard_other_notifications);
         mOverflowNotifications.setOnTouchListener(mOverflowTouchListener);
 
-        mEmptyHandleDrawable = getResources().getDrawable(R.drawable.ic_handle_notification_normal);
         mRemoteViewLayoutParams = getRemoteViewLayoutParams(mCreationOrientation);
         mOverflowLayoutParams = getOverflowLayoutParams();
         updateTargets();
@@ -373,7 +390,7 @@ public class PornView extends FrameLayout {
         registerSensorListener();
         registerBroadcastReceiver();
         mSettingsObserver.observe();
-        if (mRedisplayTimeout > 0 && !mPM.isScreenOn()) updateRedisplayTimer();
+        if (mRedisplayTimeout > 0 && !isScreenOn()) updateRedisplayTimer();
     }
 
     @Override
@@ -452,7 +469,7 @@ public class PornView extends FrameLayout {
         mGlowPadView.setTargetResources(storedDraw);
     }
 
-    void doTransition(View view, float to, long duration) {
+    private void doTransition(View view, float to, long duration) {
         if (mAnim != null) {
             mAnim.cancel();
         }
@@ -461,21 +478,24 @@ public class PornView extends FrameLayout {
         mAnim.start();
     }
 
-    public void launchNotificationPendingIntent() {
+    /**
+     * Launches the pending intent for the currently selected notification
+     */
+    private void launchNotificationPendingIntent() {
         if (mNotification != null) {
             PendingIntent contentIntent = mNotification.getNotification().contentIntent;
             if (contentIntent != null) {
                 try {
                     contentIntent.send();
-                } catch (CanceledException e) {
+                    mNM.cancelNotificationFromListener(mNotificationListener,
+                            mNotification.getPackageName(), mNotification.getTag(),
+                            mNotification.getId());
+                } catch (RemoteException re) {
+                } catch (CanceledException ce) {
                 }
             }
             mNotification = null;
         }
-    }
-
-    public boolean hasPendingNotification() {
-        return mDisplayNotifications && mNotification != null;
     }
 
     private void showNotificationView() {
@@ -521,7 +541,7 @@ public class PornView extends FrameLayout {
             mKeyguardLock = null;
         }
         setVisibility(View.GONE);
-        mVeil.setAlpha(1f);
+        restoreBrightness();
         if (mBar instanceof PhoneStatusBar) {
             ((PhoneStatusBar) mBar).setNavigationBarLightsOn(true);
         } else {
@@ -532,17 +552,18 @@ public class PornView extends FrameLayout {
 
     private void handleShowNotification(boolean ping) {
         if (!mDisplayNotifications) return;
-        handleShowNotificationView();
+        showNotificationView();
         setActiveNotification(mNotification, true);
         inflateRemoteView(mNotification);
-        if (!mPM.isScreenOn()) {
+        if (!isScreenOn()) {
             // to avoid flicker and showing any other screen than the PornView
             // we use a runnable posted with a 250ms delay to turn wake the device
             mHandler.postDelayed(new Runnable() {
                 @Override
                 public void run() {
+                    setBrightness(mInitialBrightness);
                     wakeDevice();
-                    doTransition(mVeil, 1f - mInitialBrightness, 1000);
+                    doTransition(PornView.this, 1f, 1000);
                 }
             }, 250);
         }
@@ -554,7 +575,6 @@ public class PornView extends FrameLayout {
             mNM.cancelNotificationFromListener(mNotificationListener,
                     mNotification.getPackageName(), mNotification.getTag(),
                     mNotification.getId());
-
         } catch (RemoteException e) {
         }
         mNotification = getNextAvailableNotification();
@@ -579,11 +599,58 @@ public class PornView extends FrameLayout {
     }
 
     private void turnScreenOff() {
-        mPM.goToSleep(SystemClock.uptimeMillis());
+        try {
+            mPM.goToSleep(SystemClock.uptimeMillis(), 0);
+        } catch (RemoteException e) {
+        }
+    }
+
+    private boolean isScreenOn() {
+        try {
+            return mPM.isScreenOn();
+        } catch (RemoteException e) {
+        }
+
+        return false;
+    }
+
+    private void setBrightness(float brightness) {
+        final ContentResolver resolver = mContext.getContentResolver();
+        mBrightnessMode = Settings.System.getInt(resolver, Settings.System.SCREEN_BRIGHTNESS_MODE,
+                Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC);
+        if (mBrightnessMode != Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC) {
+            mUserBrightnessLevel = Settings.System.getInt(resolver, Settings.System.SCREEN_BRIGHTNESS,
+                    android.os.PowerManager.BRIGHTNESS_ON);
+            final int dim = getResources().getInteger(
+                    com.android.internal.R.integer.config_screenBrightnessDim);
+            int level = (int)((android.os.PowerManager.BRIGHTNESS_ON - dim) * brightness) + dim;
+            Settings.System.putInt(resolver,
+                    Settings.System.SCREEN_BRIGHTNESS_MODE,
+                    Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL);
+            try {
+                mPM.setTemporaryScreenBrightnessSettingOverride(level);
+            } catch (RemoteException e) {
+            }
+        }
+    }
+
+    private void restoreBrightness() {
+        if (mUserBrightnessLevel < 0 || mBrightnessMode < 0
+                || mBrightnessMode == Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC) {
+            return;
+        }
+        final ContentResolver resolver = mContext.getContentResolver();
+        try {
+            mPM.setTemporaryScreenBrightnessSettingOverride(mUserBrightnessLevel);
+        } catch (RemoteException e) {
+        }
+        Settings.System.putInt(resolver,
+                Settings.System.SCREEN_BRIGHTNESS_MODE,
+                mBrightnessMode);
     }
 
     private void userActivity() {
-        mVeil.setAlpha(0f);
+        restoreBrightness();
         updateTimeoutTimer();
     }
 
@@ -592,8 +659,8 @@ public class PornView extends FrameLayout {
         filter.addAction(ACTION_DISPLAY_TIMEOUT);
         filter.addAction(Intent.ACTION_SCREEN_OFF);
         filter.addAction(Intent.ACTION_SCREEN_ON);
-        // uncomment the line below for testing
-        filter.addAction(ACTION_FORCE_DISPLAY);
+        /* uncomment the line below for testing */
+        //filter.addAction(ACTION_FORCE_DISPLAY);
         mContext.registerReceiver(mBroadcastReceiver, filter);
     }
 
@@ -636,7 +703,7 @@ public class PornView extends FrameLayout {
 
     private StatusBarNotification getNextAvailableNotification() {
         try {
-            // check if other clearable notifications exist and if so display the next one
+            // check if other notifications exist and if so display the next one
             StatusBarNotification[] sbns = mNM
                     .getActiveNotificationsFromListener(mNotificationListener);
             if (sbns == null) return null;
@@ -670,7 +737,8 @@ public class PornView extends FrameLayout {
                                 iv.setImageDrawable(pkgContext.getResources()
                                         .getDrawable(sbns[i].getNotification().icon));
                                 iv.setTag(sbns[i]);
-                                if (sbns[i].getId() == mNotification.getId()) {
+                                if (sbns[i].getPackageName().equals(mNotification.getPackageName())
+                                        && sbns[i].getId() == mNotification.getId()) {
                                     iv.setBackgroundResource(R.drawable.porn_active_notification_background);
                                 } else {
                                     iv.setBackgroundResource(0);
@@ -709,21 +777,19 @@ public class PornView extends FrameLayout {
                         if (i != mLastChildPosition ) {
                             if (hitRect.contains((int)x, (int)y)) {
                                 mLastChildPosition = i;
-                                if (sbn != null && sbn.getId() != mNotification.getId()) {
+                                if (sbn != null) {
                                     swapNotification(sbn);
                                     iv.setBackgroundResource(R.drawable.porn_active_notification_background);
                                 }
                             } else {
                                 iv.setBackgroundResource(0);
                             }
-                        } else {
-                            iv.setBackgroundResource(R.drawable.porn_active_notification_background);
                         }
                     }
+
                     break;
                 case MotionEvent.ACTION_UP:
                 case MotionEvent.ACTION_CANCEL:
-                    mLastChildPosition = -1;
                     inflateRemoteView(mNotification);
                     break;
             }
@@ -732,6 +798,10 @@ public class PornView extends FrameLayout {
         }
     };
 
+    /**
+     * Swaps the current StatusBarNotification with {@code sbn}
+     * @param sbn The StatusBarNotification to swap with the current
+     */
     private void swapNotification(StatusBarNotification sbn) {
         mNotification = sbn;
         setActiveNotification(sbn, false);
@@ -748,23 +818,42 @@ public class PornView extends FrameLayout {
 
     /**
      * Determine if we should show notifications or not.
+     * @return True if we should show this view.
      */
     private boolean shouldShowNotification() {
         return mProximityIsFar;
     }
 
+    /**
+     * Wakes the device up and turns the screen on.
+     */
     private void wakeDevice() {
-        mPM.wakeUp(SystemClock.uptimeMillis());
-        userActivity();
+        try {
+            mPM.wakeUp(SystemClock.uptimeMillis());
+        } catch (RemoteException e) {
+        }
+        updateTimeoutTimer();
     }
 
+    /**
+     * Determine i a call is currently in progress.
+     * @return True if a call is in progress.
+     */
+    private boolean isOnCall() {
+        TelephonyManager tm = (TelephonyManager) mContext.getSystemService(Context.TELEPHONY_SERVICE);
+        return tm.getCallState() != TelephonyManager.CALL_STATE_IDLE;
+    }
+
+    /**
+     * Sets {@code sbn} as the current notification inside the ring.
+     * @param sbn StatusBarNotification to be placed as the current one.
+     * @param updateOthers Set to true to update the overflow notifications.
+     */
     private void setActiveNotification(final StatusBarNotification sbn, final boolean updateOthers) {
         try {
             Context pkgContext = mContext.createPackageContext(sbn.getPackageName(), Context.CONTEXT_RESTRICTED);
             mNotificationDrawable = pkgContext.getResources().getDrawable(sbn.getNotification().icon);
-            TargetDrawable nDrawable = new TargetDrawable(getResources(),
-                    createLockHandle(mNotificationDrawable));
-            mGlowPadView.setHandleDrawable(nDrawable);
+            mCurrentNotificationIcon.setImageDrawable(mNotificationDrawable);
             setHandleText(sbn);
             mGlowPadView.post(new Runnable() {
                 @Override
@@ -778,6 +867,11 @@ public class PornView extends FrameLayout {
         }
     }
 
+    /**
+     * Inflates the RemoteViews specified by {@code sbn}.  If bigContentView is available it will be
+     * used otherwise the standard contentView will be inflated.
+     * @param sbn The StatusBarNotification to inflate content from.
+     */
     private void inflateRemoteView(StatusBarNotification sbn) {
         final Notification notification = sbn.getNotification();
         boolean useBigContent = notification.bigContentView != null;
@@ -797,6 +891,10 @@ public class PornView extends FrameLayout {
         }
     }
 
+    /**
+     * Sets the text to be displayed around the outside of the ring.
+     * @param sbn The StatusBarNotification to get the text from.
+     */
     private void setHandleText(StatusBarNotification sbn) {
         final Notification notificiation = sbn.getNotification();
         CharSequence tickerText = mDisplayNotificationText ? notificiation.tickerText
@@ -809,23 +907,16 @@ public class PornView extends FrameLayout {
         mGlowPadView.setHandleText(tickerText != null ? tickerText.toString() : "");
     }
 
-    private Drawable createNotificationLockHandle(Drawable notification) {
-        int inset = (mEmptyHandleDrawable.getIntrinsicWidth() - notification.getIntrinsicWidth()) / 2;
-        LayerDrawable layers = new LayerDrawable(new Drawable[] {mEmptyHandleDrawable, notification});
-        layers.setLayerInset(1,
-                inset,
-                inset,
-                inset,
-                inset);
-        return layers;
-    }
-
-    private Drawable createLockHandle(Drawable notification) {
-        Drawable normal = createNotificationLockHandle(notification);
+    /**
+     * Creates a drawable with the required states for the center ring handle
+     * @param handle Drawable to use as the base image
+     * @return A StateListDrawable with the appropriate states defined.
+     */
+    private Drawable createLockHandle(Drawable handle) {
         StateListDrawable stateListDrawable = new StateListDrawable();
-        stateListDrawable.addState(TargetDrawable.STATE_INACTIVE, normal);
-        stateListDrawable.addState(TargetDrawable.STATE_ACTIVE, normal);
-        stateListDrawable.addState(TargetDrawable.STATE_FOCUSED, normal);
+        stateListDrawable.addState(TargetDrawable.STATE_INACTIVE, handle);
+        stateListDrawable.addState(TargetDrawable.STATE_ACTIVE, handle);
+        stateListDrawable.addState(TargetDrawable.STATE_FOCUSED, handle);
         return stateListDrawable;
     }
 
@@ -836,7 +927,7 @@ public class PornView extends FrameLayout {
             if (event.sensor.equals(mProximitySensor)) {
                 if (value >= mProximitySensor.getMaximumRange()) {
                     mProximityIsFar = true;
-                    if (!mPM.isScreenOn() && mPocketModeEnabled && !isOnCall()) {
+                    if (!isScreenOn() && mPocketModeEnabled && !isOnCall()) {
                         mNotification = getNextAvailableNotification();
                         if (mNotification != null) showNotification(mNotification, true);
                     }
@@ -868,17 +959,15 @@ public class PornView extends FrameLayout {
             } else if (ACTION_FORCE_DISPLAY.equals(action)) {
                 mNotification = getNextAvailableNotification();
                 if (mNotification != null) showNotification(mNotification, true);
-                mVeil.setAlpha(0f);
+                restoreBrightness();
             }
         }
     };
 
-    private boolean isOnCall() {
-        TelephonyManager tm = (TelephonyManager) mContext.getSystemService(Context.TELEPHONY_SERVICE);
-        return tm.getCallState() != TelephonyManager.CALL_STATE_IDLE;
-    }
-
-    public void updateRedisplayTimer() {
+    /**
+     * Restarts the timer for re-displaying notifications.
+     */
+    private void updateRedisplayTimer() {
         AlarmManager am = (AlarmManager)mContext.getSystemService(Context.ALARM_SERVICE);
         Intent i = new Intent(ACTION_REDISPLAY_NOTIFICATION);
 
@@ -892,7 +981,10 @@ public class PornView extends FrameLayout {
         am.set(AlarmManager.RTC, time.getTimeInMillis(), pi);
     }
 
-    public void cancelRedisplayTimer() {
+    /**
+     * Cancels the timer for re-displaying notifications.
+     */
+    private void cancelRedisplayTimer() {
         AlarmManager am = (AlarmManager)mContext.getSystemService(Context.ALARM_SERVICE);
         Intent i = new Intent(ACTION_REDISPLAY_NOTIFICATION);
 
@@ -903,7 +995,10 @@ public class PornView extends FrameLayout {
         }
     }
 
-    public void updateTimeoutTimer() {
+    /**
+     * Restarts the timeout timer used to turn the screen off.
+     */
+    private void updateTimeoutTimer() {
         AlarmManager am = (AlarmManager)mContext.getSystemService(Context.ALARM_SERVICE);
         Intent i = new Intent(ACTION_DISPLAY_TIMEOUT);
 
@@ -917,7 +1012,10 @@ public class PornView extends FrameLayout {
         am.set(AlarmManager.RTC, time.getTimeInMillis(), pi);
     }
 
-    public void cancelTimeoutTimer() {
+    /**
+     * Cancels the timeout timer used to turn the screen off.
+     */
+    private void cancelTimeoutTimer() {
         AlarmManager am = (AlarmManager)mContext.getSystemService(Context.ALARM_SERVICE);
         Intent i = new Intent(ACTION_DISPLAY_TIMEOUT);
 
