@@ -73,6 +73,7 @@ import com.android.internal.widget.multiwaveview.TargetDrawable;
 
 import com.android.systemui.R;
 import com.android.systemui.statusbar.BaseStatusBar;
+import com.android.systemui.statusbar.tablet.TabletStatusBar;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -111,7 +112,8 @@ public class ActiveDisplayView extends FrameLayout {
     private View mRemoteView;
     private View mClock;
     private ImageView mCurrentNotificationIcon;
-    private FrameLayout mContent;
+    private FrameLayout mRemoteViewLayout;
+    private FrameLayout mContents;
     private ObjectAnimator mAnim;
     private Drawable mNotificationDrawable;
     private int mCreationOrientation;
@@ -368,23 +370,8 @@ public class ActiveDisplayView extends FrameLayout {
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
-        mGlowPadView = (GlowPadView) findViewById(R.id.glow_pad_view);
-        mGlowPadView.setOnTriggerListener(mOnTriggerListener);
-        mGlowPadView.setDrawOuterRing(false);
-        TargetDrawable nDrawable = new TargetDrawable(getResources(),
-                createLockHandle( getResources().getDrawable(R.drawable.ic_handle_notification_normal)));
-        mGlowPadView.setHandleDrawable(nDrawable);
-
-        mContent = (FrameLayout) findViewById(R.id.content);
-        mClock = findViewById(R.id.clock_view);
-        mCurrentNotificationIcon = (ImageView) findViewById(R.id.current_notification_icon);
-
-        mOverflowNotifications = (LinearLayout) findViewById(R.id.keyguard_other_notifications);
-        mOverflowNotifications.setOnTouchListener(mOverflowTouchListener);
-
-        mRemoteViewLayoutParams = getRemoteViewLayoutParams(mCreationOrientation);
-        mOverflowLayoutParams = getOverflowLayoutParams();
-        updateTargets();
+        mContents = (FrameLayout) findViewById(R.id.active_view_contents);
+        makeActiveDisplayView(mCreationOrientation, false);
     }
 
     @Override protected void onAttachedToWindow() {
@@ -403,6 +390,41 @@ public class ActiveDisplayView extends FrameLayout {
         unregisterNotificationListener();
         unregisterBroadcastReceiver();
         mSettingsObserver.unobserve();
+    }
+
+    @Override
+    protected void onConfigurationChanged(Configuration newConfig) {
+        makeActiveDisplayView(newConfig.orientation, true);
+    }
+
+    private void makeActiveDisplayView(int orientation, boolean recreate) {
+        mContents.removeAllViews();
+        View contents = View.inflate(mContext, R.layout.active_display_content, mContents);
+        mGlowPadView = (GlowPadView) contents.findViewById(R.id.glow_pad_view);
+        mGlowPadView.setOnTriggerListener(mOnTriggerListener);
+        mGlowPadView.setDrawOuterRing(false);
+        TargetDrawable nDrawable = new TargetDrawable(getResources(),
+                createLockHandle( getResources().getDrawable(R.drawable.ic_handle_notification_normal)));
+        mGlowPadView.setHandleDrawable(nDrawable);
+
+        mRemoteViewLayout = (FrameLayout) contents.findViewById(R.id.remote_content_parent);
+        mClock = contents.findViewById(R.id.clock_view);
+        mCurrentNotificationIcon = (ImageView) contents.findViewById(R.id.current_notification_icon);
+
+        mOverflowNotifications = (LinearLayout) contents.findViewById(R.id.keyguard_other_notifications);
+        mOverflowNotifications.setOnTouchListener(mOverflowTouchListener);
+
+        mRemoteViewLayoutParams = getRemoteViewLayoutParams(orientation);
+        mOverflowLayoutParams = getOverflowLayoutParams();
+        updateTargets();
+        if (recreate) {
+            updateTimeoutTimer();
+            if (mNotification == null) {
+                mNotification = getNextAvailableNotification();
+            }
+            showNotification(mNotification, true);
+            if (mBar instanceof TabletStatusBar) mBar.disable(0xffffffff);
+        }
     }
 
     private FrameLayout.LayoutParams getRemoteViewLayoutParams(int orientation) {
@@ -878,7 +900,7 @@ public class ActiveDisplayView extends FrameLayout {
         boolean useBigContent = notification.bigContentView != null;
         RemoteViews rv = useBigContent ? notification.bigContentView : notification.contentView;
         if (rv != null) {
-            if (mRemoteView != null) mContent.removeView(mRemoteView);
+            if (mRemoteView != null) mRemoteViewLayout.removeView(mRemoteView);
             if (useBigContent)  {
                 rv.removeAllViews(com.android.internal.R.id.actions);
                 rv.setViewVisibility(com.android.internal.R.id.action_divider, View.GONE);
@@ -888,7 +910,7 @@ public class ActiveDisplayView extends FrameLayout {
             }
             mRemoteView = rv.apply(mContext, null);
             mRemoteView.setAlpha(0f);
-            mContent.addView(mRemoteView, mRemoteViewLayoutParams);
+            mRemoteViewLayout.addView(mRemoteView, mRemoteViewLayoutParams);
         }
     }
 

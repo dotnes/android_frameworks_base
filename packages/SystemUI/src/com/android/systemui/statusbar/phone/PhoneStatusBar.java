@@ -566,9 +566,10 @@ public class PhoneStatusBar extends BaseStatusBar {
                 });
 
         if (mRecreating) {
-           removeActiveDisplayView();
             if (mAppSidebar != null)
                 mWindowManager.removeView(mAppSidebar);
+        } else {
+            addActiveDisplayView();
         }
         mAppSidebar = (AppSidebar)View.inflate(context, R.layout.app_sidebar, null);
         mWindowManager.addView(mAppSidebar, getAppSidebarLayoutParams(mSidebarPosition));
@@ -3241,8 +3242,6 @@ public class PhoneStatusBar extends BaseStatusBar {
                 repositionNavigationBar();
                 updateExpandedViewPos(EXPANDED_LEAVE_ALONE);
                 updateShowSearchHoldoff();
-                removeActiveDisplayView();
-                addActiveDisplayView();
                 if (mNavigationBarView != null && mNavigationBarView.mDelegateHelper != null) {
                     // if We are in Landscape/Phone Mode then swap the XY coordinates for NaVRing Swipe
                     mNavigationBarView.mDelegateHelper.setSwapXY((
