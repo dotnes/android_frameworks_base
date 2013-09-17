@@ -477,10 +477,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     boolean mShowingLockscreen;
     boolean mShowingDream;
     boolean mDreamingLockscreen;
-    boolean mHomeLongPressed;
     boolean mHomePressed;
     boolean mMenuLongPressed;
     boolean mBackLongPressed;
+    boolean mMenuPressed;
     boolean mAppSwitchLongPressed;
     boolean mHomeConsumed;
     boolean mHomeDoubleTapPending;
@@ -491,11 +491,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     boolean mConsumeSearchKeyUp;
     boolean mAssistKeyLongPressed;
     boolean mCameraLongPressed;
-
-    // Used when key is pressed and performing non-default action
-    boolean mMenuDoCustomAction;
-    boolean mBackDoCustomAction;
-    boolean mCameraDoCustomAction;
 
     // Tracks user-customisable behavior for certain key events
     private int mLongPressOnHomeBehavior = -1;
@@ -1124,6 +1119,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         @Override
         public void run() {
             if (mHomeDoubleTapPending) {
+                if (mRecentAppsPreloaded) {
+                    cancelPreloadRecentApps();
+                }
                 mHomeDoubleTapPending = false;
                 launchHomeFromHotKey();
             }
@@ -2612,6 +2610,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     mHomeConsumed = false;
                     return -1;
                 }
+                if (mRecentAppsPreloaded &&
+                        mDoubleTapOnHomeBehavior != KEY_ACTION_APP_SWITCH) {
+                    cancelPreloadRecentApps();
+                }
 
                 if (!homeWasLongPressed) {
                     if (mRecentAppsPreloaded) {
@@ -2682,23 +2684,20 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 if (mHomeDoubleTapPending) {
                     mHomeDoubleTapPending = false;
                     mHandler.removeCallbacks(mHomeDoubleTapTimeoutRunnable);
-                    mHomeConsumed = true;
                     performKeyAction(mDoubleTapOnHomeBehavior);
+                    // Eat the key up event so it won't take us home
+                    mHomeConsumed = true;
                 } else if (!mRecentAppsPreloaded &&
-                        (mLongPressOnHomeBehavior == KEY_ACTION_APP_SWITCH
-                         || mDoubleTapOnHomeBehavior == KEY_ACTION_APP_SWITCH)) {
+                        (mLongPressOnHomeBehavior == KEY_ACTION_APP_SWITCH ||
+                        mDoubleTapOnHomeBehavior == KEY_ACTION_APP_SWITCH)) {
                     preloadRecentApps();
                 }
             } else if (longPress) {
-                if (!mRecentAppsPreloaded && mLongPressOnHomeBehavior == KEY_ACTION_APP_SWITCH) {
-                    preloadRecentApps();
-                }
                 if (!keyguardOn && mLongPressOnHomeBehavior != KEY_ACTION_NOTHING) {
                     performHapticFeedbackLw(null, HapticFeedbackConstants.LONG_PRESS, false);
-                    mHomeConsumed = true;
                     performKeyAction(mLongPressOnHomeBehavior);
-                    // Eat the long-press so it won't take us home when the key is released
-                    mHomeLongPressed = true;
+                    // Eat the key up event so it won't take us home when the key is released
+                    mHomeConsumed = true;
                 }
             }
             return -1;
@@ -2706,12 +2705,18 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             // Hijack modified menu keys for debugging features
             final int chordBug = KeyEvent.META_SHIFT_ON;
 
+            if (virtualKey) {
+                // Let the app handle the key
+                return 0;
+            }
+
             if (down) {
                 if (!mRecentAppsPreloaded && (mPressOnMenuBehavior == KEY_ACTION_APP_SWITCH ||
                         mLongPressOnMenuBehavior == KEY_ACTION_APP_SWITCH)) {
                     preloadRecentApps();
                 }
                 if (repeatCount == 0) {
+                    mMenuPressed = true;
                     if (mEnableShiftMenuBugReports && (metaState & chordBug) == chordBug) {
                         Intent intent = new Intent(Intent.ACTION_BUG_REPORT);
                         mContext.sendOrderedBroadcast(intent, null);
@@ -2731,32 +2736,40 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         Settings.System.putInt(
                                 res, Settings.System.SHOW_PROCESSES, shown ? 0 : 1);
                         return -1;
-                    } else if (mPressOnMenuBehavior != KEY_ACTION_MENU && !virtualKey) {
-                        mMenuDoCustomAction = true;
-                        return -1;
                     }
                 } else if (longPress) {
-                    if (mRecentAppsPreloaded &&
-                            mLongPressOnMenuBehavior != KEY_ACTION_APP_SWITCH) {
-                        cancelPreloadRecentApps();
-                    }
                     if (!keyguardOn && mLongPressOnMenuBehavior != KEY_ACTION_NOTHING) {
+                        if (mRecentAppsPreloaded &&
+                                mLongPressOnMenuBehavior != KEY_ACTION_APP_SWITCH) {
+                            cancelPreloadRecentApps();
+                        }
                         performHapticFeedbackLw(null, HapticFeedbackConstants.LONG_PRESS, false);
                         performKeyAction(mLongPressOnMenuBehavior);
                         // Do not perform action when key is released
-                        mMenuDoCustomAction = false;
+                        mMenuPressed = false;
                         return -1;
                     }
                 }
-            } else {
-                if (mRecentAppsPreloaded && mPressOnMenuBehavior != KEY_ACTION_APP_SWITCH &&
-                        mLongPressOnMenuBehavior != KEY_ACTION_APP_SWITCH) {
-                    cancelPreloadRecentApps();
-                }
-                if (mMenuDoCustomAction) {
-                    mMenuDoCustomAction = false;
+            }
+            if (mPressOnMenuBehavior != KEY_ACTION_MENU) {
+                if (!down && mMenuPressed) {
+                    mMenuPressed = false;
+                    if (mRecentAppsPreloaded && mPressOnMenuBehavior != KEY_ACTION_APP_SWITCH) {
+                        cancelPreloadRecentApps();
+                    }
                     if (!canceled && !keyguardOn) {
                         performKeyAction(mPressOnMenuBehavior);
+                    }
+                }
+                return -1;
+            } else {
+                if (!down) {
+                    if (mMenuPressed) {
+                        mMenuPressed = false;
+                        if (mRecentAppsPreloaded) {
+                            cancelPreloadRecentApps();
+                        }
+                    } else if (mLongPressOnMenuBehavior != KEY_ACTION_NOTHING) {
                         return -1;
                     }
                 }
@@ -2784,11 +2797,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 if (repeatCount == 0) {
                     mAppSwitchLongPressed = false;
                 } else if (longPress) {
-                    if (mRecentAppsPreloaded &&
-                            mLongPressOnAppSwitchBehavior != KEY_ACTION_APP_SWITCH) {
-                        cancelPreloadRecentApps();
-                    }
                     if (!keyguardOn && mLongPressOnAppSwitchBehavior != KEY_ACTION_NOTHING) {
+                        if (mRecentAppsPreloaded &&
+                                mLongPressOnAppSwitchBehavior != KEY_ACTION_APP_SWITCH) {
+                            cancelPreloadRecentApps();
+                        }
                         performHapticFeedbackLw(null, HapticFeedbackConstants.LONG_PRESS, false);
                         performKeyAction(mLongPressOnAppSwitchBehavior);
                         mAppSwitchLongPressed = true;
@@ -2805,7 +2818,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     if (!canceled && !keyguardOn) {
                         performKeyAction(mPressOnAppSwitchBehavior);
                     }
-                    return -1;
                 }
             }
             return -1;
@@ -2818,11 +2830,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 if (repeatCount == 0) {
                     mAssistKeyLongPressed = false;
                 } else if (longPress) {
-                    if (mRecentAppsPreloaded &&
-                            mLongPressOnAssistBehavior != KEY_ACTION_APP_SWITCH) {
-                        cancelPreloadRecentApps();
-                    }
                     if (!keyguardOn && mLongPressOnAssistBehavior != KEY_ACTION_NOTHING) {
+                        if (mRecentAppsPreloaded &&
+                                mLongPressOnAssistBehavior != KEY_ACTION_APP_SWITCH) {
+                            cancelPreloadRecentApps();
+                        }
                         performHapticFeedbackLw(null, HapticFeedbackConstants.LONG_PRESS, false);
                         performKeyAction(mLongPressOnAssistBehavior);
                         mAssistKeyLongPressed = true;
@@ -2836,7 +2848,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                             mPressOnAssistBehavior != KEY_ACTION_APP_SWITCH) {
                         cancelPreloadRecentApps();
                     }
-                    if (!keyguardOn) {
+                    if (!canceled && !keyguardOn) {
                         performKeyAction(mPressOnAssistBehavior);
                     }
                 }
