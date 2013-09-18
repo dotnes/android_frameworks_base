@@ -620,10 +620,6 @@ public class TabletStatusBar extends BaseStatusBar implements
         mHasDockBattery = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_hasDockBattery);
 
-        if (mRecreating) {
-            if (mAppSidebar != null)
-                mWindowManager.removeView(mAppSidebar);
-        }
         mAppSidebar = (AppSidebar)View.inflate(context, R.layout.app_sidebar, null);
         mWindowManager.addView(mAppSidebar, getAppSidebarLayoutParams(mSidebarPosition));
 
@@ -731,14 +727,17 @@ public class TabletStatusBar extends BaseStatusBar implements
         filter.addAction(Intent.ACTION_SCREEN_OFF);
         context.registerReceiver(mBroadcastReceiver, filter);
 
-        if (mRecreating) {
-            removeSidebarView();
-        }
-        addSidebarView();
-
         SettingsObserver settingsObserver = new SettingsObserver(new Handler());
         settingsObserver.observe();
         updateSettings();
+
+        if (mRecreating) {
+            removeSidebarView();
+        } else {
+            addActiveDisplayView();
+        }
+        addSidebarView();
+
         return sb;
     }
 
