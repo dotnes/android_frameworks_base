@@ -2216,4 +2216,7 @@
   <java-symbol type="drawable" name="unlock_halo_op4" />
   <java-symbol type="drawable" name="unlock_ring_op4" />
   <java-symbol type="drawable" name="unlock_wave_op4" />
+
+  <!-- Irda Service -->
+  <java-symbol type="bool" name="config_enableIrdaManagerService" />
 </resources>
