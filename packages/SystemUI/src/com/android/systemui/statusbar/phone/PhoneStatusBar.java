@@ -566,7 +566,7 @@ public class PhoneStatusBar extends BaseStatusBar {
                 });
 
         if (mRecreating) {
-            removePornView();
+           removeActiveDisplayView();
             if (mAppSidebar != null)
                 mWindowManager.removeView(mAppSidebar);
         }
@@ -597,7 +597,7 @@ public class PhoneStatusBar extends BaseStatusBar {
             // no window manager? good luck with that
         }
 
-        addPornView();
+        addActiveDisplayView();
 
         // set recents activity navigation bar view
         RecentsActivity.addNavigationCallback(mNavigationBarView);
@@ -2841,8 +2841,8 @@ public class PhoneStatusBar extends BaseStatusBar {
         }
     }
 
-    public void setNavigationBarLightsOn(boolean on) {
-        mNavigationBarView.setLowProfile(!on);
+    public void setNavigationBarLightsOn(boolean on, boolean force) {
+        mNavigationBarView.setLowProfile(!on, true, force);
     }
 
     public void topAppWindowChanged(boolean showMenu) {
@@ -3241,8 +3241,8 @@ public class PhoneStatusBar extends BaseStatusBar {
                 repositionNavigationBar();
                 updateExpandedViewPos(EXPANDED_LEAVE_ALONE);
                 updateShowSearchHoldoff();
-                removePornView();
-                addPornView();
+                removeActiveDisplayView();
+                addActiveDisplayView();
                 if (mNavigationBarView != null && mNavigationBarView.mDelegateHelper != null) {
                     // if We are in Landscape/Phone Mode then swap the XY coordinates for NaVRing Swipe
                     mNavigationBarView.mDelegateHelper.setSwapXY((

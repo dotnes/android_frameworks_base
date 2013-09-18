@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.systemui.statusbar.policy.porn;
+package com.android.systemui.statusbar.policy.activedisplay;
 
 import android.animation.ObjectAnimator;
 import android.app.ActivityManagerNative;
@@ -34,11 +34,6 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.database.ContentObserver;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.ColorMatrix;
-import android.graphics.ColorMatrixColorFilter;
-import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.InsetDrawable;
@@ -78,24 +73,23 @@ import com.android.internal.widget.multiwaveview.TargetDrawable;
 
 import com.android.systemui.R;
 import com.android.systemui.statusbar.BaseStatusBar;
-import com.android.systemui.statusbar.phone.PhoneStatusBar;
 
 import java.util.ArrayList;
 import java.util.Calendar;
 
-public class PornView extends FrameLayout {
+public class ActiveDisplayView extends FrameLayout {
     private static final boolean DEBUG = false;
-    private static final String TAG = "PornView";
+    private static final String TAG = "ActiveDisplayView";
 
     // the following is used for testing purposes
     private static final String ACTION_FORCE_DISPLAY
-            = "com.android.systemui.FORCE_DISPLAY";
+            = "com.android.systemui.action.FORCE_DISPLAY";
 
     private static final String ACTION_REDISPLAY_NOTIFICATION
-            = "com.android.systemui.REDISPLAY_NOTIFICATION";
+            = "com.android.systemui.action.REDISPLAY_NOTIFICATION";
 
     private static final String ACTION_DISPLAY_TIMEOUT
-            = "com.android.systemui.DISPLAY_TIMEOUT";
+            = "com.android.systemui.action.DISPLAY_TIMEOUT";
 
     private static final int MAX_OVERFLOW_ICONS = 8;
 
@@ -158,7 +152,7 @@ public class PornView extends FrameLayout {
             if (shouldShowNotification() && isValidNotification(sbn)) {
                 // need to make sure either the screen is off or the user is currently
                 // viewing the notifications
-                if (PornView.this.getVisibility() == View.VISIBLE
+                if (ActiveDisplayView.this.getVisibility() == View.VISIBLE
                         || !isScreenOn())
                     showNotification(sbn, true);
             }
@@ -224,7 +218,7 @@ public class PornView extends FrameLayout {
         }
 
         public void onGrabbed(final View v, final int handle) {
-            // prevent the PornView from turning off while user is interacting with it
+            // prevent the ActiveDisplayView from turning off while user is interacting with it
             cancelTimeoutTimer();
             restoreBrightness();
             ObjectAnimator.ofFloat(mCurrentNotificationIcon, "alpha", 0f).start();
@@ -245,7 +239,7 @@ public class PornView extends FrameLayout {
 
         public void onTargetChange(View v, int target) {
 
-	}
+        }
 
     };
 
@@ -259,26 +253,26 @@ public class PornView extends FrameLayout {
 
         void observe() {
             ContentResolver resolver =
-                    PornView.this.mContext.getContentResolver();
+                    ActiveDisplayView.this.mContext.getContentResolver();
             resolver.registerContentObserver(Settings.System.getUriFor(
-                    Settings.System.ENABLE_PORN), false, this);
+                    Settings.System.ENABLE_ACTIVE_DISPLAY), false, this);
             resolver.registerContentObserver(Settings.System.getUriFor(
-                    Settings.System.PORN_TEXT), false, this);
+                    Settings.System.ACTIVE_DISPLAY_TEXT), false, this);
             resolver.registerContentObserver(Settings.System.getUriFor(
-                    Settings.System.PORN_ALL_NOTIFICATIONS), false, this);
+                    Settings.System.ACTIVE_DISPLAY_ALL_NOTIFICATIONS), false, this);
             resolver.registerContentObserver(Settings.System.getUriFor(
-                    Settings.System.PORN_POCKET_MODE), false, this);
+                    Settings.System.ACTIVE_DISPLAY_POCKET_MODE), false, this);
             resolver.registerContentObserver(Settings.System.getUriFor(
-                    Settings.System.PORN_REDISPLAY), false, this);
+                    Settings.System.ACTIVE_DISPLAY_REDISPLAY), false, this);
             resolver.registerContentObserver(Settings.System.getUriFor(
-                    Settings.System.PORN_BRIGHTNESS), false, this);
+                    Settings.System.ACTIVE_DISPLAY_BRIGHTNESS), false, this);
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.SCREEN_BRIGHTNESS_MODE), false, this);
             update();
         }
 
         void unobserve() {
-            PornView.this.mContext.getContentResolver()
+            ActiveDisplayView.this.mContext.getContentResolver()
                     .unregisterContentObserver(this);
         }
 
@@ -289,20 +283,20 @@ public class PornView extends FrameLayout {
 
         public void update() {
             ContentResolver resolver =
-                    PornView.this.mContext.getContentResolver();
+                    ActiveDisplayView.this.mContext.getContentResolver();
 
             mDisplayNotifications = Settings.System.getInt(
-                    resolver, Settings.System.ENABLE_PORN, 0) == 1;
+                    resolver, Settings.System.ENABLE_ACTIVE_DISPLAY, 0) == 1;
             mDisplayNotificationText = Settings.System.getInt(
-                    resolver, Settings.System.PORN_TEXT, 0) == 1;
+                    resolver, Settings.System.ACTIVE_DISPLAY_TEXT, 0) == 1;
             mShowAllNotifications = Settings.System.getInt(
-                    resolver, Settings.System.PORN_ALL_NOTIFICATIONS, 0) == 1;
+                    resolver, Settings.System.ACTIVE_DISPLAY_ALL_NOTIFICATIONS, 0) == 1;
             mPocketModeEnabled = Settings.System.getInt(
-                    resolver, Settings.System.PORN_POCKET_MODE, 0) == 1;
+                    resolver, Settings.System.ACTIVE_DISPLAY_POCKET_MODE, 0) == 1;
             mRedisplayTimeout = Settings.System.getLong(
-                    resolver, Settings.System.PORN_REDISPLAY, 0L);
+                    resolver, Settings.System.ACTIVE_DISPLAY_REDISPLAY, 0L);
             mInitialBrightness = Settings.System.getInt(
-                    resolver, Settings.System.PORN_BRIGHTNESS, 100) / 100f;
+                    resolver, Settings.System.ACTIVE_DISPLAY_BRIGHTNESS, 100) / 100f;
 
             int brightnessMode = Settings.System.getInt(
                     resolver, Settings.System.SCREEN_BRIGHTNESS_MODE, -1);
@@ -340,11 +334,11 @@ public class PornView extends FrameLayout {
         }
     };
 
-    public PornView(Context context) {
+    public ActiveDisplayView(Context context) {
         this(context, null);
     }
 
-    public PornView(Context context, AttributeSet attrs) {
+    public ActiveDisplayView(Context context, AttributeSet attrs) {
         super(context, attrs);
 
         mSensorManager = (SensorManager) mContext.getSystemService(Context.SENSOR_SERVICE);
@@ -358,7 +352,7 @@ public class PornView extends FrameLayout {
         mNotificationListener = new INotificationListenerWrapper();
 
         mIconSize = getResources().getDimensionPixelSize(R.dimen.overflow_icon_size);
-        mIconMargin = getResources().getDimensionPixelSize(R.dimen.porn_notification_margin);
+        mIconMargin = getResources().getDimensionPixelSize(R.dimen.ad_notification_margin);
         mIconPadding = getResources().getDimensionPixelSize(R.dimen.overflow_icon_padding);
 
         mKeyguardManager = (KeyguardManager) context.getSystemService(Context.KEYGUARD_SERVICE);
@@ -471,7 +465,11 @@ public class PornView extends FrameLayout {
             storedDraw.add(new TargetDrawable(res, getLayeredDrawable(activeBack,
                     mNotificationDrawable, targetInset, false)));
             storedDraw.add(new TargetDrawable(res, null));
-            storedDraw.add(new TargetDrawable(res, res.getDrawable(R.drawable.ic_pornview_dismiss_notification)));
+            if (mNotification.isClearable()) {
+                storedDraw.add(new TargetDrawable(res, res.getDrawable(R.drawable.ic_ad_dismiss_notification)));
+            } else {
+                storedDraw.add(new TargetDrawable(res, null));
+            }
         }
         storedDraw.add(new TargetDrawable(res, null));
         mGlowPadView.setTargetResources(storedDraw);
@@ -532,15 +530,11 @@ public class PornView extends FrameLayout {
 
     private void handleShowNotificationView() {
         if (mKeyguardLock == null) {
-            mKeyguardLock = mKeyguardManager.newKeyguardLock("porn");
+            mKeyguardLock = mKeyguardManager.newKeyguardLock("active_display");
             mKeyguardLock.disableKeyguard();
         }
         setVisibility(View.VISIBLE);
-        if (mBar instanceof PhoneStatusBar) {
-            ((PhoneStatusBar) mBar).setNavigationBarLightsOn(false);
-        } else {
-            mBar.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE, View.SYSTEM_UI_FLAG_LOW_PROFILE);
-        }
+        mBar.disable(0xffffffff);
     }
 
     private void handleHideNotificationView() {
@@ -550,11 +544,7 @@ public class PornView extends FrameLayout {
         }
         setVisibility(View.GONE);
         restoreBrightness();
-        if (mBar instanceof PhoneStatusBar) {
-            ((PhoneStatusBar) mBar).setNavigationBarLightsOn(true);
-        } else {
-            mBar.setSystemUiVisibility(0, View.SYSTEM_UI_FLAG_LOW_PROFILE);
-        }
+        mBar.disable(0);
         cancelTimeoutTimer();
     }
 
@@ -564,14 +554,14 @@ public class PornView extends FrameLayout {
         setActiveNotification(mNotification, true);
         inflateRemoteView(mNotification);
         if (!isScreenOn()) {
-            // to avoid flicker and showing any other screen than the PornView
+            // to avoid flicker and showing any other screen than the ActiveDisplayView
             // we use a runnable posted with a 250ms delay to turn wake the device
             mHandler.postDelayed(new Runnable() {
                 @Override
                 public void run() {
                     setBrightness(mInitialBrightness);
                     wakeDevice();
-                    doTransition(PornView.this, 1f, 1000);
+                    doTransition(ActiveDisplayView.this, 1f, 1000);
                 }
             }, 250);
         }
@@ -668,7 +658,7 @@ public class PornView extends FrameLayout {
         filter.addAction(Intent.ACTION_SCREEN_OFF);
         filter.addAction(Intent.ACTION_SCREEN_ON);
         /* uncomment the line below for testing */
-        //filter.addAction(ACTION_FORCE_DISPLAY);
+        filter.addAction(ACTION_FORCE_DISPLAY);
         mContext.registerReceiver(mBroadcastReceiver, filter);
     }
 
@@ -716,6 +706,8 @@ public class PornView extends FrameLayout {
                     .getActiveNotificationsFromListener(mNotificationListener);
             if (sbns == null) return null;
             for (int i = sbns.length - 1; i >= 0; i--) {
+                if (sbns[i] == null)
+                    continue;
                 if (shouldShowNotification() && isValidNotification(sbns[i])) {
                     return sbns[i];
                 }
@@ -747,12 +739,12 @@ public class PornView extends FrameLayout {
                                 iv.setTag(sbns[i]);
                                 if (sbns[i].getPackageName().equals(mNotification.getPackageName())
                                         && sbns[i].getId() == mNotification.getId()) {
-                                    iv.setBackgroundResource(R.drawable.porn_active_notification_background);
+                                    iv.setBackgroundResource(R.drawable.ad_active_notification_background);
                                 } else {
                                     iv.setBackgroundResource(0);
                                 }
                             } else {
-                                iv.setImageResource(R.drawable.ic_pornview_morenotifications_holo_dark);
+                                iv.setImageResource(R.drawable.ic_ad_morenotifications);
                             }
                             iv.setPadding(mIconPadding, mIconPadding, mIconPadding, mIconPadding);
                             iv.setScaleType(ImageView.ScaleType.FIT_CENTER);
@@ -773,6 +765,7 @@ public class PornView extends FrameLayout {
             int action = event.getActionMasked();
             switch (action) {
                 case MotionEvent.ACTION_DOWN:
+                    mLastChildPosition = -1;
                 case MotionEvent.ACTION_MOVE:
                     float x = event.getX();
                     float y = event.getY();
@@ -787,7 +780,7 @@ public class PornView extends FrameLayout {
                                 mLastChildPosition = i;
                                 if (sbn != null) {
                                     swapNotification(sbn);
-                                    iv.setBackgroundResource(R.drawable.porn_active_notification_background);
+                                    iv.setBackgroundResource(R.drawable.ad_active_notification_background);
                                 }
                             } else {
                                 iv.setBackgroundResource(0);

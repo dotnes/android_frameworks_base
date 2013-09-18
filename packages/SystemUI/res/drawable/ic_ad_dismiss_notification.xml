@@ -19,18 +19,18 @@
         android:state_enabled="true"
         android:state_active="false"
         android:state_focused="false"
-        android:drawable="@drawable/ic_pornview_dismiss_notification_normal" />
+        android:drawable="@drawable/ic_ad_dismiss_notification_normal" />
 
     <item
         android:state_enabled="true"
         android:state_active="true"
         android:state_focused="false"
-        android:drawable="@drawable/ic_pornview_dismiss_notification_activated" />
+        android:drawable="@drawable/ic_ad_dismiss_notification_activated" />
 
     <item
         android:state_enabled="true"
         android:state_active="false"
         android:state_focused="true"
-        android:drawable="@drawable/ic_pornview_dismiss_notification_activated" />
+        android:drawable="@drawable/ic_ad_dismiss_notification_activated" />
 
 </selector>

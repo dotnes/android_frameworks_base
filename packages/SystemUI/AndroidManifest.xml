@@ -401,7 +401,7 @@
         <activity android:name="com.android.systemui.Transparent"
             android:theme="@android:style/Theme.Translucent.NoTitleBar" />
 
-        <activity android:name=".statusbar.policy.porn.DummyActivity"
+        <activity android:name=".statusbar.policy.activedisplay.DummyActivity"
                   android:label=""
                   android:taskAffinity=""
                   android:excludeFromRecents="true"

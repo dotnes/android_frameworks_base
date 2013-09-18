@@ -495,11 +495,14 @@ public class TabletStatusBar extends BaseStatusBar implements
         mWindowManager.updateViewLayout(mNotificationPanel,
                 mNotificationPanelParams);
         updateSearchPanel();
+        removeActiveDisplayView();
+        addActiveDisplayView();
     }
 
     @Override
     protected void refreshLayout(int layoutDirection) {
         mNotificationPanel.refreshLayout(layoutDirection);
+        addActiveDisplayView();
     }
 
     protected void loadDimens() {

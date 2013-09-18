@@ -2653,37 +2653,37 @@ public final class Settings {
          * Whether to display notifications on screen when screen is off
          * @hide
          */
-        public static final String ENABLE_PORN = "enable_porn";
+        public static final String ENABLE_ACTIVE_DISPLAY = "enable_active_display";
 
         /**
          * Whether to display notification messages around ring
          * @hide
          */
-        public static final String PORN_TEXT = "porn_text";
+        public static final String ACTIVE_DISPLAY_TEXT = "active_displaytext";
 
         /**
          * Time to redisplay notifications on screen from when screen turns off, 0 = never redisplay
          * @hide
          */
-        public static final String PORN_REDISPLAY = "porn_redisplay";
+        public static final String ACTIVE_DISPLAY_REDISPLAY = "active_displayredisplay";
 
         /**
-         * Brightness of the display when displaying P.O.R.N.
+         * Brightness of the display when displaying the active display view
          * @hide
          */
-        public static final String PORN_BRIGHTNESS = "porn_brightness";
+        public static final String ACTIVE_DISPLAY_BRIGHTNESS = "active_displaybrightness";
 
         /**
-         * Display P.O.R.N. when device comes out of the user's pocket, etc...
+         * Display active display view when device comes out of the user's pocket, etc...
          * @hide
          */
-        public static final String PORN_POCKET_MODE = "porn_pocket_mode";
+        public static final String ACTIVE_DISPLAY_POCKET_MODE = "active_displaypocket_mode";
 
         /**
          * Whether to include ongoing/non-clearable notifications
          * @hide
          */
-        public static final String PORN_ALL_NOTIFICATIONS = "porn_all_notifications";
+        public static final String ACTIVE_DISPLAY_ALL_NOTIFICATIONS = "active_displayall_notifications";
 
         /**
          * @deprecated Use {@link android.provider.Settings.Global#LOW_BATTERY_SOUND}

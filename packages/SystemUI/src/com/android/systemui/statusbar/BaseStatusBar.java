@@ -114,7 +114,7 @@ import com.android.systemui.statusbar.view.PieExpandPanel;
 import com.android.systemui.statusbar.WidgetView;
 import com.android.systemui.aokp.AppWindow;
 
-import com.android.systemui.statusbar.policy.porn.PornView;
+import com.android.systemui.statusbar.policy.activedisplay.ActiveDisplayView;
 
 import java.util.ArrayList;
 import java.math.BigInteger;
@@ -274,7 +274,7 @@ public abstract class BaseStatusBar extends SystemUI implements
         return mPile;
     }
 
-    protected PornView mPornView;
+    protected ActiveDisplayView mActiveDisplayView;
 
     public IStatusBarService getStatusBarService() {
         return mBarService;
@@ -2037,18 +2037,18 @@ public abstract class BaseStatusBar extends SystemUI implements
         if(mCClock != null) mCClock.setTextColor(mClockColor);
     }
 
-    protected void addPornView() {
-        mPornView = (PornView)View.inflate(mContext, R.layout.porn_notification_view, null);
-        mWindowManager.addView(mPornView, getPornViewLayoutParams());
-        mPornView.setStatusBar(this);
+    protected void addActiveDisplayView() {
+        mActiveDisplayView = (ActiveDisplayView)View.inflate(mContext, R.layout.active_display_view, null);
+        mWindowManager.addView(mActiveDisplayView, getActiveDisplayViewLayoutParams());
+        mActiveDisplayView.setStatusBar(this);
     }
 
-    protected void removePornView() {
-        if (mPornView != null)
-            mWindowManager.removeView(mPornView);
+    protected void removeActiveDisplayView() {
+        if (mActiveDisplayView != null)
+            mWindowManager.removeView(mActiveDisplayView);
     }
 
-    protected WindowManager.LayoutParams getPornViewLayoutParams() {
+    protected WindowManager.LayoutParams getActiveDisplayViewLayoutParams() {
         WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
                 LayoutParams.MATCH_PARENT,
                 LayoutParams.MATCH_PARENT,
@@ -2061,7 +2061,7 @@ public abstract class BaseStatusBar extends SystemUI implements
                         | WindowManager.LayoutParams.FLAG_SPLIT_TOUCH,
                 PixelFormat.TRANSLUCENT);
         lp.gravity = Gravity.TOP | Gravity.FILL_VERTICAL | Gravity.FILL_HORIZONTAL;
-        lp.setTitle("PornView");
+        lp.setTitle("ActiveDisplayView");
 
         return lp;
     }

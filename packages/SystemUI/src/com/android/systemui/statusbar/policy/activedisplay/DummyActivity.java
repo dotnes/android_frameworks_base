@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.policy.porn;
+package com.android.systemui.statusbar.policy.activedisplay;
 
 import android.app.Activity;
 import android.os.Bundle;
