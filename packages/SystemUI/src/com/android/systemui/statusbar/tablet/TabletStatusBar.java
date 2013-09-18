@@ -734,14 +734,6 @@ public class TabletStatusBar extends BaseStatusBar implements
         SettingsObserver settingsObserver = new SettingsObserver(new Handler());
         settingsObserver.observe();
         updateSettings();
-
-        if (mRecreating) {
-            removeSidebarView();
-        } else {
-            addActiveDisplayView();
-        }
-        addSidebarView();
-
         return sb;
     }
 
