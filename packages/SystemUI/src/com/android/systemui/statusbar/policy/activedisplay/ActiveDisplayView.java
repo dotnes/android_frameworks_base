@@ -759,11 +759,7 @@ public class ActiveDisplayView extends FrameLayout {
                                 iv.setImageDrawable(pkgContext.getResources()
                                         .getDrawable(sbns[i].getNotification().icon));
                                 iv.setTag(sbns[i]);
-                                if (sbns[i].getPackageName().equals(mNotification.getPackageName())
-                                        && sbns[i].getId() == mNotification.getId()) {
-                                    iv.setBackgroundResource(R.drawable.ad_active_notification_background);
-                                } else {
-                                    iv.setBackgroundResource(0);
+                                iv.setBackgroundResource(0);
                                 }
                             } else {
                                 iv.setImageResource(R.drawable.ic_ad_morenotifications);
