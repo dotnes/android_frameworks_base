@@ -759,9 +759,15 @@ public class ActiveDisplayView extends FrameLayout {
                                 iv.setImageDrawable(pkgContext.getResources()
                                         .getDrawable(sbns[i].getNotification().icon));
                                 iv.setTag(sbns[i]);
-                                iv.setBackgroundResource(0);
+                                if (sbns[i].getPackageName().equals(mNotification.getPackageName())
+                                        && sbns[i].getId() == mNotification.getId()) {
+                                    iv.setBackgroundResource(R.drawable.ad_active_notification_background);
+                                } else {
+                                    iv.setBackgroundResource(0);
                                 }
-                            iv.setImageResource(R.drawable.ic_ad_morenotifications);
+                            } else {
+                                iv.setImageResource(R.drawable.ic_ad_morenotifications);
+                            }
                             iv.setPadding(mIconPadding, mIconPadding, mIconPadding, mIconPadding);
                             iv.setScaleType(ImageView.ScaleType.FIT_CENTER);
                             mOverflowNotifications.addView(iv, mOverflowLayoutParams);
