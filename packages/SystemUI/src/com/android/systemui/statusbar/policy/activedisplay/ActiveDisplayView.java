@@ -246,7 +246,7 @@ public class ActiveDisplayView extends FrameLayout {
     };
 
     /**
-     * Class used to listen for changes to P.O.R.N. related settings
+     * Class used to listen for changes to active display related settings
      */
     class SettingsObserver extends ContentObserver {
         SettingsObserver(Handler handler) {
@@ -761,9 +761,7 @@ public class ActiveDisplayView extends FrameLayout {
                                 iv.setTag(sbns[i]);
                                 iv.setBackgroundResource(0);
                                 }
-                            } else {
-                                iv.setImageResource(R.drawable.ic_ad_morenotifications);
-                            }
+                            iv.setImageResource(R.drawable.ic_ad_morenotifications);
                             iv.setPadding(mIconPadding, mIconPadding, mIconPadding, mIconPadding);
                             iv.setScaleType(ImageView.ScaleType.FIT_CENTER);
                             mOverflowNotifications.addView(iv, mOverflowLayoutParams);
