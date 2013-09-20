@@ -1354,6 +1354,7 @@ public class ConnectivityManager {
             timeOutMs = mService.checkMobileProvisioning(suggestedTimeOutMs);
         } catch (RemoteException e) {
         }
+        return timeOutMs;
     }
 
     /**
