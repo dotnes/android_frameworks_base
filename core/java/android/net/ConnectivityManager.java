@@ -1343,8 +1343,8 @@ public class ConnectivityManager {
      *
      * @param suggestedTimeOutMs, timeout in milliseconds
      *
-     * @return time out that will be used, maybe less that suggestedTimeOutMs
-     * -1 if an error.
+     * @param visible
+     * @param networkType
      *
      * {@hide}
      */
@@ -1354,7 +1354,6 @@ public class ConnectivityManager {
             timeOutMs = mService.checkMobileProvisioning(suggestedTimeOutMs);
         } catch (RemoteException e) {
         }
-        return timeOutMs;
     }
 
     /**
