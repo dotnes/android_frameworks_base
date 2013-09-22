@@ -492,9 +492,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     boolean mHomeLongPressed;
     boolean mMenuLongPressed;
     boolean mBackLongPressed;
-    boolean mHomeConsumed;
     boolean mMenuPressed;
     boolean mAppSwitchLongPressed;
+    boolean mHomeConsumed;
     boolean mHomeDoubleTapPending;
     Intent mHomeIntent;
     Intent mCarDockIntent;
@@ -502,6 +502,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     boolean mSearchKeyShortcutPending;
     boolean mConsumeSearchKeyUp;
     boolean mAssistKeyLongPressed;
+    boolean mCameraLongPressed;
 
     // Tracks user-customisable behavior for certain key events
     private int mLongPressOnHomeBehavior = -1;
@@ -1073,7 +1074,18 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 triggerVirtualKeypress(KeyEvent.KEYCODE_MENU);
                 break;
             case KEY_ACTION_APP_SWITCH:
-                toggleRecentApps();
+                sendCloseSystemWindows(SYSTEM_DIALOG_REASON_RECENT_APPS);
+                try {
+                    IStatusBarService statusbar = getStatusBarService();
+                    if (statusbar != null) {
+                        statusbar.toggleRecentApps();
+                        mRecentAppsPreloaded = false;
+                    }
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "RemoteException when showing recent apps", e);
+                    // re-acquire status bar service next time it is needed.
+                    mStatusBarService = null;
+                }
                 break;
             case KEY_ACTION_SEARCH:
                 launchAssistAction();
@@ -1093,11 +1105,41 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
     }
 
+    private void preloadRecentApps() {
+        try {
+            IStatusBarService statusbar = getStatusBarService();
+            if (statusbar != null) {
+                statusbar.preloadRecentApps();
+                mRecentAppsPreloaded = true;
+            }
+        } catch (RemoteException e) {
+            Slog.e(TAG, "RemoteException when preloading recent apps", e);
+            // re-acquire status bar service next time it is needed.
+            mStatusBarService = null;
+        }
+    }
+
+    private void cancelPreloadRecentApps() {
+        try {
+            IStatusBarService statusbar = getStatusBarService();
+            if (statusbar != null) {
+                statusbar.cancelPreloadRecentApps();
+                mRecentAppsPreloaded = false;
+            }
+        } catch (RemoteException e) {
+            Slog.e(TAG, "RemoteException when showing recent apps", e);
+            // re-acquire status bar service next time it is needed.
+            mStatusBarService = null;
+        }
+    }
+
     private final Runnable mHomeDoubleTapTimeoutRunnable = new Runnable() {
         @Override
         public void run() {
             if (mHomeDoubleTapPending) {
-                cancelPreloadRecentApps();
+                if (mRecentAppsPreloaded) {
+                    cancelPreloadRecentApps();
+                }
                 mHomeDoubleTapPending = false;
                 launchHomeFromHotKey();
             }
@@ -2585,34 +2627,45 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             // If we have released the home key, and didn't do anything else
             // while it was pressed, then it is time to go home!
             if (!down && mHomePressed) {
+                final boolean homeWasLongPressed = mHomeLongPressed;
+                mHomeLongPressed = false;
                 mHomePressed = false;
                 if (mHomeConsumed) {
                     mHomeConsumed = false;
                     return -1;
                 }
-                if (mDoubleTapOnHomeBehavior != KEY_ACTION_APP_SWITCH) {
+                if (mRecentAppsPreloaded &&
+                        mDoubleTapOnHomeBehavior != KEY_ACTION_APP_SWITCH) {
                     cancelPreloadRecentApps();
                 }
 
-                if (canceled) {
-                    Log.i(TAG, "Ignoring HOME; event canceled.");
-                    return -1;
-                }
-
-                // If an incoming call is ringing, HOME is totally disabled.
-                // (The user is already on the InCallScreen at this point,
-                // and his ONLY options are to answer or reject the call.)
-                try {
-                    ITelephony telephonyService = getTelephonyService();
-                    if (telephonyService != null && telephonyService.isRinging()) {
-                        if ((mRingHomeBehavior
-                                & Settings.Secure.RING_HOME_BUTTON_BEHAVIOR_ANSWER) != 0) {
-                            Log.i(TAG, "Answering with HOME button.");
-                            telephonyService.answerRingingCall();
-                            return -1;
-                        } else {
-                            Log.i(TAG, "Ignoring HOME; there's a ringing incoming call.");
-                            return -1;
+                if (!homeWasLongPressed) {
+                    if (mRecentAppsPreloaded) {
+                        cancelPreloadRecentApps();
+                    }
+                    mHomePressed = false;
+                    if (!canceled) {
+                        boolean incomingRinging = false;
+                        try {
+                            ITelephony telephonyService = getTelephonyService();
+                            if (telephonyService != null) {
+                                incomingRinging = telephonyService.isRinging();
+                            }
+                            if (incomingRinging) {
+                                if ((mRingHomeBehavior
+                                            & Settings.Secure.RING_HOME_BUTTON_BEHAVIOR_ANSWER) != 0) {
+                                    Log.i(TAG, "Answering with HOME button.");
+                                    telephonyService.answerRingingCall();
+                                    Intent launchPhone = new Intent(Intent.ACTION_DIAL, null);
+                                    mContext.startActivity(launchPhone);
+                                } else {
+                                    Log.i(TAG, "Ignoring HOME; there's a ringing incoming call.");
+                                }
+                            } else {
+                                launchHomeFromHotKey();
+                            }
+                        } catch (RemoteException ex) {
+                            Log.w(TAG, "RemoteException from getPhoneInterface()", ex);
                         }
                     } else {
                         Log.i(TAG, "Ignoring HOME; event canceled.");
@@ -2649,11 +2702,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     }
                 }
             }
-
-            if (!down) {
-                return -1;
-            }
-
             // Remember that home is pressed and handle special actions.
             if (repeatCount == 0) {
                 mHomePressed = true;
@@ -2663,17 +2711,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     performKeyAction(mDoubleTapOnHomeBehavior);
                     // Eat the key up event so it won't take us home
                     mHomeConsumed = true;
-                } else if (!mPreloadedRecentApps &&
+                } else if (!mRecentAppsPreloaded &&
                         (mLongPressOnHomeBehavior == KEY_ACTION_APP_SWITCH ||
                         mDoubleTapOnHomeBehavior == KEY_ACTION_APP_SWITCH)) {
                     preloadRecentApps();
                 }
             } else if (longPress) {
-                if (!keyguardOn && !mHomeConsumed &&
-                        mLongPressOnHomeBehavior != KEY_ACTION_NOTHING) {
-                    if (mLongPressOnHomeBehavior != KEY_ACTION_APP_SWITCH) {
-                        cancelPreloadRecentApps();
-                    }
+                if (!keyguardOn && mLongPressOnHomeBehavior != KEY_ACTION_NOTHING) {
                     performHapticFeedbackLw(null, HapticFeedbackConstants.LONG_PRESS, false);
                     performKeyAction(mLongPressOnHomeBehavior);
                     // Eat the key up event so it won't take us home when the key is released
@@ -2691,7 +2735,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             }
 
             if (down) {
-                if (!mPreloadedRecentApps && (mPressOnMenuBehavior == KEY_ACTION_APP_SWITCH ||
+                if (!mRecentAppsPreloaded && (mPressOnMenuBehavior == KEY_ACTION_APP_SWITCH ||
                         mLongPressOnMenuBehavior == KEY_ACTION_APP_SWITCH)) {
                     preloadRecentApps();
                 }
@@ -2719,7 +2763,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     }
                 } else if (longPress) {
                     if (!keyguardOn && mLongPressOnMenuBehavior != KEY_ACTION_NOTHING) {
-                        if (mLongPressOnMenuBehavior != KEY_ACTION_APP_SWITCH) {
+                        if (mRecentAppsPreloaded &&
+                                mLongPressOnMenuBehavior != KEY_ACTION_APP_SWITCH) {
                             cancelPreloadRecentApps();
                         }
                         performHapticFeedbackLw(null, HapticFeedbackConstants.LONG_PRESS, false);
@@ -2733,7 +2778,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             if (mPressOnMenuBehavior != KEY_ACTION_MENU) {
                 if (!down && mMenuPressed) {
                     mMenuPressed = false;
-                    if (mPressOnMenuBehavior != KEY_ACTION_APP_SWITCH) {
+                    if (mRecentAppsPreloaded && mPressOnMenuBehavior != KEY_ACTION_APP_SWITCH) {
                         cancelPreloadRecentApps();
                     }
                     if (!canceled && !keyguardOn) {
@@ -2745,7 +2790,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 if (!down) {
                     if (mMenuPressed) {
                         mMenuPressed = false;
-                        cancelPreloadRecentApps();
+                        if (mRecentAppsPreloaded) {
+                            cancelPreloadRecentApps();
+                        }
                     } else if (mLongPressOnMenuBehavior != KEY_ACTION_NOTHING) {
                         return -1;
                     }
@@ -2767,7 +2814,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             return 0;
         } else if (keyCode == KeyEvent.KEYCODE_APP_SWITCH) {
             if (down) {
-                if (!mPreloadedRecentApps && (mPressOnAppSwitchBehavior == KEY_ACTION_APP_SWITCH ||
+                if (!mRecentAppsPreloaded && (mPressOnAppSwitchBehavior == KEY_ACTION_APP_SWITCH ||
                         mLongPressOnAppSwitchBehavior == KEY_ACTION_APP_SWITCH)) {
                     preloadRecentApps();
                 }
@@ -2775,7 +2822,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     mAppSwitchLongPressed = false;
                 } else if (longPress) {
                     if (!keyguardOn && mLongPressOnAppSwitchBehavior != KEY_ACTION_NOTHING) {
-                        if (mLongPressOnAppSwitchBehavior != KEY_ACTION_APP_SWITCH) {
+                        if (mRecentAppsPreloaded &&
+                                mLongPressOnAppSwitchBehavior != KEY_ACTION_APP_SWITCH) {
                             cancelPreloadRecentApps();
                         }
                         performHapticFeedbackLw(null, HapticFeedbackConstants.LONG_PRESS, false);
@@ -2787,7 +2835,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 if (mAppSwitchLongPressed) {
                     mAppSwitchLongPressed = false;
                 } else {
-                    if (mPressOnAppSwitchBehavior != KEY_ACTION_APP_SWITCH) {
+                    if (mRecentAppsPreloaded &&
+                            mPressOnAppSwitchBehavior != KEY_ACTION_APP_SWITCH) {
                         cancelPreloadRecentApps();
                     }
                     if (!canceled && !keyguardOn) {
@@ -2798,7 +2847,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             return -1;
         } else if (keyCode == KeyEvent.KEYCODE_ASSIST) {
             if (down) {
-                if (!mPreloadedRecentApps && (mPressOnAssistBehavior == KEY_ACTION_APP_SWITCH ||
+                if (!mRecentAppsPreloaded && (mPressOnAssistBehavior == KEY_ACTION_APP_SWITCH ||
                         mLongPressOnAssistBehavior == KEY_ACTION_APP_SWITCH)) {
                     preloadRecentApps();
                 }
@@ -2806,7 +2855,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     mAssistKeyLongPressed = false;
                 } else if (longPress) {
                     if (!keyguardOn && mLongPressOnAssistBehavior != KEY_ACTION_NOTHING) {
-                        if (mLongPressOnAssistBehavior != KEY_ACTION_APP_SWITCH) {
+                        if (mRecentAppsPreloaded &&
+                                mLongPressOnAssistBehavior != KEY_ACTION_APP_SWITCH) {
                             cancelPreloadRecentApps();
                         }
                         performHapticFeedbackLw(null, HapticFeedbackConstants.LONG_PRESS, false);
@@ -2818,7 +2868,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 if (mAssistKeyLongPressed) {
                     mAssistKeyLongPressed = false;
                 } else {
-                    if (mPressOnAssistBehavior != KEY_ACTION_APP_SWITCH) {
+                    if (mRecentAppsPreloaded &&
+                            mPressOnAssistBehavior != KEY_ACTION_APP_SWITCH) {
                         cancelPreloadRecentApps();
                     }
                     if (!canceled && !keyguardOn) {
@@ -3103,36 +3154,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             mSearchManager = (SearchManager) mContext.getSystemService(Context.SEARCH_SERVICE);
         }
         return mSearchManager;
-    }
-
-    private void preloadRecentApps() {
-        mPreloadedRecentApps = true;
-        try {
-            IStatusBarService statusbar = getStatusBarService();
-            if (statusbar != null) {
-                statusbar.preloadRecentApps();
-            }
-        } catch (RemoteException e) {
-            Slog.e(TAG, "RemoteException when preloading recent apps", e);
-            // re-acquire status bar service next time it is needed.
-            mStatusBarService = null;
-        }
-    }
-
-    private void cancelPreloadRecentApps() {
-        if (mPreloadedRecentApps) {
-            mPreloadedRecentApps = false;
-            try {
-                IStatusBarService statusbar = getStatusBarService();
-                if (statusbar != null) {
-                    statusbar.cancelPreloadRecentApps();
-                }
-            } catch (RemoteException e) {
-                Slog.e(TAG, "RemoteException when showing recent apps", e);
-                // re-acquire status bar service next time it is needed.
-                mStatusBarService = null;
-            }
-        }
     }
 
     private void toggleRecentApps() {
