@@ -94,6 +94,13 @@ public class KeyguardHostView extends KeyguardViewBase {
     private int MAX_WIDGETS;
     private boolean mUnlimitedWidgets;
 
+    private static final int LOCK_STYLE_JB = 0;
+    private static final int LOCK_STYLE_OP4 = 4;
+    private int mLockscreenStyle = LOCK_STYLE_JB;
+    private boolean mUseOp4Lockscreen;
+    private boolean mUseOp4Color;
+    private int background_color;
+
     private AppWidgetHost mAppWidgetHost;
     private AppWidgetManager mAppWidgetManager;
     private KeyguardWidgetPager mAppWidgetContainer;
@@ -466,15 +473,28 @@ public class KeyguardHostView extends KeyguardViewBase {
     };
 
     private void updateBackground() {
+        int defaultBgColor = 0xD2000000;
         String background = Settings.System.getStringForUser(getContext().getContentResolver(),
                 Settings.System.LOCKSCREEN_BACKGROUND, UserHandle.USER_CURRENT);
+        mLockscreenStyle = Settings.System.getInt(getContext().getContentResolver(),
+                Settings.System.LOCKSCREEN_STYLE, LOCK_STYLE_JB);
+        mUseOp4Lockscreen = (mLockscreenStyle == LOCK_STYLE_OP4);
+        mUseOp4Color = Settings.System.getInt(getContext().getContentResolver(),
+                Settings.System.LOCKSCREEN_USEOP4COLOR, 0) == 1;
 
-        if (background == null) {
-            return;
-        }
+        int bgColor = Settings.System.getInt(getContext().getContentResolver(),
+                 Settings.System.CIRCLES_LOCK_BG_COLOR, defaultBgColor);
 
         Drawable back = null;
-        if (!background.isEmpty()) {
+        if (mUseOp4Lockscreen && mUseOp4Color) {
+            try {
+                back = new ColorDrawable(bgColor);
+            } catch(NumberFormatException e) {
+                Log.e(TAG, "Invalid background color " + bgColor);
+            }
+        } else if (background == null) {
+            return;
+        } else if (!background.isEmpty()) {
             try {
                 back = new ColorDrawable(Integer.parseInt(background));
             } catch(NumberFormatException e) {
@@ -1331,7 +1351,8 @@ public class KeyguardHostView extends KeyguardViewBase {
         // cameras we can't trust.  TODO: plumb safe mode into camera creation code and only
         // inflate system-provided camera?
         if (!mSafeModeEnabled && !cameraDisabledByDpm() && mUserSetupCompleted
-                && mContext.getResources().getBoolean(R.bool.kg_enable_camera_default_widget)) {
+                && Settings.System.getInt(mContext.getContentResolver(),
+                Settings.System.KG_CAMERA_WIDGET, 0) == 1) {
             View cameraWidget =
                     CameraWidgetFrame.create(mContext, mCameraWidgetCallbacks, mActivityLauncher);
             if (cameraWidget != null) {
