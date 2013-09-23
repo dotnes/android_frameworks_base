@@ -26,7 +26,6 @@ import java.net.InetAddress;
 import java.net.Inet4Address;
 import java.net.UnknownHostException;
 import java.util.EnumMap;
-import java.util.Locale;
 
 /**
  * Describes the state of any Wifi connection that is active or
@@ -276,7 +275,7 @@ public class WifiInfo implements Parcelable {
             return SupplicantState.FOUR_WAY_HANDSHAKE;
         else {
             try {
-                return SupplicantState.valueOf(stateName.toUpperCase(Locale.ROOT));
+                return SupplicantState.valueOf(stateName.toUpperCase());
             } catch (IllegalArgumentException e) {
                 return SupplicantState.INVALID;
             }

@@ -62,7 +62,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Locale;
 
 /**
  * The Settings provider contains global system-level device preferences.
@@ -2621,22 +2620,6 @@ public final class Settings {
         public static final String LOCKSCREEN_DISABLED = "lockscreen.disabled";
 
         /**
-         * Which lockscreen style to use. The value is an integer.
-         * ( 0 - GlowPadView    : JB     )
-         * ( 1 - MultiwaveView  : ICS    )
-         * ( 2 - Tabs           : GB     )
-         * ( 3 - Rotary         : Eclair )
-         * @hide
-         */
-        public static final String LOCKSCREEN_STYLE = "lockscreen_style";
-
-        /**
-         * Whether to use optimus4 background color as lockscreen background color.
-         * @hide
-         */
-        public static final String LOCKSCREEN_USEOP4COLOR = "lockscreen_useop4color";
-
-        /**
          * Stores values for custom lockscreen targets
          * @hide
          */
@@ -5148,31 +5131,6 @@ public final class Settings {
          * @hide
          */
         public static final String NOTIFICATIONS_BEHAVIOUR = "notifications_behaviour";
-
-
-        /**
-         * Sets bg color of optimus lockscreen bg
-         * @hide
-         */
-	public static final String CIRCLES_LOCK_BG_COLOR = "circles_lock_bg_color";
-
-        /**
-         * Sets ring color of optimus lockscreen
-         * @hide
-         */
-        public static final String CIRCLES_LOCK_RING_COLOR = "circles_lock_ring_color";
-
-        /**
-         * Sets halo color of optimus lockscreen
-         * @hide
-         */
-        public static final String CIRCLES_LOCK_HALO_COLOR = "circles_lock_halo_color";
-
-        /**
-         * Sets wave color of optimus lockscreen
-         * @hide
-         */
-        public static final String CIRCLES_LOCK_WAVE_COLOR = "circles_lock_wave_color";
 
         /**
          * Settings to backup. This is here so that it's in the same place as the settings
@@ -8517,7 +8475,7 @@ public final class Settings {
          * @hide
          */
         public static final String getBluetoothHeadsetPriorityKey(String address) {
-            return BLUETOOTH_HEADSET_PRIORITY_PREFIX + address.toUpperCase(Locale.ROOT);
+            return BLUETOOTH_HEADSET_PRIORITY_PREFIX + address.toUpperCase();
         }
 
         /**
@@ -8525,7 +8483,7 @@ public final class Settings {
          * @hide
          */
         public static final String getBluetoothA2dpSinkPriorityKey(String address) {
-            return BLUETOOTH_A2DP_SINK_PRIORITY_PREFIX + address.toUpperCase(Locale.ROOT);
+            return BLUETOOTH_A2DP_SINK_PRIORITY_PREFIX + address.toUpperCase();
         }
 
         /**
@@ -8533,7 +8491,7 @@ public final class Settings {
          * @hide
          */
         public static final String getBluetoothInputDevicePriorityKey(String address) {
-            return BLUETOOTH_INPUT_DEVICE_PRIORITY_PREFIX + address.toUpperCase(Locale.ROOT);
+            return BLUETOOTH_INPUT_DEVICE_PRIORITY_PREFIX + address.toUpperCase();
         }
 
         /**

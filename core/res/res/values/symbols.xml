@@ -2198,26 +2198,6 @@
   <!-- Package Manager -->
   <java-symbol type="array" name="config_disabledComponents" />
 
-  <!-- Lockscreen Style -->
-  <java-symbol type="id" name="sliding_tab_view" />
-  <java-symbol type="id" name="rotary_selector_view" />
-  <java-symbol type="id" name="multiwave_view" />
-  <java-symbol type="drawable" name="ic_lock_ringer_on" />
-  <java-symbol type="drawable" name="ic_lock_ringer_off" />
-  <java-symbol type="color" name="keyguard_text_color_soundon" />
-  <java-symbol type="color" name="keyguard_text_color_soundoff" />
-  <java-symbol type="id" name="carrier_text" />
-  <java-symbol type="drawable" name="ic_lockscreen_chevron_up" />
-  <java-symbol type="drawable" name="ic_lockscreen_chevron_down" />
-  <java-symbol type="drawable" name="ic_lockscreen_chevron_left" />
-  <java-symbol type="drawable" name="ic_lockscreen_chevron_right" />
-
-  <!-- Optimus 4x lockscreen -->
-  <java-symbol type="id" name="op4_view" />
-  <java-symbol type="drawable" name="unlock_halo_op4" />
-  <java-symbol type="drawable" name="unlock_ring_op4" />
-  <java-symbol type="drawable" name="unlock_wave_op4" />
-
   <!-- Irda Service -->
   <java-symbol type="bool" name="config_enableIrdaManagerService" />
 </resources>
