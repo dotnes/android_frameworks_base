@@ -453,6 +453,11 @@ public class MockContext extends Context {
     }
 
     @Override
+    public boolean isPrivacyGuardEnabled() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public boolean isHwuiDisabled() {
         throw new UnsupportedOperationException();
     }

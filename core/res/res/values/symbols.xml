@@ -2184,13 +2184,13 @@
   <!-- IME Picker showing upon pressing Sym Key -->
   <java-symbol type="bool" name="config_symKeyShowsImePicker" />
 
-  <!-- Screenshort Trash -->
-  <java-symbol type="string" name="trash" />
-
   <!-- Privacy Guard -->
   <java-symbol type="string" name="privacy_guard_notification" />
   <java-symbol type="string" name="privacy_guard_notification_detail" />
   <java-symbol type="drawable" name="stat_notify_privacy_guard" />
+
+  <!-- Screenshort Trash -->
+  <java-symbol type="string" name="trash" />
 
   <!-- Irda Service -->
   <java-symbol type="bool" name="config_enableIrdaManagerService" />
@@ -2198,4 +2198,6 @@
   <!-- Package Manager -->
   <java-symbol type="array" name="config_disabledComponents" />
 
+  <!-- Irda Service -->
+  <java-symbol type="bool" name="config_enableIrdaManagerService" />
 </resources>

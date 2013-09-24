@@ -521,6 +521,12 @@ public class ContextWrapper extends Context {
 
     /** @hide */
     @Override
+    public boolean isPrivacyGuardEnabled() {
+        return mBase.isPrivacyGuardEnabled();
+    }
+
+    /** @hide */
+    @Override
     public boolean isHwuiDisabled() {
         return mBase.isHwuiDisabled();
     }

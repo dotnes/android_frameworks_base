@@ -226,6 +226,10 @@ interface IPackageManager {
     int getPreferredActivities(out List<IntentFilter> outFilters,
             out List<ComponentName> outActivities, String packageName);
 
+    boolean getPrivacyGuardSetting(in String packageName, int userId);
+
+    void setPrivacyGuardSetting(in String packageName, boolean enabled, int userId);
+
     boolean getHwuiSetting(in String packageName, int userId);
 
     void setHwuiSetting(in String packageName, boolean enabled, int userId);

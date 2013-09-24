@@ -1888,6 +1888,15 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             return true;
         }
 
+        case IS_PRIVACY_GUARD_ENABLED_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            int pid = data.readInt();
+            boolean res = isPrivacyGuardEnabledForProcess(pid);
+            reply.writeNoException();
+            reply.writeInt(res ? 1 : 0);
+            return true;
+        }
+
         case IS_HWUI_DISABLED_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             int pid = data.readInt();
@@ -4320,6 +4329,19 @@ class ActivityManagerProxy implements IActivityManager
         reply.readException();
         data.recycle();
         reply.recycle();
+    }
+
+    public boolean isPrivacyGuardEnabledForProcess(int pid) throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        data.writeInt(pid);
+        mRemote.transact(IS_PRIVACY_GUARD_ENABLED_TRANSACTION, data, reply, 0);
+        reply.readException();
+        int res = reply.readInt();
+        data.recycle();
+        reply.recycle();
+        return res == 1;
     }
 
     public boolean isHwuiDisabledForProcess(int pid) throws RemoteException {
