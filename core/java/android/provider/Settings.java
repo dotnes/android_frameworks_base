@@ -5539,6 +5539,26 @@ public final class Settings {
         public static final String WAKELOCK_BLOCKING_LIST = "wakelock_blocking_list";
 
         /**
+         * @hide
+         */
+        public static final String START_SCREEN_STATE_SERVICE = "start_screen_state_service";
+
+        /**
+         * @hide
+         */
+        public static final String SCREEN_STATE_TWOG = "screen_state_twog";
+
+        /**
+         * @hide
+         */
+        public static final String SCREEN_STATE_GPS = "screen_state_gps";
+
+        /**
+         * @hide
+         */
+         public static final String SCREEN_STATE_MOBILE_DATA = "screen_state_mobile_data";
+
+        /**
          * Whether to enable notification shortcuts (toggle)
          *
          * @hide
