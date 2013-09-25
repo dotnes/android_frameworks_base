@@ -97,8 +97,6 @@ public class ActiveDisplayView extends FrameLayout {
 
     private static final int MAX_OVERFLOW_ICONS = 8;
 
-    private static final long DISPLAY_TIMEOUT = 8000L;
-
     // Targets
     private static final int UNLOCK_TARGET = 0;
     private static final int OPEN_APP_TARGET = 4;
@@ -152,6 +150,7 @@ public class ActiveDisplayView extends FrameLayout {
     private int mBrightnessMode = -1;
     private int mUserBrightnessLevel = -1;
     private boolean mSunlightModeEnabled = false;
+    private long mDisplayTimeout = 8000L;
 
     /**
      * Simple class that listens to changes in notifications
@@ -282,6 +281,8 @@ public class ActiveDisplayView extends FrameLayout {
                     Settings.System.ACTIVE_DISPLAY_SUNLIGHT_MODE), false, this);
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.SCREEN_BRIGHTNESS_MODE), false, this);
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.ACTIVE_DISPLAY_TIMEOUT), false, this);
             update();
         }
 
@@ -316,6 +317,9 @@ public class ActiveDisplayView extends FrameLayout {
                     resolver, Settings.System.ACTIVE_DISPLAY_BRIGHTNESS, 100) / 100f;
             mSunlightModeEnabled = Settings.System.getInt(
                     resolver, Settings.System.ACTIVE_DISPLAY_SUNLIGHT_MODE, 0) == 1;
+            mDisplayTimeout = Settings.System.getLong(
+                    resolver, Settings.System.ACTIVE_DISPLAY_TIMEOUT, 8000L);
+
 
             int brightnessMode = Settings.System.getInt(
                     resolver, Settings.System.SCREEN_BRIGHTNESS_MODE, -1);
@@ -1136,7 +1140,7 @@ public class ActiveDisplayView extends FrameLayout {
         } catch (Exception e) {
         }
         Calendar time = Calendar.getInstance();
-        time.setTimeInMillis(System.currentTimeMillis() + DISPLAY_TIMEOUT);
+        time.setTimeInMillis(System.currentTimeMillis() + mDisplayTimeout);
         am.set(AlarmManager.RTC, time.getTimeInMillis(), pi);
     }
 
