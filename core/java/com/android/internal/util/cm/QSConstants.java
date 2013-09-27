@@ -42,9 +42,9 @@ public class QSConstants {
         public static ArrayList<String> TILES_DEFAULT = new ArrayList<String>();
 
         static {
-            TILES_DEFAULT.add(TILE_SETTINGS);
             TILES_DEFAULT.add(TILE_WIFI);
             TILES_DEFAULT.add(TILE_MOBILEDATA);
+            TILES_DEFAULT.add(TILE_GPS);
             TILES_DEFAULT.add(TILE_AUTOROTATE);
             TILES_DEFAULT.add(TILE_BRIGHTNESS);
             TILES_DEFAULT.add(TILE_BATTERY);
