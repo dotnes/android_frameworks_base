@@ -1,4 +1,4 @@
-package com.android.systemui.jellybam;
+package com.android.systemui.bam;
 
 import android.os.Environment;
 import android.os.Parcel;

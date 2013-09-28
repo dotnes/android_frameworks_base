@@ -1,4 +1,4 @@
-package com.android.systemui.jellybam;
+package com.android.systemui.bam;
 
 import android.content.Context;
 import android.content.pm.PackageManager;
