@@ -34,10 +34,8 @@ import java.io.IOException;
 
 public class RebootTile extends QuickSettingsTile {
 
-    public RebootTile(Context context, LayoutInflater inflater,
-            QuickSettingsContainerView container,
-            final QuickSettingsController qsc, Handler handler) {
-        super(context, inflater, container, qsc);
+    public RebootTile(Context context, final QuickSettingsController qsc, Handler handler) {
+        super(context, qsc);
 
         mLabel = mContext.getString(R.string.quick_settings_reboot);
         mDrawable = R.drawable.ic_qs_reboot;

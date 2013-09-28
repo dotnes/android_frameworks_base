@@ -17,9 +17,8 @@ import com.android.systemui.statusbar.phone.QuickSettingsController;
 
 public class BamcontrolTile extends QuickSettingsTile{
 
-    public BamcontrolTile(Context context, LayoutInflater inflater,
-            QuickSettingsContainerView container, QuickSettingsController qsc) {
-        super(context, inflater, container, qsc);
+    public BamcontrolTile(Context context, QuickSettingsController qsc) {
+        super(context, qsc);
 
         mOnClick = new View.OnClickListener() {
 

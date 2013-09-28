@@ -22,12 +22,10 @@ import com.android.systemui.statusbar.phone.QuickSettingsController;
 import com.android.systemui.statusbar.phone.QuickSettingsContainerView;
 
 public class WiFiADBTile extends QuickSettingsTile {
-    private static final String TAG = "WiFiAdbTile";
+    private static final String TAG = "NetworkAdbTile";
 
-    public WiFiADBTile(Context context, LayoutInflater inflater,
-            QuickSettingsContainerView container,
-            QuickSettingsController qsc, Handler handler) {
-        super(context, inflater, container, qsc);
+    public WiFiADBTile(Context context, QuickSettingsController qsc, Handler mHandler) {
+        super(context, qsc);
 
         mOnClick = new OnClickListener() {
             @Override

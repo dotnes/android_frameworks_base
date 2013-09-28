@@ -22,9 +22,11 @@ import android.app.ProfileManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.os.RemoteException;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
+import android.view.WindowManagerGlobal;
 
 import com.android.systemui.R;
 import com.android.systemui.statusbar.phone.QuickSettingsContainerView;
@@ -39,8 +41,8 @@ public class ProfileTile extends QuickSettingsTile {
     public ProfileTile(Context context, final QuickSettingsController qsc) {
         super(context, qsc);
 
-        qsc.registerAction(ProfileManagerService.INTENT_ACTION_PROFILE_SELECTED, this);
-        qsc.registerAction(ProfileManagerService.INTENT_ACTION_PROFILE_UPDATED, this);
+        qsc.registerAction(ProfileManager.INTENT_ACTION_PROFILE_SELECTED, this);
+        qsc.registerAction(ProfileManager.INTENT_ACTION_PROFILE_UPDATED, this);
 
         mProfileManager = (ProfileManager) mContext.getSystemService(Context.PROFILE_SERVICE);
 
@@ -116,6 +118,10 @@ public class ProfileTile extends QuickSettingsTile {
                     }
                 }).create();
         dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_DIALOG);
+        try {
+            WindowManagerGlobal.getWindowManagerService().dismissKeyguard();
+        } catch (RemoteException e) {
+        }
         dialog.show();
     }
 

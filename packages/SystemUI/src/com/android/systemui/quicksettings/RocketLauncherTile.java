@@ -20,10 +20,8 @@ public class RocketLauncherTile extends QuickSettingsTile {
 
     private final Context mContext;
 
-    public RocketLauncherTile(Context context, LayoutInflater inflater,
-            QuickSettingsContainerView container,
-            final QuickSettingsController qsc) {
-        super(context, inflater, container, qsc);
+    public RocketLauncherTile(Context context, final QuickSettingsController qsc) {
+        super(context, qsc);
 
         mContext = context;
 

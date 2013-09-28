@@ -128,7 +128,7 @@ public class CameraTile extends QuickSettingsTile {
             updateOrientation();
 
             final PanelView panel = getContainingPanel();
-            final View parent = (View) mContainerView.getParent();
+            final View parent = (View) mContainer.getParent();
 
             mHandler.postDelayed(new Runnable() {
                 @Override
