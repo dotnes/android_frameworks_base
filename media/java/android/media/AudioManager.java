@@ -489,10 +489,7 @@ public class AudioManager {
                 } else {
                     int swapKeys = Settings.System.getInt(mContext.getContentResolver(),
                         Settings.System.SWAP_VOLUME_KEYS_ON_ROTATION, 0);
-                    int rotation = mWindowManager.getDefaultDisplay().getRotation();
-                    if (swapKeys == 1
-                            && (rotation == Surface.ROTATION_90
-                            ||  rotation == Surface.ROTATION_180)) {
+                    if (swapKeys) {
                         direction = keyCode == KeyEvent.KEYCODE_VOLUME_UP
                                 ? ADJUST_LOWER
                                 : ADJUST_RAISE;
