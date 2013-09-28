@@ -127,8 +127,6 @@ import com.android.systemui.quicksettings.DesktopModeTile;
 import com.android.systemui.quicksettings.HybridTile;
 import com.android.systemui.quicksettings.RebootTile;
 
-import com.android.systemui.statusbar.powerwidget.PowerButton;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import com.android.systemui.statusbar.BaseStatusBar;
