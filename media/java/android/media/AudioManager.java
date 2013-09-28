@@ -39,7 +39,9 @@ import android.provider.Settings;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.Surface;
 import android.view.VolumePanel;
+import android.view.WindowManager;
 
 import java.util.HashMap;
 
@@ -58,6 +60,7 @@ public class AudioManager {
     private final Binder mToken = new Binder();
     private static String TAG = "AudioManager";
     private final ProfileManager mProfileManager;
+    private final WindowManager mWindowManager;
 
     /**
      * Broadcast intent, a hint for applications that audio is about to become
@@ -433,6 +436,7 @@ public class AudioManager {
         mUseVolumeKeySounds = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_useVolumeKeySounds);
         mProfileManager = (ProfileManager) context.getSystemService(Context.PROFILE_SERVICE);
+        mWindowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
     }
 
     private static IAudioService getService()
@@ -489,7 +493,10 @@ public class AudioManager {
                 } else {
                     int swapKeys = Settings.System.getInt(mContext.getContentResolver(),
                         Settings.System.SWAP_VOLUME_KEYS_ON_ROTATION, 0);
-                    if (swapKeys) {
+                    int rotation = mWindowManager.getDefaultDisplay().getRotation();
+                    if (swapKeys == 1
+                            && (rotation == Surface.ROTATION_90
+                            ||  rotation == Surface.ROTATION_180)) {
                         direction = keyCode == KeyEvent.KEYCODE_VOLUME_UP
                                 ? ADJUST_LOWER
                                 : ADJUST_RAISE;
