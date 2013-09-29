@@ -2033,6 +2033,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
             loadIntegerSetting(stmt, Settings.System.UI_FORCE_OVERFLOW_BUTTON,
                     R.integer.def_force_overflow_button);
+
+            loadIntegerSetting(stmt, Settings.System.QS_QUICK_ACCESS,
+                    R.integer.def_qs_quick_access);
+
+            loadIntegerSetting(stmt, Settings.System.QS_QUICK_ACCESS_LINKED,
+                    R.integer.def_qs_quick_access_linked);
         } finally {
             if (stmt != null) stmt.close();
         }
