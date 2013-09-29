@@ -510,7 +510,6 @@ public class PhoneStatusBar extends BaseStatusBar {
             return;
         }
         mRibbonView.setVisibility(View.GONE);
-        mRibbonQS.shutdown();
         mRibbonQS = null;
     }
 
