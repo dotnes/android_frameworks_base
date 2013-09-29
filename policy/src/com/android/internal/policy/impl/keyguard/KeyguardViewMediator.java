@@ -1285,7 +1285,11 @@ public class KeyguardViewMediator {
             if (DEBUG) Log.d(TAG, "handleShow");
             if (!mSystemReady) return;
 
-            playSounds(true);
+            new Thread(new Runnable() {
+                public void run() {
+                    playSounds(true);
+                }
+            }).start();
 
             mKeyguardViewManager.show(options);
             mShowing = true;
