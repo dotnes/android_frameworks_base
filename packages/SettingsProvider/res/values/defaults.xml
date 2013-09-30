@@ -209,5 +209,5 @@
 
     <!-- Enable QS Ribbon by default -->
     <integer name="def_qs_quick_access">1</integer>
-    <integer name="def_qs_quick_access_linked>1</integer>
+    <integer name="def_qs_quick_access_linked">1</integer>
 </resources>
