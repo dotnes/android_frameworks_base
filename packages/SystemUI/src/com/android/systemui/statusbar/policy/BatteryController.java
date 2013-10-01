@@ -44,9 +44,10 @@ public class BatteryController extends BroadcastReceiver {
     private ArrayList<BatteryStateChangeCallback> mChangeCallbacks =
             new ArrayList<BatteryStateChangeCallback>();
 
-    private int mLevel;
     private boolean mPlugged;
     private ColorUtils.ColorSettingInfo mColorInfo;
+    private int mBatteryLevel = 0;
+    private int mBatteryStatus = BatteryManager.BATTERY_STATUS_UNKNOWN;
 
     // For HALO Mods
     private ArrayList<BatteryStateChangeCallbackHalo> mChangeCallbacksHalo =
@@ -80,6 +81,8 @@ public class BatteryController extends BroadcastReceiver {
 
     public void addStateChangedCallback(BatteryStateChangeCallback cb) {
         mChangeCallbacks.add(cb);
+        // trigger initial update
+        cb.onBatteryLevelChanged(mBatteryLevel, isBatteryStatusCharging());
     }
 
     public void removeStateChangedCallback(BatteryStateChangeCallback cb) {
@@ -101,17 +104,29 @@ public class BatteryController extends BroadcastReceiver {
         updateBatteryLevel();
     }
 
+    protected int getBatteryLevel() {
+        return mBatteryLevel;
+    }
+
+    protected int getBatteryStatus() {
+        return mBatteryStatus;
+    }
+
+    protected boolean isBatteryStatusCharging() {
+        return getBatteryStatus() == BatteryManager.BATTERY_STATUS_CHARGING;
+    }
+
     public void onReceive(Context context, Intent intent) {
         final String action = intent.getAction();
         if (action.equals(Intent.ACTION_BATTERY_CHANGED)) {
-            mLevel = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, 0);
+            mBatteryLevel = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, 0);
             mPlugged = intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, 0) != 0;
             updateBatteryLevel();
         }
 
 	// For HALO Mods
 	for (BatteryStateChangeCallbackHalo cb_Halo : mChangeCallbacksHalo) {
-            cb_Halo.onBatteryLevelChangedHalo(mLevel, mPlugged);
+            cb_Halo.onBatteryLevelChangedHalo(mBatteryLevel, mPlugged);
         }
     }
 
@@ -128,19 +143,19 @@ public class BatteryController extends BroadcastReceiver {
                 batteryBitmap.setColorFilter(mColorInfo.lastColor, PorterDuff.Mode.SRC_IN);
             }
             v.setImageDrawable(batteryBitmap);
-            v.setImageLevel(mLevel);
+            v.setImageLevel(mBatteryLevel);
             v.setContentDescription(mContext.getString(R.string.accessibility_battery_level,
-                    mLevel));
+                    mBatteryLevel));
         }
         N = mLabelViews.size();
         for (int i=0; i<N; i++) {
             TextView v = mLabelViews.get(i);
             v.setText(mContext.getString(R.string.status_bar_settings_battery_meter_format,
-                    mLevel));
+                    mBatteryLevel));
         }
 
         for (BatteryStateChangeCallback cb : mChangeCallbacks) {
-            cb.onBatteryLevelChanged(mLevel, mPlugged);
+            cb.onBatteryLevelChanged(mBatteryLevel, mPlugged);
         }
     }
 }
