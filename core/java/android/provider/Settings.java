@@ -3798,29 +3798,12 @@ public final class Settings {
           /**
           * Action to perform when the home key pressed. (Default is 1)
           * 0 - Nothing
-          * 1 - Home
-          * 2 - Back
-          * 3 - Menu
-          * 4 - App-switch
-          * 5 - Search
-          * 6 - Voice Search
-          * 7 - In-App Search
-          * 8 - Power Off
-          * 9 - Notification shade toggle
-          * 10 - Expanded desktop toggle
-          * 11 - Kill App
-          * 12 - Last App
-          * 13 - Custom App
-          * 14 - Widget viewpager
-          * 15 - QuickSettings shade toggle
-          * 16 - Camera button
-          * @hide
-          */
-         public static final String KEY_HOME_ACTION = "key_home_action";
-
-         /**
-          * Action to perform when the home key is long pressed. (Default is 4)
-          * (See KEY_HOME_LONG_PRESS_ACTION for valid values)
+          * 1 - Menu
+          * 2 - App-switch
+          * 3 - Search
+          * 4 - Voice search
+          * 5 - In-app search
+          * 6 - Launch Camera
           * @hide
           */
          public static final String KEY_HOME_LONG_PRESS_ACTION = "key_home_long_press_action";
@@ -5072,6 +5055,21 @@ public final class Settings {
          * @hide
          */
         public static final String GESTURE_SWIPE_DISTANCE = "gesture_swipe_distance";
+
+         /**
+          * Action to perform when the Camera key is pressed. (Default is 0)
+          * (See KEY_HOME_LONG_PRESS_ACTION for valid values)
+          * @hide
+          */
+         public static final String KEY_CAMERA_ACTION = "key_camera_action";
+
+         /**
+          * Action to perform when the Camera key is long-pressed. (Default is 6)
+          * (See KEY_HOME_LONG_PRESS_ACTION for valid values)
+          * @hide
+          */
+         public static final String KEY_CAMERA_LONG_PRESS_ACTION = "key_camera_long_press_action";
+
 
         /**
          * @hide
