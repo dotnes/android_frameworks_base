@@ -2972,6 +2972,11 @@ public final class Settings {
          */
         public static final String QS_DISABLE_PANEL = "qs_disable_panel";
 
+        /**
+         * @hide
+         */
+        public static final String DRAWER_TRANSITION = "drawer_transition";
+
        /**
          * HALO enabled, should default to 0 (HALO is disabled)
          * @hide
