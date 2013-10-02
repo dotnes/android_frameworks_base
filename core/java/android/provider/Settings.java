@@ -3786,6 +3786,20 @@ public final class Settings {
          */
         public static final String HARDWARE_KEY_REBINDING = "hardware_key_rebinding";
 
+        /**
+         * Action to perform when the home key pressed. (Default is 1)
+         * 0 - Nothing
+         * 1 - Menu
+         * 2 - App-switch
+         * 3 - Search
+         * 4 - Voice search
+         * 5 - In-app search
+         * 6 - Launch Camera
+         * 7 - Torch
+         * @hide
+         */
+        public static final String KEY_HOME_ACTION = "key_home_action";
+
           /**
           * Action to perform when the home key pressed. (Default is 1)
           * 0 - Nothing
@@ -3795,6 +3809,7 @@ public final class Settings {
           * 4 - Voice search
           * 5 - In-app search
           * 6 - Launch Camera
+          * 7 - Torch
           * @hide
           */
          public static final String KEY_HOME_LONG_PRESS_ACTION = "key_home_long_press_action";
