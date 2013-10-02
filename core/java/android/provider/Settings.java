@@ -5047,21 +5047,6 @@ public final class Settings {
          */
         public static final String GESTURE_SWIPE_DISTANCE = "gesture_swipe_distance";
 
-         /**
-          * Action to perform when the Camera key is pressed. (Default is 0)
-          * (See KEY_HOME_LONG_PRESS_ACTION for valid values)
-          * @hide
-          */
-         public static final String KEY_CAMERA_ACTION = "key_camera_action";
-
-         /**
-          * Action to perform when the Camera key is long-pressed. (Default is 6)
-          * (See KEY_HOME_LONG_PRESS_ACTION for valid values)
-          * @hide
-          */
-         public static final String KEY_CAMERA_LONG_PRESS_ACTION = "key_camera_long_press_action";
-
-
         /**
          * @hide
          */
