@@ -624,6 +624,7 @@ public class ActiveDisplayView extends FrameLayout {
 
         setVisibility(View.GONE);
         restoreBrightness();
+        mWakedByPocketMode = false;
         cancelTimeoutTimer();
         if (mLightSensor != null)
             mSensorManager.unregisterListener(mSensorListener, mLightSensor);
