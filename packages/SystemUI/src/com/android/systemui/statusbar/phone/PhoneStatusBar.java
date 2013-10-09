@@ -118,9 +118,6 @@ import com.android.systemui.statusbar.NotificationData;
 import com.android.systemui.statusbar.NotificationData.Entry;
 import com.android.systemui.statusbar.SignalClusterView;
 import com.android.systemui.statusbar.StatusBarIconView;
-import com.android.internal.util.slim.ButtonConfig;
-import com.android.internal.util.slim.ButtonsConstants;
-import com.android.internal.util.slim.ButtonsHelper;
 import com.android.systemui.statusbar.phone.ShortcutsWidget;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.DockBatteryController;
@@ -311,7 +308,6 @@ public class PhoneStatusBar extends BaseStatusBar {
     private boolean mCarrierLabelVisible = false;
     private int mCarrierLabelHeight;
     private int mNotificationHeaderHeight;
-    private boolean mNotificationShortcutsHideCarrier;
 
     private boolean mShowCarrierInPanel = false;
 
@@ -343,8 +339,8 @@ public class PhoneStatusBar extends BaseStatusBar {
     ShortcutsWidget mNotificationShortcutsLayout;
     HorizontalScrollView mNotificationShortcutsScrollView;
     private boolean mNotificationShortcutsVisible;
-    private boolean mNotificationShortcutsIsActive;
-    private boolean mNotificationHideCarrier;
+    private boolean mNotificationShortcutsToggle;
+    private boolean mNotificationShortcutsHideCarrier;
     FrameLayout.LayoutParams lpScrollView;
     FrameLayout.LayoutParams lpCarrierLabel;
     int mShortcutsDrawerMargin;
@@ -487,18 +483,18 @@ public class PhoneStatusBar extends BaseStatusBar {
     }
 
     private int calculateCarrierLabelBottomMargin() {
-        return mNotificationShortcutsIsActive ? mShortcutsSpacingHeight : 0;
+        return mNotificationShortcutsToggle ? mShortcutsSpacingHeight : 0;
     }
 
     private void updateCarrierMargin(boolean forceHide) {
-        lpScrollView.bottomMargin = mNotificationShortcutsIsActive ? mShortcutsDrawerMargin : 0;
+        lpScrollView.bottomMargin = mNotificationShortcutsToggle ? mShortcutsDrawerMargin : 0;
         mScrollView.setLayoutParams(lpScrollView);
 
         if (!mShowCarrierInPanel || mCarrierAndWifiView == null) return;
         if (forceHide) {
-            lpCarrierLabel.bottomMargin = mNotificationShortcutsIsActive ? mShortcutsSpacingHeight : 0;
+            lpCarrierLabel.bottomMargin = mNotificationShortcutsToggle ? mShortcutsSpacingHeight : 0;
         } else {
-            lpCarrierLabel.bottomMargin = mNotificationShortcutsIsActive ? mShortcutsSpacingHeight : mCloseViewHeight;
+            lpCarrierLabel.bottomMargin = mNotificationShortcutsToggle ? mShortcutsSpacingHeight : mCloseViewHeight;
         }
         mCarrierAndWifiView.setLayoutParams(lpCarrierLabel);
     }
@@ -947,12 +943,10 @@ public class PhoneStatusBar extends BaseStatusBar {
                 return true;
             }
         });
-        mNotificationShortcutsScrollView = (HorizontalScrollView) mStatusBarWindow.findViewById(R.id.custom_notification_scrollview);
+        mNotificationShortcutsScrollView = (HorizontalScrollView)mStatusBarWindow.findViewById(R.id.custom_notification_scrollview);
 
-        String notificationShortcutsIsActive = Settings.System.getStringForUser(mContext.getContentResolver(),
-                Settings.System.NOTIFICATION_SHORTCUTS_CONFIG, UserHandle.USER_CURRENT);
-        mNotificationShortcutsIsActive = !(notificationShortcutsIsActive == null
-                || notificationShortcutsIsActive.isEmpty());
+        mNotificationShortcutsToggle = Settings.System.getIntForUser(mContext.getContentResolver(),
+                Settings.System.NOTIFICATION_SHORTCUTS_TOGGLE, 0, UserHandle.USER_CURRENT) != 0;
 
         lpScrollView = (FrameLayout.LayoutParams) mScrollView.getLayoutParams();
 
@@ -980,8 +974,6 @@ public class PhoneStatusBar extends BaseStatusBar {
 
         mVelocityTracker = VelocityTracker.obtain();
         updateRibbonTargets();
-        mNotificationShortcutsLayout.setupShortcuts();
-        
         return mStatusBarView;
     }
 
@@ -1500,7 +1492,7 @@ public class PhoneStatusBar extends BaseStatusBar {
         if (mSettingsButton == null || mNotificationButton == null) {
             // Tablet
             updateNotificationShortcutsVisibility(false, true);
-            if (mNotificationShortcutsIsActive) {
+            if (mNotificationShortcutsToggle) {
                 mNotificationPanel.postDelayed(new Runnable() {
                     @Override
                     public void run() {
@@ -1693,7 +1685,7 @@ public class PhoneStatusBar extends BaseStatusBar {
         }
     }
     protected void updateNotificationShortcutsVisibility(boolean vis, boolean instant) {
-        if ((!mNotificationShortcutsIsActive && mNotificationShortcutsVisible == vis) ||
+        if ((!mNotificationShortcutsToggle && mNotificationShortcutsVisible == vis) ||
                 mStatusBarWindow.findViewById(R.id.custom_notification_scrollview) == null) {
             return;
         }
@@ -2165,7 +2157,7 @@ public class PhoneStatusBar extends BaseStatusBar {
         }, FLIP_DURATION - 150);
         updateRibbon(false);
 
-        if (mNotificationShortcutsIsActive)
+        if (mNotificationShortcutsToggle)
             updateNotificationShortcutsVisibility(true);
     }
 
@@ -2412,7 +2404,7 @@ public class PhoneStatusBar extends BaseStatusBar {
         }, FLIP_DURATION - 150);
         updateRibbon(true);
 
-        if (mNotificationShortcutsIsActive) {
+        if (mNotificationShortcutsToggle) {
             mNotificationPanel.postDelayed(new Runnable() {
                 @Override
                 public void run() {
@@ -3745,7 +3737,7 @@ public class PhoneStatusBar extends BaseStatusBar {
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.CURRENT_UI_MODE), false, this);
             resolver.registerContentObserver(Settings.System.getUriFor(
-                    Settings.System.NOTIFICATION_SHORTCUTS_CONFIG), false, this, UserHandle.USER_ALL);
+                    Settings.System.NOTIFICATION_SHORTCUTS_TOGGLE), false, this, UserHandle.USER_ALL);
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.NOTIFICATION_SHORTCUTS_HIDE_CARRIER), false, this, UserHandle.USER_ALL);
             resolver.registerContentObserver(Settings.System.getUriFor(
@@ -3812,8 +3804,8 @@ public class PhoneStatusBar extends BaseStatusBar {
             mBrightnessControl = brightnessValue != Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC
                     && Settings.System.getIntForUser(resolver, Settings.System.STATUS_BAR_BRIGHTNESS_CONTROL,
                             0, UserHandle.USER_CURRENT) == 1;
-            String notificationShortcutsIsActive = Settings.System.getStringForUser(resolver,
-                    Settings.System.NOTIFICATION_SHORTCUTS_CONFIG, UserHandle.USER_CURRENT);
+            mNotificationShortcutsToggle = Settings.System.getIntForUser(resolver,
+                    Settings.System.NOTIFICATION_SHORTCUTS_TOGGLE, 0, UserHandle.USER_CURRENT) != 0;
             mNotificationShortcutsHideCarrier = Settings.System.getIntForUser(resolver,
                     Settings.System.NOTIFICATION_SHORTCUTS_HIDE_CARRIER, 0, UserHandle.USER_CURRENT) != 0;
 
