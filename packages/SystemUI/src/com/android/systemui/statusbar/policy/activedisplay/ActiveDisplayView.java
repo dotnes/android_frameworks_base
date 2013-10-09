@@ -610,8 +610,7 @@ public class ActiveDisplayView extends FrameLayout {
                 mBar.disable(0xffffffff);
             }
         }, 100);
-        if (mLightSensor != null)
-            mSensorManager.registerListener(mSensorListener, mLightSensor, SensorManager.SENSOR_DELAY_UI);
+        registerSensorListener(mLightSensor);
     }
 
     private void handleHideNotificationView() {
@@ -623,8 +622,7 @@ public class ActiveDisplayView extends FrameLayout {
         restoreBrightness();
         mBar.disable(0);
         cancelTimeoutTimer();
-        if (mLightSensor != null)
-            mSensorManager.unregisterListener(mSensorListener, mLightSensor);
+        unregisterSensorListener(mLightSensor);
     }
 
     private void handleShowNotification(boolean ping) {
@@ -668,6 +666,7 @@ public class ActiveDisplayView extends FrameLayout {
 
     private void onScreenTurnedOn() {
         cancelRedisplayTimer();
+        disableProximitySensor();
     }
 
     private void onScreenTurnedOff() {
@@ -675,6 +674,7 @@ public class ActiveDisplayView extends FrameLayout {
         hideNotificationView();
         cancelTimeoutTimer();
         if (mRedisplayTimeout > 0) updateRedisplayTimer();
+        enableProximitySensor();
     }
 
     private void turnScreenOff() {
@@ -692,6 +692,19 @@ public class ActiveDisplayView extends FrameLayout {
         }
 
         return false;
+    }
+
+    private void enableProximitySensor() {
+        if (mPocketModeEnabled && mDisplayNotifications) {
+            mProximityIsFar = true;
+            registerSensorListener(mProximitySensor);
+        }
+    }
+
+    private void disableProximitySensor() {
+        if (mPocketModeEnabled && mDisplayNotifications) {
+            unregisterSensorListener(mProximitySensor);
+        }
     }
 
     private void setBrightness(float brightness) {
@@ -767,24 +780,20 @@ public class ActiveDisplayView extends FrameLayout {
         }
     }
 
-    private void registerSensorListener() {
-        if (mProximitySensor != null && mPocketModeEnabled) {
-            mSensorManager.registerListener(mSensorListener, mProximitySensor, SensorManager.SENSOR_DELAY_NORMAL);
-        } else {
-            unregisterSensorListener();
-        }
-    }
+    private void registerSensorListener(Sensor sensor) {
+        if (sensor != null)
+            mSensorManager.registerListener(mSensorListener, sensor, SensorManager.SENSOR_DELAY_UI);
+     }
 
-    private void unregisterSensorListener() {
-        if (mProximitySensor != null)
-            mSensorManager.unregisterListener(mSensorListener, mProximitySensor);
-    }
+    private void unregisterSensorListener(Sensor sensor) {
+        if (sensor != null)
+            mSensorManager.unregisterListener(mSensorListener, sensor);
+     }
 
     private void registerCallbacks() {
         if (!mCallbacksRegistered) {
             registerBroadcastReceiver();
             registerNotificationListener();
-            registerSensorListener();
             mCallbacksRegistered = true;
         }
     }
@@ -793,7 +802,6 @@ public class ActiveDisplayView extends FrameLayout {
         if (mCallbacksRegistered) {
             unregisterBroadcastReceiver();
             unregisterNotificationListener();
-            unregisterSensorListener();
             mCallbacksRegistered = false;
         }
     }
@@ -835,14 +843,20 @@ public class ActiveDisplayView extends FrameLayout {
                             && mOverflowNotifications.getChildCount() < MAX_OVERFLOW_ICONS) {
                         ImageView iv = new ImageView(mContext);
                         if (mOverflowNotifications.getChildCount() < (MAX_OVERFLOW_ICONS - 1)) {
-                            Context pkgContext = null;
-                            try {
-                                pkgContext = mContext.createPackageContext(sbns[i].getPackageName(), Context.CONTEXT_RESTRICTED);
-                            } catch (NameNotFoundException nnfe) {
-                                Log.e(TAG, "updateOtherNoticiations()", nnfe);
-                                continue;
-                            }
-                            iv.setImageDrawable(pkgContext.getResources().getDrawable(sbns[i].getNotification().icon));
+                                Drawable iconDrawable = null;
+                                try {
+                                    Context pkgContext = mContext.createPackageContext(
+                                            sbns[i].getPackageName(), Context.CONTEXT_RESTRICTED);
+                                    iconDrawable = pkgContext.getResources()
+                                            .getDrawable(sbns[i].getNotification().icon);
+                                } catch (NameNotFoundException nnfe) {
+                                    iconDrawable = mContext.getResources()
+                                            .getDrawable(R.drawable.ic_ad_unknown_icon);
+                                } catch (Resources.NotFoundException nfe) {
+                                    iconDrawable = mContext.getResources()
+                                            .getDrawable(R.drawable.ic_ad_unknown_icon);
+                                }
+                                iv.setImageDrawable(iconDrawable);
                             iv.setTag(sbns[i]);
                             if (sbns[i].getPackageName().equals(mNotification.getPackageName())
                                     && sbns[i].getId() == mNotification.getId()) {
@@ -986,21 +1000,22 @@ public class ActiveDisplayView extends FrameLayout {
         try {
             Context pkgContext = mContext.createPackageContext(sbn.getPackageName(), Context.CONTEXT_RESTRICTED);
             mNotificationDrawable = pkgContext.getResources().getDrawable(sbn.getNotification().icon);
-            TargetDrawable centerDrawable = new TargetDrawable(getResources(),createCenterDrawable(mNotificationDrawable));
-            centerDrawable.setScaleX(0.9f);
-            centerDrawable.setScaleY(0.9f);
-            mGlowPadView.setCenterDrawable(centerDrawable);
-            setHandleText(sbn);
-            mGlowPadView.post(new Runnable() {
-                @Override
-                public void run() {
-                    updateResources();
-                    mGlowPadView.invalidate();
-                    if (updateOthers) updateOtherNotifications();
-                }
-            });
-        } catch (NameNotFoundException e) {
+        } catch (NameNotFoundException nnfe) {
+            mNotificationDrawable = mContext.getResources().getDrawable(R.drawable.ic_ad_unknown_icon);
+        } catch (Resources.NotFoundException nfe) {
+            mNotificationDrawable = mContext.getResources().getDrawable(R.drawable.ic_ad_unknown_icon);
         }
+        mCurrentNotificationIcon.setImageDrawable(mNotificationDrawable);
+        setHandleText(sbn);
+        mNotification = sbn;
+        mGlowPadView.post(new Runnable() {
+            @Override
+            public void run() {
+                updateResources();
+                mGlowPadView.invalidate();
+                if (updateOthers) updateOtherNotifications();
+            }
+        });
     }
 
     /**
@@ -1059,7 +1074,7 @@ public class ActiveDisplayView extends FrameLayout {
     private Drawable createCenterDrawable(Drawable handle) {
         StateListDrawable stateListDrawable = new StateListDrawable();
         stateListDrawable.addState(TargetDrawable.STATE_INACTIVE, handle);
-        
+
         return stateListDrawable;
     }
 
@@ -1068,22 +1083,16 @@ public class ActiveDisplayView extends FrameLayout {
         public void onSensorChanged(SensorEvent event) {
             float value = event.values[0];
             if (event.sensor.equals(mProximitySensor)) {
-                if (value >= mProximitySensor.getMaximumRange()) {
-                    mProximityIsFar = true;
-                    if (!isScreenOn() && mPocketModeEnabled && !isOnCall() && !inQuietHours()) {
-                        if (System.currentTimeMillis() >= (mPocketTime + POCKET_THRESHOLD)) {
-                            mWakedByPocketMode = true;
-
+                boolean isFar = value >= mProximitySensor.getMaximumRange();
+                if (isFar != mProximityIsFar) {
+                    mProximityIsFar = isFar;
+                    if (isFar) {
+                        if (!isScreenOn() && mPocketModeEnabled && !isOnCall()) {
                             mNotification = getNextAvailableNotification();
                             if (mNotification != null) showNotification(mNotification, true);
                         }
                     }
                 } else {
-                    if (mProximityIsFar) mPocketTime = System.currentTimeMillis();
-                    mProximityIsFar = false;
-                    if (isScreenOn() && mPocketModeEnabled && !isOnCall() && mWakedByPocketMode) {
-                        mWakedByPocketMode = false;
-
                         restoreBrightness();
                         cancelTimeoutTimer();
                         turnScreenOff();
