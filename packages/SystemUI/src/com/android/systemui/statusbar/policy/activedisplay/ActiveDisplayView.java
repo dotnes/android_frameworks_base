@@ -256,6 +256,10 @@ public class ActiveDisplayView extends FrameLayout {
 
         }
 
+        public void onTargetChange(View v, int target) {
+
+        }
+
     };
 
     /**
