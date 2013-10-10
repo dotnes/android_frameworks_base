@@ -47,8 +47,6 @@ import android.view.Surface;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.Toast;
-
-import com.android.systemui.aokp.AwesomeAction;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.phone.PanelBar;
 import com.android.systemui.statusbar.tablet.StatusBarPanel;
@@ -74,7 +72,7 @@ public class PieControlPanel extends FrameLayout implements StatusBarPanel, OnNa
     private WindowManager mWindowManager;
     private Display mDisplay;
     private KeyguardManager mKeyguardManger;
-    
+
     ViewGroup mContentFrame;
     Rect mContentArea = new Rect();
 
@@ -142,7 +140,7 @@ public class PieControlPanel extends FrameLayout implements StatusBarPanel, OnNa
     }
 
     static private int[] gravityArray = {Gravity.BOTTOM, Gravity.LEFT, Gravity.TOP, Gravity.RIGHT, Gravity.BOTTOM, Gravity.LEFT};
-    static public int findGravityOffset(int gravity) {    
+    static public int findGravityOffset(int gravity) {
         for (int gravityIndex = 1; gravityIndex < gravityArray.length - 2; gravityIndex++) {
             if (gravity == gravityArray[gravityIndex])
                 return gravityIndex;
@@ -158,7 +156,7 @@ public class PieControlPanel extends FrameLayout implements StatusBarPanel, OnNa
             int gravityIndex = findGravityOffset(convertPieGravitytoGravity(
                     Settings.System.getInt(mContext.getContentResolver(),
                     Settings.System.PIE_GRAVITY, 3)));
-            
+
             // Orient Pie to that place
             reorient(gravityArray[gravityIndex], false);
 
@@ -276,7 +274,7 @@ public class PieControlPanel extends FrameLayout implements StatusBarPanel, OnNa
             case Gravity.RIGHT:
                 mPieControl.setCenter(mWidth, (verticalPos != -1 ? verticalPos : mHeight / 2));
                 break;
-            case Gravity.BOTTOM: 
+            case Gravity.BOTTOM:
                 mPieControl.setCenter((verticalPos != -1 ? verticalPos : mWidth / 2), mHeight);
                 break;
         }
@@ -301,8 +299,12 @@ public class PieControlPanel extends FrameLayout implements StatusBarPanel, OnNa
             injectKeyDelayed(KeyEvent.KEYCODE_MENU);
         } else if (buttonName.equals(PieControl.RECENT_BUTTON)) {
             mStatusBar.toggleRecentApps();
+        } else if (buttonName.equals(PieControl.CLEAR_ALL_BUTTON)) {
+            mStatusBar.clearRecentApps();
         } else if (buttonName.equals(PieControl.SEARCH_BUTTON)) {
             launchAssistAction();
+        } else if (buttonName.equals(PieControl.POWER_BUTTON)) {
+            injectKeyDelayed(KeyEvent.KEYCODE_POWER);
         } else if (buttonName.equals(PieControl.LAST_APP_BUTTON)) {
             toggleLastApp();
         } else if (buttonName.equals(PieControl.KILL_TASK_BUTTON)) {
@@ -312,14 +314,12 @@ public class PieControlPanel extends FrameLayout implements StatusBarPanel, OnNa
             Intent appWindow = new Intent();
             appWindow.setAction("com.android.systemui.ACTION_SHOW_APP_WINDOW");
             mContext.sendBroadcast(appWindow);
-	    } else if (buttonName.equals(PieControl.POWER_BUTTON)) {
-            injectKeyDelayed(KeyEvent.KEYCODE_POWER);
         }
     }
 
     private Intent getAssistIntent() {
         Intent intent = ((SearchManager) mContext.getSystemService(Context.SEARCH_SERVICE))
-                .getAssistIntent(mContext, true, UserHandle.USER_CURRENT);
+                    .getAssistIntent(mContext, true, UserHandle.USER_CURRENT);
         return intent;
     }
 

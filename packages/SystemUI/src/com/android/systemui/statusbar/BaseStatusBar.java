@@ -97,7 +97,6 @@ import com.android.systemui.SystemUI;
 import com.android.systemui.recent.RecentTasksLoader;
 import com.android.systemui.recent.RecentsActivity;
 import com.android.systemui.recent.TaskDescription;
-import com.android.systemui.statusbar.AppSidebar;
 import com.android.systemui.statusbar.halo.Halo;
 import com.android.systemui.statusbar.phone.QuickSettingsContainerView;
 import com.android.systemui.statusbar.phone.Ticker;
@@ -107,14 +106,13 @@ import com.android.systemui.statusbar.policy.Clock;
 import com.android.systemui.statusbar.policy.ClockCenter;
 import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.NotificationRowLayout;
+import com.android.systemui.statusbar.policy.activedisplay.ActiveDisplayView;
 import com.android.systemui.statusbar.tablet.StatusBarPanel;
 import com.android.systemui.statusbar.tablet.TabletTicker;
 import com.android.systemui.statusbar.view.PieStatusPanel;
 import com.android.systemui.statusbar.view.PieExpandPanel;
 import com.android.systemui.statusbar.WidgetView;
 import com.android.systemui.aokp.AppWindow;
-
-import com.android.systemui.statusbar.policy.activedisplay.ActiveDisplayView;
 
 import java.util.ArrayList;
 import java.math.BigInteger;
@@ -139,9 +137,6 @@ public abstract class BaseStatusBar extends SystemUI implements
     private WidgetView mWidgetView;
 
     private AppWindow mAppWindow;
-
-    protected AppSidebar mAppSidebar;
-    protected int mSidebarPosition;
 
     protected static final boolean ENABLE_INTRUDERS = false;
 
@@ -241,6 +236,11 @@ public abstract class BaseStatusBar extends SystemUI implements
 
     protected Display mDisplay;
 
+    protected AppSidebar mAppSidebar;
+    protected int mSidebarPosition;
+
+    protected ActiveDisplayView mActiveDisplayView;
+
     private boolean mDeviceProvisioned = false;
     private int mAutoCollapseBehaviour;
 
@@ -275,8 +275,6 @@ public abstract class BaseStatusBar extends SystemUI implements
     public NotificationRowLayout getNotificationRowLayout() {
         return mPile;
     }
-
-    protected ActiveDisplayView mActiveDisplayView;
 
     public IStatusBarService getStatusBarService() {
         return mBarService;
@@ -2038,18 +2036,6 @@ public abstract class BaseStatusBar extends SystemUI implements
         if(mCClock != null) mCClock.setTextColor(mClockColor);
     }
 
-    protected void addActiveDisplayView() {
-        mActiveDisplayView = (ActiveDisplayView)View.inflate(mContext, R.layout.active_display, null);
-        mWindowManager.addView(mActiveDisplayView, getActiveDisplayViewLayoutParams());
-        mActiveDisplayView.setStatusBar(this);
-    }
-
-    protected void removeActiveDisplayView() {
-        if (mActiveDisplayView != null)
-            mWindowManager.removeView(mActiveDisplayView);
-    }
-
-
     class SidebarObserver extends ContentObserver {
         SidebarObserver(Handler handler) {
             super(handler);
@@ -2105,6 +2091,17 @@ public abstract class BaseStatusBar extends SystemUI implements
         lp.setTitle("AppSidebar");
 
         return lp;
+    }
+
+    protected void addActiveDisplayView() {
+        mActiveDisplayView = (ActiveDisplayView)View.inflate(mContext, R.layout.active_display, null);
+        mWindowManager.addView(mActiveDisplayView, getActiveDisplayViewLayoutParams());
+        mActiveDisplayView.setStatusBar(this);
+    }
+
+    protected void removeActiveDisplayView() {
+        if (mActiveDisplayView != null)
+            mWindowManager.removeView(mActiveDisplayView);
     }
 
     protected WindowManager.LayoutParams getActiveDisplayViewLayoutParams() {

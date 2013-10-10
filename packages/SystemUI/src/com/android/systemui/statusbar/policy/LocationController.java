@@ -33,7 +33,6 @@ import android.provider.Settings;
 import android.app.INotificationManager;
 
 import com.android.systemui.R;
-import com.android.systemui.statusbar.policy.BatteryController.BatteryStateChangeCallback;
 
 public class LocationController extends BroadcastReceiver {
     private static final String TAG = "StatusBar.LocationController";
@@ -91,7 +90,7 @@ public class LocationController extends BroadcastReceiver {
             textResId = R.string.gps_notification_searching_text;
             visible = true;
         }
-        
+
         try {
             if (visible) {
                 Intent gpsIntent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
@@ -111,14 +110,14 @@ public class LocationController extends BroadcastReceiver {
                 // Notification.Builder will helpfully fill these out for you no matter what you do
                 n.tickerView = null;
                 n.tickerText = null;
-                
+
                 n.priority = Notification.PRIORITY_HIGH;
 
                 int[] idOut = new int[1];
                 mNotificationService.enqueueNotificationWithTag(
                         mContext.getPackageName(), mContext.getBasePackageName(),
-                        null, 
-                        GPS_NOTIFICATION_ID, 
+                        null,
+                        GPS_NOTIFICATION_ID,
                         n,
                         idOut,
                         UserHandle.USER_ALL);

@@ -58,7 +58,7 @@ import renamed to BatteryStateChangeCallbackHalo
 and created in BatteryController.java to fit new HALO Mods.
 CyanogenMod have a method BatteryStateChangeCallback(int, int)
 and HALO needs a method (int, boolean)
-*/ 
+*/
 import com.android.systemui.statusbar.policy.BatteryController.BatteryStateChangeCallbackHalo;
 import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.NetworkController.NetworkSignalChangedCallback;

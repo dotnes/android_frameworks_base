@@ -595,13 +595,6 @@ public class PhoneStatusBar extends BaseStatusBar {
                     }
                 });
 
-        if (mRecreating) {
-            removeSidebarView();
-        } else {
-            addActiveDisplayView();
-        }
-        addSidebarView();
-
         if (ENABLE_INTRUDERS) {
             mIntruderAlertView = (IntruderAlertView) View.inflate(context, R.layout.intruder_alert, null);
             mIntruderAlertView.setVisibility(View.GONE);
@@ -625,11 +618,16 @@ public class PhoneStatusBar extends BaseStatusBar {
         } catch (RemoteException ex) {
             // no window manager? good luck with that
         }
+        // set recents activity navigation bar view
+        RecentsActivity.addNavigationCallback(mNavigationBarView);
+
+        if (mRecreating) {
+            removeSidebarView();
+        }
 
         addActiveDisplayView();
 
-        // set recents activity navigation bar view
-        RecentsActivity.addNavigationCallback(mNavigationBarView);
+        addSidebarView();
 
         // figure out which pixel-format to use for the status bar.
         mPixelFormat = PixelFormat.TRANSLUCENT;
@@ -874,8 +872,6 @@ public class PhoneStatusBar extends BaseStatusBar {
             mAokpSwipeRibbonRight.setControllers(mBluetoothController, mNetworkController, mBatteryController,
                     mLocationController, null);
 
-            android.util.Log.d("PARANOID", "mSettingsContainer="+mSettingsContainer);
-
             // wherever you find it, Quick Settings needs a container to survive
             mSettingsContainer = (QuickSettingsContainerView)
                     mStatusBarWindow.findViewById(R.id.quick_settings_container);
@@ -943,7 +939,7 @@ public class PhoneStatusBar extends BaseStatusBar {
                 return true;
             }
         });
-        mNotificationShortcutsScrollView = (HorizontalScrollView)mStatusBarWindow.findViewById(R.id.custom_notification_scrollview);
+        mNotificationShortcutsScrollView = (HorizontalScrollView) mStatusBarWindow.findViewById(R.id.custom_notification_scrollview);
 
         mNotificationShortcutsToggle = Settings.System.getIntForUser(mContext.getContentResolver(),
                 Settings.System.NOTIFICATION_SHORTCUTS_TOGGLE, 0, UserHandle.USER_CURRENT) != 0;
@@ -2054,6 +2050,18 @@ public class PhoneStatusBar extends BaseStatusBar {
         });
         return a;
     }
+
+    public Animator setVisibilityOnStart(
+            final Animator a, final View v, final int vis) {
+        a.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationStart(Animator animation) {
+                v.setVisibility(vis);
+            }
+        });
+        return a;
+    }
+
     public Animator interpolator(TimeInterpolator ti, Animator a) {
         a.setInterpolator(ti);
         return a;
@@ -2118,13 +2126,13 @@ public class PhoneStatusBar extends BaseStatusBar {
                         .setDuration(FLIP_DURATION_IN)
                     )));
         if (mRibbonView != null && mHasQuickAccessSettings) {
-            mRibbonView.setVisibility(View.VISIBLE);
             mRibbonViewAnim = start(
-                    startDelay(FLIP_DURATION_OUT * zeroOutDelays,
-                            interpolator(mDecelerateInterpolator,
-                                    ObjectAnimator.ofFloat(mRibbonView, View.SCALE_X, 1f)
-                                    .setDuration(FLIP_DURATION_IN)
-                                    )));
+            startDelay(FLIP_DURATION_OUT * zeroOutDelays,
+                setVisibilityOnStart(
+                interpolator(mDecelerateInterpolator,
+                    ObjectAnimator.ofFloat(mRibbonView, View.SCALE_X, 1f)
+                        .setDuration(FLIP_DURATION_IN)),
+                mRibbonView, View.VISIBLE)));
         }
         mFlipSettingsViewAnim = start(
             setVisibilityWhenDone(
@@ -2629,45 +2637,45 @@ public class PhoneStatusBar extends BaseStatusBar {
     }
 
     private void brightnessControl(MotionEvent event) {
-        final int action = event.getAction();
-        final int x = (int) event.getRawX();
-        final int y = (int) event.getRawY();
-        if (action == MotionEvent.ACTION_DOWN) {
-            mLinger = 0;
-            mInitialTouchX = x;
-            mInitialTouchY = y;
-            mVelocityTracker = VelocityTracker.obtain();
-            mHandler.removeCallbacks(mLongPressBrightnessChange);
-            if ((y) < mNotificationHeaderHeight) {
-                mHandler.postDelayed(mLongPressBrightnessChange,
-                        BRIGHTNESS_CONTROL_LONG_PRESS_TIMEOUT);
-            }
-        } else if (action == MotionEvent.ACTION_MOVE) {
-            if ((y) < mNotificationHeaderHeight) {
-                mVelocityTracker.computeCurrentVelocity(1000);
-                float yVel = mVelocityTracker.getYVelocity();
-                yVel = Math.abs(yVel);
-                if (yVel < 50.0f) {
-                    if (mLinger > BRIGHTNESS_CONTROL_LINGER_THRESHOLD) {
-                        adjustBrightness(x);
-                    } else {
-                        mLinger++;
-                    }
+            final int action = event.getAction();
+            final int x = (int) event.getRawX();
+            final int y = (int) event.getRawY();
+            if (action == MotionEvent.ACTION_DOWN) {
+                mLinger = 0;
+                mInitialTouchX = x;
+                mInitialTouchY = y;
+                mVelocityTracker = VelocityTracker.obtain();
+                mHandler.removeCallbacks(mLongPressBrightnessChange);
+                if ((y) < mNotificationHeaderHeight) {
+                    mHandler.postDelayed(mLongPressBrightnessChange,
+                            BRIGHTNESS_CONTROL_LONG_PRESS_TIMEOUT);
                 }
-                int touchSlop = ViewConfiguration.get(mContext).getScaledTouchSlop();
-                if (Math.abs(x - mInitialTouchX) > touchSlop ||
-                        Math.abs(y - mInitialTouchY) > touchSlop) {
+            } else if (action == MotionEvent.ACTION_MOVE) {
+                if ((y) < mNotificationHeaderHeight) {
+                    mVelocityTracker.computeCurrentVelocity(1000);
+                    float yVel = mVelocityTracker.getYVelocity();
+                    yVel = Math.abs(yVel);
+                    if (yVel < 50.0f) {
+                        if (mLinger > BRIGHTNESS_CONTROL_LINGER_THRESHOLD) {
+                            adjustBrightness(x);
+                        } else {
+                            mLinger++;
+                        }
+                    }
+                    int touchSlop = ViewConfiguration.get(mContext).getScaledTouchSlop();
+                    if (Math.abs(x - mInitialTouchX) > touchSlop ||
+                            Math.abs(y - mInitialTouchY) > touchSlop) {
                     mHandler.removeCallbacks(mLongPressBrightnessChange);
                 }
-            } else {
+              } else {
+                  mHandler.removeCallbacks(mLongPressBrightnessChange);
+              }
+            } else if (action == MotionEvent.ACTION_UP
+                    || action == MotionEvent.ACTION_CANCEL) {
+                mVelocityTracker.recycle();
+                mVelocityTracker = null;
                 mHandler.removeCallbacks(mLongPressBrightnessChange);
-            }
-        } else if (action == MotionEvent.ACTION_UP
-                || action == MotionEvent.ACTION_CANCEL) {
-            mVelocityTracker.recycle();
-            mVelocityTracker = null;
-            mHandler.removeCallbacks(mLongPressBrightnessChange);
-            mLinger = 0;
+                mLinger = 0;
         }
     }
 
@@ -2835,6 +2843,7 @@ public class PhoneStatusBar extends BaseStatusBar {
         mNavigationBarView.setLowProfile(!on, true, force);
     }
 
+    @Override
     public void topAppWindowChanged(boolean showMenu) {
         if (mPieControlPanel != null)
             mPieControlPanel.setMenu(showMenu);
@@ -3060,7 +3069,7 @@ public class PhoneStatusBar extends BaseStatusBar {
                 }
 
                 if (snapshot.isEmpty()) {
-                    maybeCollapseAfterNotificationRemoval(true);
+                    animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_NONE);
                     return;
                 }
 
@@ -3239,8 +3248,10 @@ public class PhoneStatusBar extends BaseStatusBar {
                 }
                 try {
                     // position app sidebar on left if in landscape orientation and device has a navbar
+                    mSystemUiLayout = ExtendedPropertiesUtils.getActualProperty("com.android.systemui.layout");
                     if (mWindowManagerService.hasNavigationBar() &&
-                            config.orientation == Configuration.ORIENTATION_LANDSCAPE && (mCurrentUIMode == 0)) {
+                            mSystemUiLayout < 600 &&
+                            config.orientation == Configuration.ORIENTATION_LANDSCAPE) {
                         mWindowManager.updateViewLayout(mAppSidebar,
                                 getAppSidebarLayoutParams(AppSidebar.SIDEBAR_POSITION_LEFT));
                         mHandler.postDelayed(new Runnable() {

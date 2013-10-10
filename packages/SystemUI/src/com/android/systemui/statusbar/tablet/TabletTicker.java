@@ -132,10 +132,11 @@ public class TabletTicker
     }
 
     public void remove(IBinder key, boolean advance) {
-        if (isDisabled()) {
-            if (mEvent != null) mEvent.updateTicker(null);
-            return;
-        }
+
+        //if (isDisabled()) {
+        //    mEvent.updateTicker(null);
+        //    return;
+        //}
         if (mCurrentKey == key) {
             // Showing now
             if (advance) {

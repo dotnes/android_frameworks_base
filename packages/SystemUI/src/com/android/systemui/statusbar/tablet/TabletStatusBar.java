@@ -211,10 +211,6 @@ public class TabletStatusBar extends BaseStatusBar implements
     private String mShortClickWeather;
     private String mLongClickWeather;
 
-    //Appbar
-    private AppSidebar mAppSidebar;
-    private int mSidebarPosition;
-
     ViewGroup mBarContents;
 
     // hide system chrome ("lights out") support
@@ -489,14 +485,11 @@ public class TabletStatusBar extends BaseStatusBar implements
         mWindowManager.updateViewLayout(mNotificationPanel,
                 mNotificationPanelParams);
         updateSearchPanel();
-        removeActiveDisplayView();
-        addActiveDisplayView();
     }
 
     @Override
     protected void refreshLayout(int layoutDirection) {
         mNotificationPanel.refreshLayout(layoutDirection);
-        addActiveDisplayView();
     }
 
     protected void loadDimens() {
@@ -614,9 +607,6 @@ public class TabletStatusBar extends BaseStatusBar implements
         mHasDockBattery = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_hasDockBattery);
 
-        mAppSidebar = (AppSidebar)View.inflate(context, R.layout.app_sidebar, null);
-        mWindowManager.addView(mAppSidebar, getAppSidebarLayoutParams(mSidebarPosition));
-
         if (mHasDockBattery) {
             mDockBatteryController = new DockBatteryController(mContext);
             mDockBatteryController.addIconView((ImageView)sb.findViewById(R.id.dock_battery));
@@ -727,9 +717,10 @@ public class TabletStatusBar extends BaseStatusBar implements
 
         if (mRecreating) {
             removeSidebarView();
-        } else {
-            addActiveDisplayView();
         }
+
+        addActiveDisplayView();
+
         addSidebarView();
 
         return sb;
@@ -1145,7 +1136,7 @@ public class TabletStatusBar extends BaseStatusBar implements
         // run a ticker without being attached will crash!
         if (hasTicker(n.getNotification()) && mStatusBarView.getWindowToken() != null) {
             if (0 == (mDisabled & (StatusBarManager.DISABLE_NOTIFICATION_ICONS
-                            | StatusBarManager.DISABLE_NOTIFICATION_TICKER))) {               
+                            | StatusBarManager.DISABLE_NOTIFICATION_TICKER))) {
                 mTabletTicker.add(key, n);
                 if (mHaloActive) {
                     mFeedbackIconArea.setVisibility(View.VISIBLE);
@@ -1904,7 +1895,7 @@ public class TabletStatusBar extends BaseStatusBar implements
         if (sidebarPosition != mSidebarPosition) {
             mSidebarPosition = sidebarPosition;
             mWindowManager.updateViewLayout(mAppSidebar, getAppSidebarLayoutParams(sidebarPosition));
-            }
+        }
 
         onBarHeightChanged(getStatusBarHeight());
         mNumberOfButtons = Settings.System.getInt(cr, Settings.System.NAVIGATION_BAR_BUTTONS_QTY, 3);
