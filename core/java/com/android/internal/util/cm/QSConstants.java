@@ -31,25 +31,23 @@ public class QSConstants {
         public static final String TILE_VOLUME = "toggleVolume";
      	public static final String TILE_QUIETHOURS = "toggleQuietHours";
         public static final String TILE_HYBRID = "toggleHybrid";
-	public static final String TILE_CAMERA = "toggleCamera";
+        public static final String TILE_CAMERA = "toggleCamera";
+        public static final String TILE_PIB = "togglePib";
         public static final String TILE_MUSIC = "toggleMusic";
-        public static final String TILE_REBOOT = "toggleReboot";
-        public static final String TILE_HOLOBAM = "toggleHolobam";
-        public static final String TILE_BAMCONTROL = "toggleBamcontrol";
-        public static final String TILE_WIFIADB = "toggleWifiAdb";
+        public static final String TILE_NETWORKADB = "toggleNetworkAdb";
 
         public static final String TILE_DELIMITER = "|";
         public static ArrayList<String> TILES_DEFAULT = new ArrayList<String>();
 
         static {
+            TILES_DEFAULT.add(TILE_USER);
+            TILES_DEFAULT.add(TILE_BRIGHTNESS);
+            TILES_DEFAULT.add(TILE_SETTINGS);
             TILES_DEFAULT.add(TILE_WIFI);
             TILES_DEFAULT.add(TILE_MOBILEDATA);
-            TILES_DEFAULT.add(TILE_GPS);
-            TILES_DEFAULT.add(TILE_AUTOROTATE);
-            TILES_DEFAULT.add(TILE_BRIGHTNESS);
             TILES_DEFAULT.add(TILE_BATTERY);
             TILES_DEFAULT.add(TILE_AIRPLANE);
-            TILES_DEFAULT.add(TILE_TORCH);
-            TILES_DEFAULT.add(TILE_HOLOBAM);
+            TILES_DEFAULT.add(TILE_HYBRID);
+            TILES_DEFAULT.add(TILE_DESKTOPMODE);
         }
 }

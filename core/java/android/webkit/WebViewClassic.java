@@ -2173,10 +2173,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
             mAccessibilityInjector.destroy();
             mAccessibilityInjector = null;
         }
-        if (mSavePasswordDialog != null) {
-            mSavePasswordDialog.dismiss();
-            mSavePasswordDialog = null;
-        }
         if (mWebViewCore != null) {
             // Tell WebViewCore to destroy itself
             synchronized (this) {
@@ -5788,7 +5784,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
         }
         return mWebViewPrivate.super_dispatchKeyEvent(event);
     }
-    
+
     private static final int SNAP_BOUND = 16;
     private static int sChannelDistance = 16;
     private int mFirstTouchX = -1; // the first touched point

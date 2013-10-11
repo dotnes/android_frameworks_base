@@ -59,7 +59,7 @@ public class Contacts {
     @Deprecated
     public static final Uri CONTENT_URI = Uri.parse("content://" + AUTHORITY);
 
-    /** 
+    /**
      * Signifies an email address row that is stored in the ContactMethods table
      * @deprecated see {@link android.provider.ContactsContract}
      */
@@ -205,14 +205,14 @@ public class Contacts {
             }
             Cursor cursor = null;
             try {
-				cursor = cr.query(Settings.CONTENT_URI, new String[]{VALUE},
+                cursor = cr.query(Settings.CONTENT_URI, new String[]{VALUE},
                     selectString, selectArgs, null);
                 if (!cursor.moveToNext()) return null;
                 return cursor.getString(0);
             } finally {
-				if (cursor != null) {
+                if (cursor != null) {
                     cursor.close();
-				}
+                }
             }
         }
 
@@ -2211,7 +2211,7 @@ public class Contacts {
             }
 
             /** The action code to use when adding a contact
-             * @deprecated see {@link android.provider.ContactsContract} 
+             * @deprecated see {@link android.provider.ContactsContract}
              */
             @Deprecated
             public static final String ACTION = ContactsContract.Intents.Insert.ACTION;

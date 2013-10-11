@@ -1343,8 +1343,8 @@ public class ConnectivityManager {
      *
      * @param suggestedTimeOutMs, timeout in milliseconds
      *
-     * @param visible
-     * @param networkType
+     * @return time out that will be used, maybe less that suggestedTimeOutMs
+     * -1 if an error.
      *
      * {@hide}
      */

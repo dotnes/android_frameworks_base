@@ -1596,7 +1596,7 @@ public final class InputMethodManager {
             FinishedInputEventCallback callback, Handler handler) {
         synchronized (mH) {
             if (mCurMethod != null) {
-                boolean symShowIME = mServedView != null ?  
+                boolean symShowIME = mServedView != null ?
                     mServedView.getContext().getResources().getBoolean(
                     com.android.internal.R.bool.config_symKeyShowsImePicker) :
                     true;
@@ -1689,7 +1689,6 @@ public final class InputMethodManager {
                 mH.removeMessages(MSG_TIMEOUT_INPUT_EVENT, p);
             }
         }
-
         invokeFinishedInputEventCallback(p, handled);
     }
 

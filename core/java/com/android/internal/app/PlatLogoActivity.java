@@ -67,7 +67,7 @@ public class PlatLogoActivity extends Activity {
         tv.setTextSize(1.25f*size);
         tv.setTextColor(0xFFFFFFFF);
         tv.setShadowLayer(4*metrics.density, 0, 2*metrics.density, 0x66000000);
-        tv.setText("BAM " + Build.VERSION.RELEASE);
+        tv.setText("P.A.C. " + Build.VERSION.RELEASE);
         view.addView(tv, lp);
 
         tv = new TextView(this);
@@ -95,7 +95,7 @@ public class PlatLogoActivity extends Activity {
         mContent.setImageResource(isCid ? com.android.internal.R.drawable.cidlogo
             : com.android.internal.R.drawable.platlogo_alt);
         mContent.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
-        
+
         final int p = (int)(32 * metrics.density);
         mContent.setPadding(p, p, p, p);
 
@@ -126,7 +126,7 @@ public class PlatLogoActivity extends Activity {
                 return true;
             }
         });
-        
+
         setContentView(mContent);
     }
 }
