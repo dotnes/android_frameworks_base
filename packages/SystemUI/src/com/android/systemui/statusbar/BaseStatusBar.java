@@ -1657,8 +1657,6 @@ public abstract class BaseStatusBar extends SystemUI implements
             mHandler.removeCallbacks(mPanelCollapseRunnable);
             mHandler.postDelayed(mPanelCollapseRunnable, COLLAPSE_AFTER_REMOVE_DELAY);
         }
-
-        return entry.notification;
     }
 
     public void prepareHaloNotification(NotificationData.Entry entry, StatusBarNotification notification, boolean update) {
