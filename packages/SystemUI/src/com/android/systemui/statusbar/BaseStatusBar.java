@@ -87,8 +87,6 @@ import android.widget.RemoteViews;
 import android.widget.TextView;
 import android.service.notification.StatusBarNotification;
 
-import android.service.notification.StatusBarNotification;
-
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.statusbar.StatusBarIconList;
@@ -324,7 +322,7 @@ public abstract class BaseStatusBar extends SystemUI implements
         }
     }
 
-    private ContentObserver mProvisioningObserver = new ContentObserver(mHandler) {
+    private ContentObserver mProvisioningObserver = new ContentObserver(new Handler()) {
         @Override
         public void onChange(boolean selfChange) {
             final boolean provisioned = 0 != Settings.Global.getInt(
@@ -335,8 +333,6 @@ public abstract class BaseStatusBar extends SystemUI implements
             }
         }
     };
-
-    private SettingsObserver mSettingsObserver = new SettingsObserver(mHandler);
 
     //0: normal; 1: never expand; 2: always expand; 3: revert to old
     int notificationsBehaviour = 0;
@@ -442,8 +438,6 @@ public abstract class BaseStatusBar extends SystemUI implements
         mContext.getContentResolver().registerContentObserver(
                 Settings.System.getUriFor(Settings.System.NOTIFICATIONS_BEHAVIOUR), true,
                 SettingsObserver);
-
-        mSettingsObserver.observe();
 
         mBarService = IStatusBarService.Stub.asInterface(
                 ServiceManager.getService(Context.STATUS_BAR_SERVICE));
@@ -1663,6 +1657,8 @@ public abstract class BaseStatusBar extends SystemUI implements
             mHandler.removeCallbacks(mPanelCollapseRunnable);
             mHandler.postDelayed(mPanelCollapseRunnable, COLLAPSE_AFTER_REMOVE_DELAY);
         }
+
+        return entry.notification;
     }
 
     public void prepareHaloNotification(NotificationData.Entry entry, StatusBarNotification notification, boolean update) {

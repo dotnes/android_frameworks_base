@@ -1343,7 +1343,7 @@ public class Halo extends FrameLayout implements Ticker.TickerCallback, TabletTi
                     new DecelerateInterpolator(), null);
         }
 
-        CustomObjectAnimator contentFlipAnimator = new CustomObjectAnimator(this);        
+        CustomObjectAnimator contentFlipAnimator = new CustomObjectAnimator(this);
         public void flipContent(int duration, int delay) {
 
             // Make sure the animation does not stutter by letting it finish
@@ -1793,7 +1793,7 @@ public class Halo extends FrameLayout implements Ticker.TickerCallback, TabletTi
             if(intent.getAction().equals(Intent.ACTION_USER_PRESENT) &&
                     Settings.System.getInt(mContext.getContentResolver(), Settings.System.HALO_ACTIVE, 0) == 1 &&
                     Settings.System.getInt(mContext.getContentResolver(), Settings.System.HALO_UNLOCK_PING, 0) == 1 &&
-		    mState != State.SILENT && mPingNewcomer) {
+                    mState != State.SILENT && mPingNewcomer) {
                     mEffect.animateHaloBatch(0, 0, false, 0, HaloProperties.MessageType.MESSAGE);
                     mHandler.postDelayed(new Runnable() {
                         public void run() {
@@ -1811,9 +1811,7 @@ public class Halo extends FrameLayout implements Ticker.TickerCallback, TabletTi
                                  } else {
                                      mEffect.ping(mPaintHolo, HaloEffect.WAKE_TIME * 2);
                                  }
-
                                 mPingNewcomer = false;
-
                             }
                         }
                     }, 400);
