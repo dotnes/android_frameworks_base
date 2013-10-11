@@ -298,7 +298,7 @@ public final class ContactsContract {
          * @hide
          */
         public static final int DISPLAY_ORDER_ALTERNATIVE = 2;
-        
+
         /**
          * A key in the {@link android.provider.Settings android.provider.Settings} provider
          * that stores the preferred view mode for contacts (standard vs. compact).
