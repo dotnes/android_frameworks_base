@@ -143,7 +143,6 @@ public class NetworkController extends BroadcastReceiver {
     private boolean mUseAltSignal;
     private Locale mLocale = null;
     private Locale mLastLocale = null;
-    private boolean mShow4gForLte;
 
     // our ui
     Context mContext;
@@ -751,7 +750,7 @@ public class NetworkController extends BroadcastReceiver {
                             R.string.accessibility_data_connection_3g);
                     break;
                 case TelephonyManager.NETWORK_TYPE_LTE:
-                    if (mShow4gForLte) {
+                    if (mShow4GforLTE) {
                         mDataIconList = mUseAltSignal ? TelephonyIcons.DATA_4G_ALT[mInetCondition] :
                             TelephonyIcons.DATA_4G[mInetCondition];
                         mDataTypeIconId = mDataIconList[0];
@@ -1631,10 +1630,6 @@ public class NetworkController extends BroadcastReceiver {
             resolver.registerContentObserver(
                     Settings.System.getUriFor(Settings.System.STATUSBAR_SIGNAL_CLUSTER_ALT), false,
                     this);
-            resolver.registerContentObserver(
-                    Settings.System.getUriFor(Settings.System.STATUSBAR_SIGNAL_SHOW_4G_FOR_LTE),
-                    mContext.getResources().getBoolean(com.android.internal.R.bool.config_show4GForLTE),
-                    this);
             updateSettings();
         }
 
@@ -1650,9 +1645,6 @@ public class NetworkController extends BroadcastReceiver {
                 Settings.System.STATUSBAR_HIDE_SIGNAL_BARS,false));
         mUseAltSignal = (Settings.System.getBoolean(mContext.getContentResolver(),
                 Settings.System.STATUSBAR_SIGNAL_CLUSTER_ALT, clustdefault));
-        mShow4gForLte = (Settings.System.getBoolean(mContext.getContentResolver(),
-                Settings.System.STATUSBAR_SIGNAL_SHOW_4G_FOR_LTE,
-                mContext.getResources().getBoolean(com.android.internal.R.bool.config_show4GForLTE)));
         updateTelephonySignalStrength();
         updateDataNetType();
         updateDataIcon();
