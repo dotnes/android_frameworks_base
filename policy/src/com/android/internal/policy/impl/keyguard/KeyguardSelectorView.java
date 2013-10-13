@@ -34,6 +34,17 @@ import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.graphics.Bitmap.Config;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.PorterDuffXfermode;
+import android.graphics.PorterDuff.Mode;
+import android.graphics.Rect;
+import android.graphics.RectF;
+import android.graphics.Xfermode;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.InsetDrawable;
 import android.graphics.drawable.LayerDrawable;
@@ -41,6 +52,7 @@ import android.graphics.drawable.StateListDrawable;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
+import android.os.BatteryManager;
 import android.os.Handler;
 import android.os.Message;
 import android.os.RemoteException;
@@ -106,6 +118,7 @@ public class KeyguardSelectorView extends LinearLayout implements KeyguardSecuri
     private UnlockReceiver receiver;
     private IntentFilter filter;
     private boolean mReceiverRegistered = false;
+    private float mBatteryLevel;
 
     private class H extends Handler {
         public void handleMessage(Message m) {
@@ -264,6 +277,11 @@ public class KeyguardSelectorView extends LinearLayout implements KeyguardSecuri
         public void onSimStateChanged(State simState) {
             updateTargets();
         }
+
+        @Override
+        public void onRefreshBatteryInfo(KeyguardUpdateMonitor.BatteryStatus batStatus) {
+            updateLockscreenBattery(batStatus);
+        }
     };
 
     private final KeyguardActivityLauncher mActivityLauncher = new KeyguardActivityLauncher() {
@@ -404,6 +422,7 @@ public class KeyguardSelectorView extends LinearLayout implements KeyguardSecuri
         mSearchDisabled = disabledBySimState || !searchActionAvailable || !searchTargetPresent
                 || !currentUserSetup;
         updateResources();
+        updateLockscreenBattery(null);
     }
 
     public void updateResources() {
@@ -607,6 +626,29 @@ public class KeyguardSelectorView extends LinearLayout implements KeyguardSecuri
                 mContext.unregisterReceiver(receiver);
                 mReceiverRegistered = false;
             }
+        }
+    }
+
+    public void updateLockscreenBattery(KeyguardUpdateMonitor.BatteryStatus status) {
+        if (Settings.System.getIntForUser(
+                mContext.getContentResolver(),
+                Settings.System.BATTERY_AROUND_LOCKSCREEN_RING,
+                0 /*default */,
+                UserHandle.USER_CURRENT) == 1) {
+            if (status != null) mBatteryLevel = status.level;
+            float cappedBattery = mBatteryLevel;
+
+            if (mBatteryLevel < 15) {
+                cappedBattery = 15;
+            }
+            else if (mBatteryLevel > 90) {
+                cappedBattery = 90;
+            }
+
+            final float hue = (cappedBattery - 15) * 1.6f;
+            mGlowPadView.setArc(mBatteryLevel * 3.6f, Color.HSVToColor(0x80, new float[]{ hue, 1.f, 1.f }));
+        } else {
+            mGlowPadView.setArc(0, 0);
         }
     }
 }
