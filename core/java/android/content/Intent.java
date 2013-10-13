@@ -3583,6 +3583,12 @@ public class Intent implements Parcelable, Cloneable {
      * @hide
      */
     public static final int FLAG_RECEIVER_BOOT_UPGRADE = 0x04000000;
+    /**
+     * If set in an Intent passed to {@link Context#startActivity Context.startActivity()},
+     * this flag will cause a newly launching task to be resized according to the split
+     * view metrics, making it running alongside another app.
+     */
+    public static final int FLAG_ACTIVITY_SPLIT_VIEW = 0x02000000;
 
     /**
      * @hide Flags that can't be changed with PendingIntent.
