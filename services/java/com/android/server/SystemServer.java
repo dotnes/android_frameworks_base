@@ -72,8 +72,6 @@ import com.android.server.usb.UsbService;
 import com.android.server.wifi.WifiService;
 import com.android.server.wm.WindowManagerService;
 
-import com.android.server.hybird.HybridService;
-
 import dalvik.system.VMRuntime;
 import dalvik.system.Zygote;
 
@@ -180,7 +178,6 @@ class ServerThread extends Thread {
         CommonTimeManagementService commonTimeMgmtService = null;
         InputManagerService inputManager = null;
         TelephonyRegistry telephonyRegistry = null;
-        HybridService mHybrid = null;
 
         // Create a shared handler thread for UI within the system server.
         // This thread is used by at least the following components:
@@ -461,14 +458,6 @@ class ServerThread extends Thread {
                 ServiceManager.addService(Context.DEVICE_POLICY_SERVICE, devicePolicy);
             } catch (Throwable e) {
                 reportWtf("starting DevicePolicyService", e);
-            }
-
-            try {
-                Slog.i(TAG, "Hybird Service");
-                mHybrid = new HybridService(context);
-                ServiceManager.addService(Context.HYBRID_SERVICE, mHybrid);
-            } catch (Throwable e) {
-                reportWtf("starting Hybrid Service", e);
             }
 
             try {
