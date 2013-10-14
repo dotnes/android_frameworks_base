@@ -1354,7 +1354,7 @@ bool EventHub::hasKeycodeLocked(Device* device, int keycode) const {
     if (!device->keyMap.haveKeyLayout() || !device->keyBitmask) {
         return false;
     }
-    
+
     Vector<int32_t> scanCodes;
     device->keyMap.keyLayoutMap->findScanCodesForKey(keycode, &scanCodes);
     const size_t N = scanCodes.size();
@@ -1364,7 +1364,7 @@ bool EventHub::hasKeycodeLocked(Device* device, int keycode) const {
             return true;
         }
     }
-    
+
     return false;
 }
 

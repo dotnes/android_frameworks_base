@@ -321,6 +321,9 @@ public final class PowerManagerService extends IPowerManager.Stub
     // True if dreams should be activated on sleep.
     private boolean mDreamsActivateOnSleepSetting;
 
+    // True if dreams should be activated on wireless charging.
+    private boolean mDreamsActivateOnWirelessCharger;
+
     // True if dreams should be activated on dock.
     private boolean mDreamsActivateOnDockSetting;
 
@@ -340,9 +343,6 @@ public final class PowerManagerService extends IPowerManager.Stub
     // The stay on while plugged in setting.
     // A bitfield of battery conditions under which to make the screen stay on.
     private int mStayOnWhilePluggedInSetting;
-
-    // True if the device should wake up when plugged or unplugged
-    private int mWakeUpWhenPluggedOrUnpluggedSetting;
 
     // True if the device should stay on.
     private boolean mStayOn;
@@ -410,6 +410,8 @@ public final class PowerManagerService extends IPowerManager.Stub
     private static native void nativeSetAutoSuspend(boolean enable);
     private static native void nativeCpuBoost(int duration);
     private boolean mKeyboardVisible = false;
+
+    private int mTouchKeyTimeout;
 
     public PowerManagerService() {
         synchronized (mLock) {
@@ -539,18 +541,15 @@ public final class PowerManagerService extends IPowerManager.Stub
             resolver.registerContentObserver(Settings.Global.getUriFor(
                     Settings.Global.STAY_ON_WHILE_PLUGGED_IN),
                     false, mSettingsObserver, UserHandle.USER_ALL);
-            resolver.registerContentObserver(Settings.Global.getUriFor(
-                    Settings.Global.WAKE_WHEN_PLUGGED_OR_UNPLUGGED),
-                    false, mSettingsObserver, UserHandle.USER_ALL);
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.SCREEN_BRIGHTNESS),
                     false, mSettingsObserver, UserHandle.USER_ALL);
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.SCREEN_BRIGHTNESS_MODE),
                     false, mSettingsObserver, UserHandle.USER_ALL);
-             resolver.registerContentObserver(Settings.System.getUriFor(
+            resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.SYSTEM_POWER_ENABLE_CRT_OFF),
-                     false, mSettingsObserver, UserHandle.USER_ALL);
+                    false, mSettingsObserver, UserHandle.USER_ALL);
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.SYSTEM_POWER_CRT_MODE),
                     false, mSettingsObserver, UserHandle.USER_ALL);
@@ -603,6 +602,10 @@ public final class PowerManagerService extends IPowerManager.Stub
                 Settings.Secure.SCREENSAVER_ACTIVATE_ON_SLEEP,
                 mDreamsActivatedOnSleepByDefaultConfig ? 1 : 0,
                 UserHandle.USER_CURRENT) != 0);
+        mDreamsActivateOnWirelessCharger = (Settings.Secure.getIntForUser(resolver,
+                Settings.Secure.SCREENSAVER_ACTIVATE_ON_WIRELESS_CHARGE,
+                0, // disabled by default
+                UserHandle.USER_CURRENT) != 0);
         mDreamsActivateOnDockSetting = (Settings.Secure.getIntForUser(resolver,
                 Settings.Secure.SCREENSAVER_ACTIVATE_ON_DOCK,
                 mDreamsActivatedOnDockByDefaultConfig ? 1 : 0,
@@ -611,7 +614,9 @@ public final class PowerManagerService extends IPowerManager.Stub
                 Settings.System.SCREEN_OFF_TIMEOUT, DEFAULT_SCREEN_OFF_TIMEOUT,
                 UserHandle.USER_CURRENT);
         mStayOnWhilePluggedInSetting = Settings.Global.getInt(resolver,
-                Settings.Global.STAY_ON_WHILE_PLUGGED_IN, BatteryManager.BATTERY_PLUGGED_AC);
+                Settings.Global.STAY_ON_WHILE_PLUGGED_IN,
+                BatteryManager.BATTERY_PLUGGED_AC);
+        // respect default config values
         mElectronBeamOffEnabled = Settings.System.getIntForUser(resolver,
                 Settings.System.SYSTEM_POWER_ENABLE_CRT_OFF,
                 mElectronBeamFadesConfig ? 0 : 1,
@@ -619,9 +624,6 @@ public final class PowerManagerService extends IPowerManager.Stub
         mElectronBeamMode = Settings.System.getIntForUser(resolver,
                 Settings.System.SYSTEM_POWER_CRT_MODE,
                 0, UserHandle.USER_CURRENT);
-        mWakeUpWhenPluggedOrUnpluggedSetting = Settings.Global.getInt(resolver,
-                Settings.Global.WAKE_WHEN_PLUGGED_OR_UNPLUGGED,
-                (mWakeUpWhenPluggedOrUnpluggedConfig ? 1 : 0));
 
         final int oldScreenBrightnessSetting = mScreenBrightnessSetting;
         mScreenBrightnessSetting = Settings.System.getIntForUser(resolver,
@@ -1334,9 +1336,8 @@ public final class PowerManagerService extends IPowerManager.Stub
 
     private boolean shouldWakeUpWhenPluggedOrUnpluggedLocked(
             boolean wasPowered, int oldPlugType, boolean dockedOnWirelessCharger) {
-
-        // Don't wake when powered if disabled in settings.
-        if (mWakeUpWhenPluggedOrUnpluggedSetting == 0) {
+        // Don't wake when powered unless configured to do so.
+        if (!mWakeUpWhenPluggedOrUnpluggedConfig) {
             return false;
         }
 
@@ -1358,6 +1359,11 @@ public final class PowerManagerService extends IPowerManager.Stub
         // If already dreaming and becoming powered, then don't wake.
         if (mIsPowered && (mWakefulness == WAKEFULNESS_NAPPING
                 || mWakefulness == WAKEFULNESS_DREAMING)) {
+            return false;
+        }
+
+        if (Settings.System.getInt(mContext.getContentResolver(),
+                Settings.System.WAKEUP_WHEN_PLUGGED_UNPLUGGED, 1) == 0) {
             return false;
         }
 
@@ -1592,9 +1598,12 @@ public final class PowerManagerService extends IPowerManager.Stub
      * activity timeout has expired and it's bedtime.
      */
     private boolean shouldNapAtBedTimeLocked() {
-        return mDreamsActivateOnSleepSetting
+        return (mDreamsActivateOnSleepSetting
+                        && mPlugType != BatteryManager.BATTERY_PLUGGED_WIRELESS)
                 || (mDreamsActivateOnDockSetting
-                        && mDockState != Intent.EXTRA_DOCK_STATE_UNDOCKED);
+                        && mDockState != Intent.EXTRA_DOCK_STATE_UNDOCKED)
+                || (mDreamsActivateOnWirelessCharger
+                        && mPlugType == BatteryManager.BATTERY_PLUGGED_WIRELESS);
     }
 
     /**

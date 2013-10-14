@@ -386,6 +386,9 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
     TelephonyManager mTelephonyManager;
 
+    // We only want one checkMobileProvisioning after booting.
+    volatile boolean mFirstProvisioningCheckStarted = false;
+
     public ConnectivityService(Context context, INetworkManagementService netd,
             INetworkStatsService statsService, INetworkPolicyManager policyManager) {
         // Currently, omitting a NetworkFactory will create one internally

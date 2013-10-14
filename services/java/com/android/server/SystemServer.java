@@ -72,17 +72,13 @@ import com.android.server.usb.UsbService;
 import com.android.server.wifi.WifiService;
 import com.android.server.wm.WindowManagerService;
 
-import com.android.server.hybird.HybridService;
-
 import dalvik.system.VMRuntime;
 import dalvik.system.Zygote;
 
 import java.io.File;
 import java.util.Timer;
 import java.util.TimerTask;
-import com.stericsson.hardware.fm.FmReceiver;
 import com.stericsson.hardware.fm.FmReceiverService;
-import com.stericsson.hardware.fm.FmTransmitter;
 import com.stericsson.hardware.fm.FmTransmitterService;
 
 class ServerThread extends Thread {
@@ -180,7 +176,6 @@ class ServerThread extends Thread {
         CommonTimeManagementService commonTimeMgmtService = null;
         InputManagerService inputManager = null;
         TelephonyRegistry telephonyRegistry = null;
-        HybridService mHybrid = null;
 
         // Create a shared handler thread for UI within the system server.
         // This thread is used by at least the following components:
@@ -464,14 +459,6 @@ class ServerThread extends Thread {
             }
 
             try {
-                Slog.i(TAG, "Hybird Service");
-                mHybrid = new HybridService(context);
-                ServiceManager.addService(Context.HYBRID_SERVICE, mHybrid);
-            } catch (Throwable e) {
-                reportWtf("starting Hybrid Service", e);
-            }
-
-            try {
                 Slog.i(TAG, "Status Bar");
                 statusBar = new StatusBarManagerService(context, wm);
                 ServiceManager.addService(Context.STATUS_BAR_SERVICE, statusBar);
@@ -568,21 +555,17 @@ class ServerThread extends Thread {
             }
 
             try {
-                if (FmReceiver.isApiSupported(context)) {
-                    Slog.i(TAG, "FM receiver Service");
-                    ServiceManager.addService("fm_receiver",
-                            new FmReceiverService(context));
-                }
+                Slog.i(TAG, "FM receiver Service");
+                ServiceManager.addService("fm_receiver",
+                        new FmReceiverService(context));
             } catch (Throwable e) {
                 Slog.e(TAG, "Failure starting FM receiver Service", e);
             }
 
             try {
-                if (FmTransmitter.isApiSupported(context)) {
-                    Slog.i(TAG, "FM transmitter Service");
-                    ServiceManager.addService("fm_transmitter",
-                            new FmTransmitterService(context));
-                }
+                Slog.i(TAG, "FM transmitter Service");
+                ServiceManager.addService("fm_transmitter",
+                        new FmTransmitterService(context));
             } catch (Throwable e) {
                 Slog.e(TAG, "Failure starting FM transmitter Service", e);
             }
