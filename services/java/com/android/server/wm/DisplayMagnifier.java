@@ -118,7 +118,6 @@ final class DisplayMagnifier {
         args.argi4 = rectangle.bottom;
         mHandler.obtainMessage(MyHandler.MESSAGE_NOTIFY_RECTANGLE_ON_SCREEN_REQUESTED,
                 args).sendToTarget();
-        args.recycle();
     }
 
     public void onWindowLayersChangedLocked() {
@@ -645,7 +644,7 @@ final class DisplayMagnifier {
                     canvas.drawPath(path, mPaint);
 
                     mSurface.unlockCanvasAndPost(canvas);
-                    
+
                     if (mAlpha > 0) {
                         mSurfaceControl.show();
                     } else {

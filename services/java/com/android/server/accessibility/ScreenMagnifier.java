@@ -253,7 +253,6 @@ public final class ScreenMagnifier extends IMagnificationCallbacks.Stub
         args.argi3 = right;
         args.argi4 = bottom;
         mHandler.obtainMessage(MESSAGE_ON_RECTANGLE_ON_SCREEN_REQUESTED, args).sendToTarget();
-        args.recycle();
     }
 
     private void handleOnRectangleOnScreenRequested(int left, int top, int right, int bottom) {
@@ -463,7 +462,7 @@ public final class ScreenMagnifier extends IMagnificationCallbacks.Stub
         }
         return mTempPointerProperties;
     }
-    
+
     private void transitionToState(int state) {
         if (DEBUG_STATE_TRANSITIONS) {
             switch (state) {

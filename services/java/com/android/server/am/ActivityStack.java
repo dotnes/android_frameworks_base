@@ -20,7 +20,6 @@ package com.android.server.am;
 import static android.Manifest.permission.START_ANY_ACTIVITY;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 
-import com.android.internal.app.ActivityTrigger;
 import com.android.internal.app.HeavyWeightSwitcherActivity;
 import com.android.internal.os.BatteryStatsImpl;
 import com.android.server.am.ActivityManagerService.PendingActivityLaunch;
@@ -72,8 +71,8 @@ import android.util.ExtendedPropertiesUtils;
 import android.util.Log;
 import android.util.Slog;
 import android.view.Display;
-import android.view.IWindowManager;
-import android.view.WindowManagerGlobal;
+
+import com.android.internal.app.ActivityTrigger;
 
 import java.io.IOException;
 import java.lang.ref.WeakReference;
@@ -1406,16 +1405,7 @@ final class ActivityStack {
             // Aggregate current change flags.
             configChanges |= r.configChangeFlags;
 
-            boolean isSplitView = false;
-
-            try {
-                IWindowManager wm = (IWindowManager) WindowManagerGlobal.getWindowManagerService();
-                isSplitView = wm.isTaskSplitView(r.task.taskId);
-            } catch (RemoteException e) {
-                Slog.e(TAG, "Cannot get split view status", e);
-            }
-
-            if (r.fullscreen && !isSplitView) {
+            if (r.fullscreen) {
                 // At this point, nothing else needs to be shown
                 if (DEBUG_VISBILITY) Slog.v(
                         TAG, "Stopping: fullscreen at " + r);
@@ -3696,10 +3686,6 @@ final class ActivityStack {
                 mService.mCancelledThumbnails.clear();
             }
 
-        }
-
-        mService.mBootingCondition.block();
-        synchronized (mService) {
             if (mMainStack) {
                 booting = mService.mBooting;
                 mService.mBooting = false;

@@ -78,7 +78,6 @@ import android.util.Slog;
 import android.util.Xml;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
-import android.widget.RemoteViews;
 import android.widget.Toast;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -1362,6 +1361,9 @@ public class NotificationManagerService extends INotificationManager.Stub
                             anyListenersInvolved = true;
                         }
                     }
+                    // make sure we're still bound to any of our
+                    // listeners who may have just upgraded
+                    rebindListenerServices();
                 }
 
                 if (anyListenersInvolved) {
@@ -1412,6 +1414,7 @@ public class NotificationManagerService extends INotificationManager.Stub
     class SettingsObserver extends ContentObserver {
         private final Uri NOTIFICATION_LIGHT_PULSE_URI
                 = Settings.System.getUriFor(Settings.System.NOTIFICATION_LIGHT_PULSE);
+
         private final Uri ENABLED_NOTIFICATION_LISTENERS_URI
                 = Settings.Secure.getUriFor(Settings.Secure.ENABLED_NOTIFICATION_LISTENERS);
 
@@ -1535,8 +1538,8 @@ public class NotificationManagerService extends INotificationManager.Stub
                     Settings.System.QUIET_HOURS_STILL, 0, UserHandle.USER_CURRENT_OR_SELF) != 0;
             mQuietHoursDim = Settings.System.getIntForUser(resolver,
                     Settings.System.QUIET_HOURS_DIM, 0, UserHandle.USER_CURRENT_OR_SELF) != 0;
-            mAnnoyingNotificationThreshold = Settings.System.getLong(resolver,
-                    Settings.System.MUTE_ANNOYING_NOTIFICATIONS_THRESHOLD, 0);
+            mAnnoyingNotificationThreshold = Settings.System.getLongForUser(resolver,
+                    Settings.System.MUTE_ANNOYING_NOTIFICATIONS_THRESHOLD, 0, UserHandle.USER_CURRENT_OR_SELF);
         }
     }
 
@@ -2153,7 +2156,7 @@ public class NotificationManagerService extends INotificationManager.Stub
                         try {
                             mVibrator.vibrate(r.sbn.getUid(), r.sbn.getBasePkg(),
                                 useDefaultVibrate ? mDefaultVibrationPattern
-                                                                : mFallbackVibrationPattern,
+                                        : mFallbackVibrationPattern,
                                 ((notification.flags & Notification.FLAG_INSISTENT) != 0) ? 0: -1);
                         } finally {
                             Binder.restoreCallingIdentity(identity);
