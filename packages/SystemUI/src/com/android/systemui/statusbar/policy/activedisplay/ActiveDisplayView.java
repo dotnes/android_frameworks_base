@@ -677,6 +677,7 @@ public class ActiveDisplayView extends FrameLayout {
     }
 
     private void onScreenTurnedOn() {
+        disableProximitySensor();
         cancelRedisplayTimer();
     }
 
