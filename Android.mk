@@ -31,8 +31,7 @@ framework_res_source_path := APPS/framework-res_intermediates/src
 SECONDARY_FRAMEWORKS_SUBDIRS := \
         core/java/android/test \
         core/java/android/speech/srec \
-        core/java/com/android/internal/http/multipart \
-        media/java/android/media/audiofx
+        core/java/com/android/internal/http/multipart
 
 include $(CLEAR_VARS)
 
