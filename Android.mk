@@ -31,7 +31,11 @@ framework_res_source_path := APPS/framework-res_intermediates/src
 SECONDARY_FRAMEWORKS_SUBDIRS := \
         core/java/android/test \
         core/java/android/speech/srec \
-        core/java/com/android/internal/http/multipart
+        core/java/com/android/internal/http/multipart \
+        media/java/android/media/videoeditor \
+        media/java/android/media/audiofx \
+        media/mca/effect/java/android/media/effect \
+        media/mca/effect/java/android/media/effect/effects
 
 include $(CLEAR_VARS)
 
