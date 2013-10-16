@@ -1,4 +1,7 @@
 /*
+ * Copyright (c) 2013, The Linux Foundation. All rights reserved.
+ * Not a Contribution.
+ *
  * Copyright (C) 2012 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -59,10 +62,11 @@ public class AppOpsManager {
     public static final int MODE_ALLOWED = 0;
     public static final int MODE_IGNORED = 1;
     public static final int MODE_ERRORED = 2;
+    public static final int MODE_ASK     = 3;
 
     // when adding one of these:
     //  - increment _NUM_OP
-    //  - add rows to sOpToSwitch, sOpNames, sOpPerms
+    //  - add rows to sOpToSwitch, sOpNames, sOpPerms, sPrivacyGuardOp
     //  - add descriptive strings to Settings/res/values/arrays.xml
     public static final int OP_NONE = -1;
     public static final int OP_COARSE_LOCATION = 0;
@@ -97,14 +101,62 @@ public class AppOpsManager {
     public static final int OP_READ_CLIPBOARD = 29;
     public static final int OP_WRITE_CLIPBOARD = 30;
     /** @hide */
-    public static final int _NUM_OP = 31;
+    public static final int OP_WIFI_CHANGE = 31;
+    public static final int OP_BLUETOOTH_CHANGE = 32;
+    public static final int OP_DATA_CONNECT_CHANGE = 33;
+    public static final int OP_ALARM_WAKEUP = 34;
+    public static final int _NUM_OP = 35;
+
+    /**
+     * Map to check if each operation is strict or not, to determine default
+     * value of each operation.
+     * If strict then AppOpsService should assign MODE_ASK value to operation
+     * by default.
+     */
+    private static boolean[] sOpStrict = new boolean[] {
+        true,   //OP_COARSE_LOCATION
+        true,   //OP_FINE_LOCATION
+        true,   //OP_GPS
+        false,  //OP_VIBRATE
+        true,   //OP_READ_CONTACTS
+        true,   //OP_WRITE_CONTACTS
+        true,   //OP_READ_CALL_LOG
+        true,   //OP_WRITE_CALL_LOG
+        false,  //OP_READ_CALENDAR
+        false,  //OP_WRITE_CALENDAR
+        true,   //OP_WIFI_SCAN
+        false,  //OP_POST_NOTIFICATION
+        false,  //OP_NEIGHBORING_CELLS
+        true,   //OP_CALL_PHONE
+        true,   //OP_READ_SMS
+        true,   //OP_WRITE_SMS
+        true,   //OP_RECEIVE_SMS
+        false,  //OP_RECEIVE_EMERGECY_SMS
+        true,   //OP_RECEIVE_MMS
+        false,  //OP_RECEIVE_WAP_PUSH
+        true,   //OP_SEND_SMS
+        true,   //OP_READ_ICC_SMS
+        true,   //OP_WRITE_ICC_SMS
+        false,  //OP_WRITE_SETTINGS
+        false,  //OP_SYSTEM_ALERT_WINDOW
+        false,  //OP_ACCESS_NOTIFICATIONS
+        true,   //OP_CAMERA
+        true,   //OP_RECORD_AUDIO
+        true,   //OP_PLAY_AUDIO
+        false,  //OP_READ_CLIPBOARD
+        false,  //OP_WRITE_CLIPBOARD
+        true,   //OP_WIFI_CHANGE
+        true,   //OP_BLUETOOTH_CHANGE
+        true,   //OP_DATA_CONNECT_CHANGE
+        false,  //OP_ALARM_WAKEUP
+    };
 
     /**
      * This maps each operation to the operation that serves as the
      * switch to determine whether it is allowed.  Generally this is
      * a 1:1 mapping, but for some things (like location) that have
      * multiple low-level operations being tracked that should be
-     * presented to hte user as one switch then this can be used to
+     * presented to the user as one switch then this can be used to
      * make them all controlled by the same single operation.
      */
     private static int[] sOpToSwitch = new int[] {
@@ -139,6 +191,10 @@ public class AppOpsManager {
             OP_PLAY_AUDIO,
             OP_READ_CLIPBOARD,
             OP_WRITE_CLIPBOARD,
+            OP_WIFI_CHANGE,
+            OP_BLUETOOTH_CHANGE,
+            OP_DATA_CONNECT_CHANGE,
+            OP_ALARM_WAKEUP,
     };
 
     /**
@@ -177,6 +233,10 @@ public class AppOpsManager {
             "PLAY_AUDIO",
             "READ_CLIPBOARD",
             "WRITE_CLIPBOARD",
+            "WIFI_CHANGE",
+            "BLUETOOTH_CHANGE",
+            "DATA_CONNECT_CHANGE",
+            "ALARM_WAKEUP",
     };
 
     /**
@@ -215,7 +275,70 @@ public class AppOpsManager {
             null, // no permission for playing audio
             null, // no permission for reading clipboard
             null, // no permission for writing clipboard
+            android.Manifest.permission.CHANGE_WIFI_STATE,
+            android.Manifest.permission.BLUETOOTH,
+            android.Manifest.permission.CHANGE_NETWORK_STATE,
+            null, // no permission for alarm wakeups
     };
+
+    /**
+     * Check if given operation is strict or not.
+     */
+    public static boolean opStrict(int op) {
+        return sOpStrict[op];
+    }
+
+    /**
+     * Privacy Guard Ops and states need to
+     * match general Ops map. Unused Ops are flagged as OP_NONE
+     */
+    private static final int[] sPrivacyGuardOp = new int[] {
+            OP_COARSE_LOCATION,
+            OP_COARSE_LOCATION,
+            OP_COARSE_LOCATION,
+            OP_NONE,
+            OP_READ_CONTACTS,
+            OP_WRITE_CONTACTS,
+            OP_READ_CALL_LOG,
+            OP_WRITE_CALL_LOG,
+            OP_READ_CALENDAR,
+            OP_WRITE_CALENDAR,
+            OP_COARSE_LOCATION,
+            OP_NONE,
+            OP_COARSE_LOCATION,
+            OP_NONE,
+            OP_READ_SMS,
+            OP_WRITE_SMS,
+            OP_READ_SMS,
+            OP_READ_SMS,
+            OP_READ_SMS,
+            OP_READ_SMS,
+            OP_WRITE_SMS,
+            OP_READ_SMS,
+            OP_WRITE_SMS,
+            OP_NONE,
+            OP_NONE,
+            OP_NONE,
+            OP_NONE,
+            OP_NONE,
+            OP_NONE,
+            OP_NONE,
+            OP_NONE,
+            OP_NONE,
+            OP_NONE,
+            OP_NONE,
+            OP_NONE,
+    };
+
+    /**
+     * Privacy Guard states
+     */
+    public static final int PRIVACY_GUARD_DISABLED      = 0;
+    public static final int PRIVACY_GUARD_DISABLED_PLUS = 1;
+    public static final int PRIVACY_GUARD_ENABLED       = 2;
+    public static final int PRIVACY_GUARD_ENABLED_PLUS  = 3;
+    public static final int PRIVACY_GUARD_CUSTOM        = 4;
+    public static final int PRIVACY_GUARD_CUSTOM_PLUS   = 5;
 
     /**
      * Retrieve the op switch that controls the given operation.
@@ -237,6 +360,19 @@ public class AppOpsManager {
      */
     public static String opToPermission(int op) {
         return sOpPerms[op];
+    }
+
+    /**
+     * Retrieve the permission associated privacy guard operation,
+     * or OP_NONE if there is not one.
+     */
+    public static int getPrivacyGuardOp(String permission) {
+        for (int i=0; i<sOpPerms.length; i++) {
+            if (sOpPerms[i] != null && sOpPerms[i].equals(permission)) {
+                return sPrivacyGuardOp[i];
+            }
+        }
+        return OP_NONE;
     }
 
     /**
@@ -310,13 +446,18 @@ public class AppOpsManager {
         private final long mTime;
         private final long mRejectTime;
         private final int mDuration;
+        private final int mAllowedCount;
+        private final int mIgnoredCount;
 
-        public OpEntry(int op, int mode, long time, long rejectTime, int duration) {
+        public OpEntry(int op, int mode, long time, long rejectTime, int duration,
+                int allowedCount, int ignoredCount) {
             mOp = op;
             mMode = mode;
             mTime = time;
             mRejectTime = rejectTime;
             mDuration = duration;
+            mAllowedCount = allowedCount;
+            mIgnoredCount = ignoredCount;
         }
 
         public int getOp() {
@@ -343,6 +484,14 @@ public class AppOpsManager {
             return mDuration == -1 ? (int)(System.currentTimeMillis()-mTime) : mDuration;
         }
 
+        public int getAllowedCount() {
+            return mAllowedCount;
+        }
+
+        public int getIgnoredCount() {
+            return mIgnoredCount;
+        }
+
         @Override
         public int describeContents() {
             return 0;
@@ -355,6 +504,8 @@ public class AppOpsManager {
             dest.writeLong(mTime);
             dest.writeLong(mRejectTime);
             dest.writeInt(mDuration);
+            dest.writeInt(mAllowedCount);
+            dest.writeInt(mIgnoredCount);
         }
 
         OpEntry(Parcel source) {
@@ -363,6 +514,8 @@ public class AppOpsManager {
             mTime = source.readLong();
             mRejectTime = source.readLong();
             mDuration = source.readInt();
+            mAllowedCount = source.readInt();
+            mIgnoredCount = source.readInt();
         }
 
         public static final Creator<OpEntry> CREATOR = new Creator<OpEntry>() {
@@ -540,19 +693,55 @@ public class AppOpsManager {
         finishOp(op, Process.myUid(), mContext.getBasePackageName());
     }
 
-    public boolean getPrivacyGuardSettingForPackage(int uid, String packageName) {
+    public List<Integer> getPrivacyGuardOpsForPackage(String packageName) {
+        try {
+            return mService.getPrivacyGuardOpsForPackage(packageName);
+        } catch (RemoteException e) {
+        }
+        return null;
+    }
+
+    public int getPrivacyGuardSettingForPackage(int uid, String packageName) {
         try {
             return mService.getPrivacyGuardSettingForPackage(uid, packageName);
         } catch (RemoteException e) {
         }
-        return false;
+        return PRIVACY_GUARD_DISABLED;
     }
 
     public void setPrivacyGuardSettingForPackage(int uid, String packageName,
-            boolean state) {
+            boolean state, boolean forceAll) {
         try {
-            mService.setPrivacyGuardSettingForPackage(uid, packageName, state);
+            mService.setPrivacyGuardSettingForPackage(uid, packageName, state, forceAll);
         } catch (RemoteException e) {
         }
+    }
+
+    public void resetCounters() {
+        try {
+            mService.resetCounters();
+        } catch (RemoteException e) {
+        }
+    }
+
+    /**
+     * Retrieve the privacy guard state associated icons for notification and settings
+     */
+    public static int getPrivacyGuardIconResId(int pgState) {
+        switch (pgState) {
+            case PRIVACY_GUARD_DISABLED:
+                return com.android.internal.R.drawable.stat_notify_privacy_guard_off;
+            case PRIVACY_GUARD_ENABLED:
+                return com.android.internal.R.drawable.stat_notify_privacy_guard;
+            case PRIVACY_GUARD_CUSTOM:
+                return com.android.internal.R.drawable.stat_notify_privacy_guard_custom;
+            case PRIVACY_GUARD_DISABLED_PLUS:
+                return com.android.internal.R.drawable.stat_notify_privacy_guard_off_plus;
+            case PRIVACY_GUARD_ENABLED_PLUS:
+                return com.android.internal.R.drawable.stat_notify_privacy_guard_plus;
+            case PRIVACY_GUARD_CUSTOM_PLUS:
+                return com.android.internal.R.drawable.stat_notify_privacy_guard_custom_plus;
+        }
+        return com.android.internal.R.drawable.stat_notify_privacy_guard_off;
     }
 }

@@ -85,6 +85,7 @@ import android.widget.LinearLayout;
 import android.widget.PopupMenu;
 import android.widget.RemoteViews;
 import android.widget.TextView;
+
 import android.service.notification.StatusBarNotification;
 
 import com.android.internal.statusbar.IStatusBarService;
@@ -243,7 +244,6 @@ public abstract class BaseStatusBar extends SystemUI implements
     protected ActiveDisplayView mActiveDisplayView;
 
     private boolean mDeviceProvisioned = false;
-    private int mAutoCollapseBehaviour;
 
     @ChaosLab(name="GestureAnywhere", classification=Classification.NEW_FIELD)
     protected GestureAnywhereView mGestureAnywhereView;
@@ -295,30 +295,15 @@ public abstract class BaseStatusBar extends SystemUI implements
 
         void observe() {
             ContentResolver resolver = mContext.getContentResolver();
-	    resolver.registerContentObserver(Settings.System.getUriFor(
-                    Settings.System.PIE_CONTROLS), false, this);
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.PIE_TRIGGER), false, this);
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.EXPANDED_DESKTOP_STATE), false, this);
-            resolver.registerContentObserver(Settings.System.getUriFor(
-                    Settings.System.STATUS_BAR_COLLAPSE_ON_DISMISS), false, this);
-
-	    update();
-
         }
 
         @Override
         public void onChange(boolean selfChange) {
             updatePieControls();
-	    update();
-        }
-
-        private void update() {
-            ContentResolver resolver = mContext.getContentResolver();
-            mAutoCollapseBehaviour = Settings.System.getIntForUser(resolver,
-                    Settings.System.STATUS_BAR_COLLAPSE_ON_DISMISS,
-                    Settings.System.STATUS_BAR_COLLAPSE_IF_NO_CLEARABLE, UserHandle.USER_CURRENT);
         }
     }
 
@@ -631,6 +616,7 @@ public abstract class BaseStatusBar extends SystemUI implements
 
         SettingsObserver settingsObserver = new SettingsObserver(new Handler());
         settingsObserver.observe();
+
         SidebarObserver observer = new SidebarObserver(mHandler);
         observer.observe();
     }
@@ -695,10 +681,12 @@ public abstract class BaseStatusBar extends SystemUI implements
     }
 
     private boolean showPie() {
-        boolean pie = Settings.System.getInt(mContext.getContentResolver(),
-                Settings.System.PIE_CONTROLS, 0) == 1;
+        boolean expanded = Settings.System.getInt(mContext.getContentResolver(),
+                Settings.System.EXPANDED_DESKTOP_STATE, 0) == 1;
+        boolean navbarZero = Integer.parseInt(ExtendedPropertiesUtils
+                .getProperty("com.android.systemui.navbar.dpi", "100")) == 0;
 
-        return (pie);
+        return (expanded || navbarZero);
     }
 
     public void updatePieControls() {
@@ -897,7 +885,6 @@ public abstract class BaseStatusBar extends SystemUI implements
 
     @Override
     protected void onConfigurationChanged(Configuration newConfig) {
-        if (mPieControlPanel != null) mPieControlPanel.bumpConfiguration();
         final Locale newLocale = mContext.getResources().getConfiguration().locale;
         if (! newLocale.equals(mLocale)) {
             mLocale = newLocale;
@@ -1632,33 +1619,18 @@ public abstract class BaseStatusBar extends SystemUI implements
         if (rowParent != null) rowParent.removeView(entry.row);
         updateExpansionStates();
         updateNotificationIcons();
-        maybeCollapseAfterNotificationRemoval(entry.userDismissed());
+
+        if (CLOSE_PANEL_WHEN_EMPTIED && isNotificationPanelFullyVisible()) {
+            if (entry.userDismissed() && !mNotificationData.hasClearableItems()) {
+                mHandler.removeCallbacks(mPanelCollapseRunnable);
+                mHandler.postDelayed(mPanelCollapseRunnable, COLLAPSE_AFTER_DISMISS_DELAY);
+            } else if (mNotificationData.size() == 0) {
+                mHandler.removeCallbacks(mPanelCollapseRunnable);
+                mHandler.postDelayed(mPanelCollapseRunnable, COLLAPSE_AFTER_REMOVE_DELAY);
+            }
+        }
 
         return entry.notification;
-    }
-
-    protected void maybeCollapseAfterNotificationRemoval(boolean userDismissed) {
-        if (mAutoCollapseBehaviour == Settings.System.STATUS_BAR_COLLAPSE_NEVER) {
-            return;
-        }
-        if (!isNotificationPanelFullyVisible()) {
-            return;
-        }
-
-        boolean collapseDueToEmpty =
-                mAutoCollapseBehaviour == Settings.System.STATUS_BAR_COLLAPSE_IF_EMPTIED
-                && mNotificationData.size() == 0;
-        boolean collapseDueToNoClearable =
-                mAutoCollapseBehaviour == Settings.System.STATUS_BAR_COLLAPSE_IF_NO_CLEARABLE
-                && !mNotificationData.hasClearableItems();
-
-        if (userDismissed && (collapseDueToEmpty || collapseDueToNoClearable)) {
-            mHandler.removeCallbacks(mPanelCollapseRunnable);
-            mHandler.postDelayed(mPanelCollapseRunnable, COLLAPSE_AFTER_DISMISS_DELAY);
-        } else if (mNotificationData.size() == 0) {
-            mHandler.removeCallbacks(mPanelCollapseRunnable);
-            mHandler.postDelayed(mPanelCollapseRunnable, COLLAPSE_AFTER_REMOVE_DELAY);
-        }
     }
 
     public void prepareHaloNotification(NotificationData.Entry entry, StatusBarNotification notification, boolean update) {
@@ -2113,12 +2085,11 @@ public abstract class BaseStatusBar extends SystemUI implements
                 LayoutParams.MATCH_PARENT,
                 WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL,
                 0
-                        | WindowManager.LayoutParams.FLAG_TOUCHABLE_WHEN_WAKING
-                        | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
-                        | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
-                        | WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
-                        | WindowManager.LayoutParams.FLAG_SPLIT_TOUCH
-                        | WindowManager.LayoutParams.FLAG_FULLSCREEN,
+                | WindowManager.LayoutParams.FLAG_TOUCHABLE_WHEN_WAKING
+                | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+                | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
+                | WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
+                | WindowManager.LayoutParams.FLAG_SPLIT_TOUCH,
                 PixelFormat.TRANSLUCENT);
         lp.gravity = Gravity.TOP | Gravity.FILL_VERTICAL | Gravity.FILL_HORIZONTAL;
         lp.setTitle("ActiveDisplayView");
@@ -2131,7 +2102,6 @@ public abstract class BaseStatusBar extends SystemUI implements
         mGestureAnywhereView = (GestureAnywhereView)View.inflate(
                 mContext, R.layout.gesture_anywhere_overlay, null);
         mWindowManager.addView(mGestureAnywhereView, getGestureAnywhereViewLayoutParams(Gravity.LEFT));
-        mGestureAnywhereView.setStatusBar(this);
     }
 
     @ChaosLab(name="GestureAnywhere", classification=Classification.NEW_METHOD)

@@ -67,7 +67,7 @@
     <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS_FULL" />
     <uses-permission android:name="android.permission.FORCE_STOP_PACKAGES" />
     <uses-permission android:name="android.permission.GET_TOP_ACTIVITY_INFO" />
-    
+
     <!-- WindowManager -->
     <uses-permission android:name="android.permission.INTERNAL_SYSTEM_WINDOW" />
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
@@ -128,15 +128,15 @@
         <service android:name=".LoadAverageService"
                 android:exported="true" />
 
-        <service android:name=".CPUInfoService"
-                android:exported="true" /> 
-
         <service android:name=".screenstate.ScreenStateService"
                 android:exported="true" >
             <intent-filter>
                <android name="android.intent.action.SCREEN_STATE_SERVICE_UPDATE"/>
             </intent-filter>
         </service>
+        
+        <service android:name=".CPUInfoService"
+                android:exported="true" />
 
         <service android:name=".ImageWallpaper"
                 android:permission="android.permission.BIND_WALLPAPER"
@@ -408,9 +408,6 @@
             </intent-filter>
         </activity>
 
-        <activity android:name="com.android.systemui.Transparent"
-            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
-
         <activity android:name=".statusbar.policy.activedisplay.DummyActivity"
                   android:label=""
                   android:taskAffinity=""
@@ -419,5 +416,7 @@
                   android:theme="@style/Theme.DummyActivity">
         </activity>
 
+        <activity android:name="com.android.systemui.Transparent"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
     </application>
 </manifest>

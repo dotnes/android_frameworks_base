@@ -101,6 +101,8 @@ import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
+import android.widget.TabHost;
+import android.widget.TabHost.TabSpec;
 import android.widget.TextView;
 
 import android.service.notification.StatusBarNotification;
@@ -120,6 +122,9 @@ import com.android.systemui.statusbar.NotificationData;
 import com.android.systemui.statusbar.NotificationData.Entry;
 import com.android.systemui.statusbar.SignalClusterView;
 import com.android.systemui.statusbar.StatusBarIconView;
+import com.android.internal.util.slim.ButtonConfig;
+import com.android.internal.util.slim.ButtonsConstants;
+import com.android.internal.util.slim.ButtonsHelper;
 import com.android.systemui.statusbar.phone.ShortcutsWidget;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.DockBatteryController;
@@ -139,10 +144,9 @@ import com.android.systemui.aokp.AwesomeAction;
 import com.android.internal.util.aokp.AokpRibbonHelper;
 import com.android.systemui.aokp.AokpSwipeRibbon;
 
-
+import java.io.File;
 import java.io.FileDescriptor;
 import java.io.IOException;
-import java.io.File;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
@@ -196,11 +200,9 @@ public class PhoneStatusBar extends BaseStatusBar {
 
     private float mFlingGestureMaxOutputVelocityPx; // how fast can it really go? (should be a little
                                                     // faster than mSelfCollapseVelocityPx)
-
     private final String NOTIF_WALLPAPER_IMAGE_PATH = "/data/data/com.android.settings/files/notification_wallpaper.jpg";
 
     PhoneStatusBarPolicy mIconPolicy;
-
 
     private IWindowManager mWm;
 
@@ -310,6 +312,7 @@ public class PhoneStatusBar extends BaseStatusBar {
     private boolean mCarrierLabelVisible = false;
     private int mCarrierLabelHeight;
     private int mNotificationHeaderHeight;
+    private boolean mNotificationShortcutsHideCarrier;
 
     private boolean mShowCarrierInPanel = false;
 
@@ -341,8 +344,8 @@ public class PhoneStatusBar extends BaseStatusBar {
     ShortcutsWidget mNotificationShortcutsLayout;
     HorizontalScrollView mNotificationShortcutsScrollView;
     private boolean mNotificationShortcutsVisible;
-    private boolean mNotificationShortcutsToggle;
-    private boolean mNotificationShortcutsHideCarrier;
+    private boolean mNotificationShortcutsIsActive;
+    private boolean mNotificationHideCarrier;
     FrameLayout.LayoutParams lpScrollView;
     FrameLayout.LayoutParams lpCarrierLabel;
     int mShortcutsDrawerMargin;
@@ -485,18 +488,18 @@ public class PhoneStatusBar extends BaseStatusBar {
     }
 
     private int calculateCarrierLabelBottomMargin() {
-        return mNotificationShortcutsToggle ? mShortcutsSpacingHeight : 0;
+        return mNotificationShortcutsIsActive ? mShortcutsSpacingHeight : 0;
     }
 
     private void updateCarrierMargin(boolean forceHide) {
-        lpScrollView.bottomMargin = mNotificationShortcutsToggle ? mShortcutsDrawerMargin : 0;
+        lpScrollView.bottomMargin = mNotificationShortcutsIsActive ? mShortcutsDrawerMargin : 0;
         mScrollView.setLayoutParams(lpScrollView);
 
         if (!mShowCarrierInPanel || mCarrierAndWifiView == null) return;
         if (forceHide) {
-            lpCarrierLabel.bottomMargin = mNotificationShortcutsToggle ? mShortcutsSpacingHeight : 0;
+            lpCarrierLabel.bottomMargin = mNotificationShortcutsIsActive ? mShortcutsSpacingHeight : 0;
         } else {
-            lpCarrierLabel.bottomMargin = mNotificationShortcutsToggle ? mShortcutsSpacingHeight : mCloseViewHeight;
+            lpCarrierLabel.bottomMargin = mNotificationShortcutsIsActive ? mShortcutsSpacingHeight : mCloseViewHeight;
         }
         mCarrierAndWifiView.setLayoutParams(lpCarrierLabel);
     }
@@ -512,6 +515,7 @@ public class PhoneStatusBar extends BaseStatusBar {
             return;
         }
         mRibbonView.setVisibility(View.GONE);
+        mRibbonQS.shutdown();
         mRibbonQS = null;
     }
 
@@ -669,7 +673,6 @@ public class PhoneStatusBar extends BaseStatusBar {
             mHideSettingsPanel = false;
             mHasSettingsPanel = res.getBoolean(R.bool.config_hasSettingsPanel);
         }
-
         mHasFlipSettings = res.getBoolean(R.bool.config_hasFlipSettingsPanel);
 
         mDateTimeView = mNotificationPanelHeader.findViewById(R.id.datetime);
@@ -915,16 +918,15 @@ public class PhoneStatusBar extends BaseStatusBar {
             }
         }
 
-        // Start observing for changes on Notification Drawer (Background & Alpha)
-        mNotifChangedObserver = new NotifChangedObserver(mHandler);
-        mNotifChangedObserver.startObserving();
-
         // Start observing for changes on QuickSettings (needed here for enable/hide qs)
         mTilesChangedObserver = new TilesChangedObserver(mHandler);
         mTilesChangedObserver.startObserving();
 
-        mClingShown = ! (DEBUG_CLINGS
+        // Start observing for changes on Notification Drawer (Background & Alpha)
+        mNotifChangedObserver = new NotifChangedObserver(mHandler);
+        mNotifChangedObserver.startObserving();
 
+        mClingShown = ! (DEBUG_CLINGS
             || !Prefs.read(mContext).getBoolean(Prefs.SHOWN_QUICK_SETTINGS_HELP, false));
 
         if (!ENABLE_NOTIFICATION_PANEL_CLING || ActivityManager.isRunningInTestHarness()) {
@@ -947,8 +949,10 @@ public class PhoneStatusBar extends BaseStatusBar {
         });
         mNotificationShortcutsScrollView = (HorizontalScrollView) mStatusBarWindow.findViewById(R.id.custom_notification_scrollview);
 
-        mNotificationShortcutsToggle = Settings.System.getIntForUser(mContext.getContentResolver(),
-                Settings.System.NOTIFICATION_SHORTCUTS_TOGGLE, 0, UserHandle.USER_CURRENT) != 0;
+        String notificationShortcutsIsActive = Settings.System.getStringForUser(mContext.getContentResolver(),
+                Settings.System.NOTIFICATION_SHORTCUTS_CONFIG, UserHandle.USER_CURRENT);
+        mNotificationShortcutsIsActive = !(notificationShortcutsIsActive == null
+                || notificationShortcutsIsActive.isEmpty());
 
         lpScrollView = (FrameLayout.LayoutParams) mScrollView.getLayoutParams();
 
@@ -974,8 +978,9 @@ public class PhoneStatusBar extends BaseStatusBar {
         // listen for USER_SETUP_COMPLETE setting (per-user)
         resetUserSetupObserver();
 
-        mVelocityTracker = VelocityTracker.obtain();
         updateRibbonTargets();
+        mNotificationShortcutsLayout.setupShortcuts();
+
         return mStatusBarView;
     }
 
@@ -1277,7 +1282,7 @@ public class PhoneStatusBar extends BaseStatusBar {
             default:
                 Settings.System.putInt(mContext.getContentResolver(),
                     Settings.System.HIDE_STATUSBAR, 0);
-    break;
+		break;
         }
     }
 
@@ -1494,7 +1499,7 @@ public class PhoneStatusBar extends BaseStatusBar {
         if (mSettingsButton == null || mNotificationButton == null) {
             // Tablet
             updateNotificationShortcutsVisibility(false, true);
-            if (mNotificationShortcutsToggle) {
+            if (mNotificationShortcutsIsActive) {
                 mNotificationPanel.postDelayed(new Runnable() {
                     @Override
                     public void run() {
@@ -1687,7 +1692,7 @@ public class PhoneStatusBar extends BaseStatusBar {
         }
     }
     protected void updateNotificationShortcutsVisibility(boolean vis, boolean instant) {
-        if ((!mNotificationShortcutsToggle && mNotificationShortcutsVisible == vis) ||
+        if ((!mNotificationShortcutsIsActive && mNotificationShortcutsVisible == vis) ||
                 mStatusBarWindow.findViewById(R.id.custom_notification_scrollview) == null) {
             return;
         }
@@ -2173,7 +2178,7 @@ public class PhoneStatusBar extends BaseStatusBar {
         }, FLIP_DURATION - 150);
         updateRibbon(false);
 
-        if (mNotificationShortcutsToggle)
+        if (mNotificationShortcutsIsActive)
             updateNotificationShortcutsVisibility(true);
     }
 
@@ -2420,7 +2425,7 @@ public class PhoneStatusBar extends BaseStatusBar {
         }, FLIP_DURATION - 150);
         updateRibbon(true);
 
-        if (mNotificationShortcutsToggle) {
+        if (mNotificationShortcutsIsActive) {
             mNotificationPanel.postDelayed(new Runnable() {
                 @Override
                 public void run() {
@@ -2711,6 +2716,7 @@ public class PhoneStatusBar extends BaseStatusBar {
         if (DEBUG_GESTURES) {
             mGestureRec.add(event);
         }
+
 
         // Cling (first-run help) handling.
         // The cling is supposed to show the first time you drag, or even tap, the status bar.
@@ -3562,8 +3568,6 @@ public class PhoneStatusBar extends BaseStatusBar {
         }
     }
 
-
-
     /**
      *  ContentObserver to watch for Quick Settings tiles changes
      * @author dvtonder
@@ -3571,7 +3575,7 @@ public class PhoneStatusBar extends BaseStatusBar {
      */
     private class TilesChangedObserver extends ContentObserver {
         public TilesChangedObserver(Handler handler) {
-	        super(handler);
+            super(handler);
                 setNotificationWallpaperHelper();
         }
 
@@ -3674,10 +3678,6 @@ public class PhoneStatusBar extends BaseStatusBar {
                     false, this);
 
             cr.registerContentObserver(
-                    Settings.System.getUriFor(Settings.System.NOTIF_WALLPAPER_ALPHA),
-                    false, this);
-
-            cr.registerContentObserver(
                     Settings.System.getUriFor(Settings.System.QS_QUICK_ACCESS),
                     false, this, UserHandle.USER_ALL);
 
@@ -3688,6 +3688,10 @@ public class PhoneStatusBar extends BaseStatusBar {
             cr.registerContentObserver(
                     Settings.System.getUriFor(Settings.System.QUICK_SETTINGS_RIBBON_TILES),
                     false, this, UserHandle.USER_ALL);
+
+            cr.registerContentObserver(
+                    Settings.System.getUriFor(Settings.System.NOTIF_WALLPAPER_ALPHA),
+                    false, this);
         }
     }
 
@@ -3734,6 +3738,22 @@ public class PhoneStatusBar extends BaseStatusBar {
         }
     }
 
+    private void setNotificationWallpaperHelper() {
+        float wallpaperAlpha = Settings.System.getFloat(mContext.getContentResolver(), Settings.System.NOTIF_WALLPAPER_ALPHA, 0.1f);
+        String notifiBack = Settings.System.getString(mContext.getContentResolver(), Settings.System.NOTIFICATION_BACKGROUND);
+        File file = new File(NOTIF_WALLPAPER_IMAGE_PATH);
+        mNotificationPanel.setBackgroundResource(0);
+        mNotificationPanel.setBackgroundResource(R.drawable.notification_panel_bg);
+        Drawable background = mNotificationPanel.getBackground();
+        background.setAlpha(0);
+        if (!file.exists()) {
+            if (notifiBack != null && !notifiBack.isEmpty()) {
+                background.setColorFilter(Integer.parseInt(notifiBack), Mode.SRC_ATOP);
+            }
+         background.setAlpha((int) ((1-wallpaperAlpha) * 255));
+         }
+    }
+
     class SettingsObserver extends ContentObserver {
         SettingsObserver(Handler handler) {
             super(handler);
@@ -3756,7 +3776,7 @@ public class PhoneStatusBar extends BaseStatusBar {
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.CURRENT_UI_MODE), false, this);
             resolver.registerContentObserver(Settings.System.getUriFor(
-                    Settings.System.NOTIFICATION_SHORTCUTS_TOGGLE), false, this, UserHandle.USER_ALL);
+                    Settings.System.NOTIFICATION_SHORTCUTS_CONFIG), false, this, UserHandle.USER_ALL);
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.NOTIFICATION_SHORTCUTS_HIDE_CARRIER), false, this, UserHandle.USER_ALL);
             resolver.registerContentObserver(Settings.System.getUriFor(
@@ -3823,8 +3843,8 @@ public class PhoneStatusBar extends BaseStatusBar {
             mBrightnessControl = brightnessValue != Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC
                     && Settings.System.getIntForUser(resolver, Settings.System.STATUS_BAR_BRIGHTNESS_CONTROL,
                             0, UserHandle.USER_CURRENT) == 1;
-            mNotificationShortcutsToggle = Settings.System.getIntForUser(resolver,
-                    Settings.System.NOTIFICATION_SHORTCUTS_TOGGLE, 0, UserHandle.USER_CURRENT) != 0;
+            String notificationShortcutsIsActive = Settings.System.getStringForUser(resolver,
+                    Settings.System.NOTIFICATION_SHORTCUTS_CONFIG, UserHandle.USER_CURRENT);
             mNotificationShortcutsHideCarrier = Settings.System.getIntForUser(resolver,
                     Settings.System.NOTIFICATION_SHORTCUTS_HIDE_CARRIER, 0, UserHandle.USER_CURRENT) != 0;
 
@@ -3922,21 +3942,5 @@ public class PhoneStatusBar extends BaseStatusBar {
         if(thisUsersNotifications == 0)
             return true;
         return false;
-    }
-
-    private void setNotificationWallpaperHelper() {
-        float wallpaperAlpha = Settings.System.getFloat(mContext.getContentResolver(), Settings.System.NOTIF_WALLPAPER_ALPHA, 0.1f);
-        String notifiBack = Settings.System.getString(mContext.getContentResolver(), Settings.System.NOTIFICATION_BACKGROUND);
-        File file = new File(NOTIF_WALLPAPER_IMAGE_PATH);
-        mNotificationPanel.setBackgroundResource(0);
-        mNotificationPanel.setBackgroundResource(R.drawable.notification_panel_bg);
-        Drawable background = mNotificationPanel.getBackground();
-        background.setAlpha(0);
-        if (!file.exists()) {
-            if (notifiBack != null && !notifiBack.isEmpty()) {
-                background.setColorFilter(Integer.parseInt(notifiBack), Mode.SRC_ATOP);
-            }
-         background.setAlpha((int) ((1-wallpaperAlpha) * 255));
-        }
     }
 }

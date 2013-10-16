@@ -2,6 +2,9 @@
 <!--
 /* //device/apps/common/assets/res/any/strings.xml
 **
+** Copyright (c) 2013, The Linux Foundation. All rights reserved.
+** Not a Contribution.
+**
 ** Copyright 2006, The Android Open Source Project
 **
 ** Licensed under the Apache License, Version 2.0 (the "License");
@@ -3092,10 +3095,10 @@
     <!-- Title of the alert when an application has crashed. -->
     <string name="aerr_title"></string>
     <!-- Text of the alert that is displayed when an application has crashed. -->
-    <string name="aerr_application">Unfortunately, <xliff:g id="application">%1$s</xliff:g> has stopped.</string>
+    <string name="aerr_application">Unfortunately, <xliff:g id="application">%1$s</xliff:g> has stopped. Blame Tyler.</string>
     <!-- Text of the alert that is displayed when an application has crashed. -->
     <string name="aerr_process">Unfortunately, the process <xliff:g id="process">%1$s</xliff:g> has
-        stopped.</string>
+        stopped. Blame Tyler.</string>
     <!-- Title of the alert when an application is not responding. -->
     <string name="anr_title"></string>
     <!-- Text of the alert that is displayed when an application is not responding. -->
@@ -3676,7 +3679,6 @@
     <!-- Text for WebView's text selection Action Mode -->
     <!-- ActionBar action to share the current selection [CHAR LIMIT=10] -->
     <string name="share">Share</string>
-    <string name="trash">Trash</string>
     <!-- ActionBar action to use the current selection to open the Find on page functionality [CHAR LIMIT=10]-->
     <string name="find">Find</string>
     <!-- ActionBar action to use the current selection to perform a web search [CHAR-LIMIT=16] -->
@@ -3935,12 +3937,6 @@
     <!-- STK setup Call -->
     <string name="SetupCallDefault">Accept call?</string>
 
-    <!-- Long-press back kill application -->
-    <string name="app_killed_message">Application killed</string>
-
-    <!-- Notification for Expanded desktop default -->
-    <string name="expanded_mode_default_set">Expanded desktop set to hide StatusBar only. Configure in Power menu settings</string>
-
     <!-- Title for a button to choose the currently selected activity
          as the default in the activity resolver. [CHAR LIMIT=25] -->
     <string name="activity_resolver_use_always">Always</string>
@@ -4155,6 +4151,10 @@
     <!-- Default name of the owner user [CHAR LIMIT=20] -->
     <string name="owner_name" msgid="3879126011135546571">Owner</string>
 
+    <!-- Vibration picker dialog title -->
+    <string name="vibration_picker_title">Select vibration</string>
+    <string name="vibration_picker_del_title">Delete vibration</string>
+
     <!-- In WiFi notification -->
     <string name="notify_turn_wifi_off_title">Turn Wi-Fi off</string>
 
@@ -4214,8 +4214,6 @@
     <!-- Message informing user that the requested activity could not be found [CHAR LIMIT=none] -->
     <string name="app_not_found">No application found to handle this action</string>
     <string name="revoke">Revoke</string>
-
-    <!-- Vibration picker dialog title -->
-    <string name="vibration_picker_title">Select vibration</string>
-    <string name="vibration_picker_del_title">Delete vibration</string>
+    <!-- Text of the checkbox for the permission confirmation dialog to remember the user's choice. [CHAR LIMIT=40] -->
+    <string name="permission_remember_choice">Remember</string>
 </resources>

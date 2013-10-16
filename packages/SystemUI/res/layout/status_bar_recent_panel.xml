@@ -25,6 +25,7 @@
     android:layout_height="match_parent"
     android:layout_width="match_parent"
     systemui:recentItemLayout="@layout/status_bar_recent_item"
+    android:fitsSystemWindows="true"
     >
     <View
         android:id="@+id/recents_transition_background"
@@ -57,7 +58,8 @@
             android:fadingEdgeLength="@dimen/status_bar_recents_scroll_fading_edge_length"
             android:layout_gravity="bottom|start"
             android:clipToPadding="false"
-            android:clipChildren="false">
+            android:clipChildren="false"
+            android:fitsSystemWindows="true">
 
             <LinearLayout android:id="@+id/recents_linear_layout"
                 android:layout_width="match_parent"
@@ -212,7 +214,7 @@
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:layout_marginTop="@*android:dimen/status_bar_height"
+            android:layout_marginTop="-5dp"
             android:clipChildren="false"
             android:clipToPadding="false"
             android:paddingTop="1dp"

@@ -74,15 +74,15 @@
             android:layout_height="@dimen/notification_panel_header_height"
             />
 
+        <include layout="@layout/weatherpanel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            />
+
         <ViewStub android:id="@+id/ribbon_settings_stub"
             android:layout="@layout/ribbon_settings"
             android:layout_width="match_parent"
             android:layout_height="@dimen/notification_min_height"
-            />
-
-        <include layout="@layout/weatherpanel"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
             />
 
         <LinearLayout
@@ -159,6 +159,7 @@
         android:requiresFadingEdge="none"
         android:fillViewport="true"
         android:overScrollMode="never"
+        android:layout_above="@id/handle"
         android:layout_gravity="bottom"
         android:visibility="invisible"
         android:layout_marginBottom="@dimen/notification_shortcuts_close_handle_height">

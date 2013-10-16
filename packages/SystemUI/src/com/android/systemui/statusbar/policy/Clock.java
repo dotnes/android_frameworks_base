@@ -40,7 +40,6 @@ import android.text.style.RelativeSizeSpan;
 import android.text.style.RelativeSizeSpan;
 import android.text.style.StyleSpan;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.util.Slog;
 import android.util.ColorUtils;
 import android.view.View;
@@ -51,6 +50,8 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
+
+import libcore.icu.LocaleData;
 
 import com.android.internal.R;
 import libcore.icu.LocaleData;
@@ -277,12 +278,8 @@ public class Clock extends TextView {
         if (!is24) {
             if (mAmPmStyle != AM_PM_STYLE_NORMAL) {
                 String AmPm;
-                if (format.indexOf("a") == 0) {
-                    if (format.indexOf("a ") == 0) {
-                        AmPm = (new SimpleDateFormat("a ")).format(mCalendar.getTime());
-                    } else {
-                        AmPm = (new SimpleDateFormat("a")).format(mCalendar.getTime());
-                    }
+                if (format.indexOf("a")==0) {
+                    AmPm = (new SimpleDateFormat("a ")).format(mCalendar.getTime());
                 } else {
                     AmPm = (new SimpleDateFormat(" a")).format(mCalendar.getTime());
                 }

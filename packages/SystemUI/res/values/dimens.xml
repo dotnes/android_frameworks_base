@@ -261,9 +261,9 @@
     <!-- PIE PIE PIE PIE PIE PIE PIE PIE PIE PIE PIE PIE PIE PIE -->
 
     <!-- Notification Shortcuts -->
-    <dimen name="notification_shortcuts_close_handle_height">26dp</dimen>
+    <dimen name="notification_shortcuts_close_handle_height">28dp</dimen>
     <dimen name="notification_shortcuts_spacing_height">88dp</dimen>
-    <dimen name="notification_shortcuts_drawer_margin">88dp</dimen>
+    <dimen name="notification_shortcuts_drawer_margin">56dp</dimen>
 
     <!--  Amount of Margin to offset NavRing in Portrait Mode -->
     <dimen name="navring_left_margin_port">-600dp</dimen>
@@ -287,7 +287,7 @@
     <!-- HALO -->
     <dimen name="halo_bubble_size">75dp</dimen>
     <dimen name="halo_number_size">24dp</dimen>
-    <dimen name="halo_number_icon_size">16dp</dimen>
+    <dimen name="halo_number_icon_size">18dp</dimen>
     <dimen name="halo_number_text_size">14sp</dimen>
     <dimen name="halo_speech_text_size">16sp</dimen>
     <dimen name="halo_status_text_size">16sp</dimen>
@@ -315,7 +315,7 @@
     <dimen name="folder_height">480dp</dimen>
     <dimen name="setup_sidebar_width">90dp</dimen>
 
-    <!-- Top margin for overflow notifications container shown in the active display view -->
+    <!-- Top margin for overflow notifications container shown in the P.O.R.N. view -->
     <dimen name="glowpad_overflow_notifications_margin_top">64dp</dimen>
 
     <!-- Top margin for overflow notifications container shown in the active display view -->
@@ -330,17 +330,8 @@
     <!-- Active display Handle notification icon size -->
     <dimen name="handle_icon_size">32dp</dimen>
 
-    <!-- Overflow Active display notification padding -->
+    <!-- Active display overflow notification padding -->
     <dimen name="overflow_icon_padding">2dp</dimen>
-
-    <!-- The width of the ticker, including the icon -->
-    <dimen name="notification_ticker_width">240dp</dimen>
-    <!-- Status bar panel bottom offset (height of status bar - overlap) -->
-    <dimen name="status_bar_panel_bottom_offset">36dp</dimen>
-    <!-- The width of the notification panel window -->
-    <dimen name="notification_panel_width">400dp</dimen>
-    <!-- The minimum height of the notification panel window -->
-    <dimen name="notification_panel_min_height">320dp</dimen>
 
     <!-- Active display clock font size -->
     <dimen name="ad_clock_font_size">75dp</dimen>
@@ -350,4 +341,5 @@
 
     <!-- AM/PM size in active display -->
     <dimen name="ad_ampm_font_size">32dp</dimen>
+
 </resources>

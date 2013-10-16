@@ -97,12 +97,12 @@ class="play no-shadow no-transform" style="margin:0 0 0 40px;max-height:250px;he
                   <p>Google Maps Android API version 2 is now available with enhanced
                     features such as 3D buildings, vector-based map tiles, rich overlay capabilities,
                     indoor maps, support for fragments, and much more.</p>
-                    
+
                   <p>The APIs are bundled with Google Play services and are
                   compatible with Android 2.2 and higher.</p>
                   <p><a
 href="{@docRoot}google/play-services/maps.html" class="button">Read more</a></p>
-                </div>            
+                </div>
               </li>
                <li class="item carousel-home">
                    <div class="col-8">
@@ -114,7 +114,7 @@ src="//lh4.ggpht.com/-6K1kfNOdek8/T72bXvtTSQI/AAAAAAAABmw/kYzmJt0_328/s1600/goog
                    <p><a class="button"
 href="{@docRoot}google/play/billing/v2/billing_subscriptions.html#trials">Read
 more</a></p>
-                   </div>                
+                   </div>
                 </li>
            </ul>
        </div>
@@ -170,7 +170,7 @@ more</a></p>
             <li><a href="{@docRoot}guide/topics/ui/dialogs.html">
               <h4>Updated Dialogs API Guide</h4>
               <p>The Dialogs API Guide now shows to use DialogFragment class, a simpler way to manage your dialogs and embed them in alternative layouts.</p>
-              </a></li>                                      
+              </a></li>
           </ul>
 			</div>
 		</div>
@@ -195,14 +195,14 @@ more</a></p>
 
 <br class="clearfix"/>
 
-      
-      
-      
-      
-      
-      
-      
-      
+
+
+
+
+
+
+
+
 
 <script src="//swfobject.googlecode.com/svn/trunk/swfobject/swfobject.js" type="text/javascript"></script>
 <script type="text/javascript">
@@ -233,16 +233,16 @@ function renderVideoPlaylists(data) {
 
   var $ulVideos = $('<ul style="display:none"/>');
   var summary = feed.media$group.media$description != null ? feed.media$group.media$description.$t : feed.subtitle.$t;
-  
+
   var $liPlaylist = $('<li class="playlist"></li>');
   var $aPlaylist = $('<a href="" onclick="togglePlaylist(this);return false;"></a>');
   $liPlaylist.append($aPlaylist);
   $aPlaylist.append('<h4>' + feed.title.$t + '</h4>');
-  
+
   var playlistDescription = summary.substr(0, MAX_LIST_DESC_LENGTH);
   playlistDescription += playlistDescription.length == MAX_LIST_DESC_LENGTH ? "..." : ""; // add ellipsis if we've chopped the description
   $aPlaylist.append('<p>' +  playlistDescription + '</p>');
-  
+
   // Loop through each entry (each video) and add it to the 'videoPreviews' list
   var length = feed.entry.length < MAX_LIST_LENGTH ? feed.entry.length : MAX_LIST_LENGTH; // max of 4 videos per list
   for (var i = 0; i < length; i++) {
@@ -267,13 +267,13 @@ function renderVideoPlaylists(data) {
     a.append(img).append(h5Title).append(pShortDescription);
 
     $ulVideos.append(li);
-    
+
     // use the first entry's thumbnail for the playlist
     if (i == 0) {
       $aPlaylist.prepend('<img src="' + thumbUrl + '" width="120" height="90"/>');
     }
   }
-  
+
   if (feed.entry.length > MAX_LIST_LENGTH) {
     // add item to go to youtube for playlist
     $ulVideos.append('<li class="more"><a href="//www.youtube.com/playlist?list=' + playlistId + '">More &raquo;</a></li>');

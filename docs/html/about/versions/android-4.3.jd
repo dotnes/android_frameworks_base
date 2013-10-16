@@ -132,7 +132,6 @@ image to test your app on the <a href="{@docRoot}tools/devices/emulator.html">An
 Then build your apps against the Android {@sdkPlatformVersion} platform to begin using the
 latest APIs.</p>
 
-
 <h3 id="ApiLevel">Update your target API level</h3>
 
 <p>To better optimize your app for devices running Android {@sdkPlatformVersion},

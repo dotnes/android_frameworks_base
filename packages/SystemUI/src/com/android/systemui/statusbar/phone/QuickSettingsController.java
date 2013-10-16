@@ -34,18 +34,17 @@ import android.view.LayoutInflater;
 import static com.android.internal.util.cm.QSConstants.TILES_DEFAULT;
 import static com.android.internal.util.cm.QSConstants.TILE_AIRPLANE;
 import static com.android.internal.util.cm.QSConstants.TILE_AUTOROTATE;
-import static com.android.internal.util.cm.QSConstants.TILE_BAMCONTROL;
 import static com.android.internal.util.cm.QSConstants.TILE_BATTERY;
 import static com.android.internal.util.cm.QSConstants.TILE_BLUETOOTH;
 import static com.android.internal.util.cm.QSConstants.TILE_BRIGHTNESS;
 import static com.android.internal.util.cm.QSConstants.TILE_CAMERA;
 import static com.android.internal.util.cm.QSConstants.TILE_DELIMITER;
 import static com.android.internal.util.cm.QSConstants.TILE_GPS;
-import static com.android.internal.util.cm.QSConstants.TILE_HOLOBAM;
 import static com.android.internal.util.cm.QSConstants.TILE_LOCKSCREEN;
 import static com.android.internal.util.cm.QSConstants.TILE_LTE;
 import static com.android.internal.util.cm.QSConstants.TILE_MOBILEDATA;
 import static com.android.internal.util.cm.QSConstants.TILE_MUSIC;
+import static com.android.internal.util.cm.QSConstants.TILE_NETWORKADB;
 import static com.android.internal.util.cm.QSConstants.TILE_NETWORKMODE;
 import static com.android.internal.util.cm.QSConstants.TILE_NFC;
 import static com.android.internal.util.cm.QSConstants.TILE_PROFILE;
@@ -60,50 +59,27 @@ import static com.android.internal.util.cm.QSConstants.TILE_TORCH;
 import static com.android.internal.util.cm.QSConstants.TILE_USER;
 import static com.android.internal.util.cm.QSConstants.TILE_VOLUME;
 import static com.android.internal.util.cm.QSConstants.TILE_WIFI;
-import static com.android.internal.util.cm.QSConstants.TILE_WIFIADB;
 import static com.android.internal.util.cm.QSConstants.TILE_WIFIAP;
 import static com.android.internal.util.cm.QSConstants.TILE_DESKTOPMODE;
 import static com.android.internal.util.cm.QSConstants.TILE_HYBRID;
-import static com.android.internal.util.cm.QSConstants.TILE_REBOOT;
-import static com.android.internal.util.cm.QSUtils.deviceSupportsBluetooth;
-import static com.android.internal.util.cm.QSUtils.deviceSupportsImeSwitcher;
-import static com.android.internal.util.cm.QSUtils.deviceSupportsLte;
-import static com.android.internal.util.cm.QSUtils.deviceSupportsMobileData;
-import static com.android.internal.util.cm.QSUtils.deviceSupportsUsbTether;
-import static com.android.internal.util.cm.QSUtils.systemProfilesEnabled;
-
-import android.content.BroadcastReceiver;
-import android.content.ContentResolver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.database.ContentObserver;
-import android.net.Uri;
-import android.os.Handler;
-import android.provider.Settings;
-import android.text.TextUtils;
-import android.util.Log;
-import android.view.LayoutInflater;
-
-import com.android.systemui.statusbar.BaseStatusBar;
+import static com.android.internal.util.cm.QSConstants.TILE_HOLOBAM;
 import com.android.internal.util.cm.QSUtils;
 
 import com.android.systemui.quicksettings.AirplaneModeTile;
 import com.android.systemui.quicksettings.AlarmTile;
 import com.android.systemui.quicksettings.AutoRotateTile;
-import com.android.systemui.quicksettings.BamcontrolTile;
 import com.android.systemui.quicksettings.BatteryTile;
 import com.android.systemui.quicksettings.BluetoothTile;
 import com.android.systemui.quicksettings.BrightnessTile;
 import com.android.systemui.quicksettings.BugReportTile;
 import com.android.systemui.quicksettings.CameraTile;
 import com.android.systemui.quicksettings.GPSTile;
-import com.android.systemui.quicksettings.HolobamTile;
 import com.android.systemui.quicksettings.InputMethodTile;
 import com.android.systemui.quicksettings.LteTile;
 import com.android.systemui.quicksettings.MobileNetworkTile;
 import com.android.systemui.quicksettings.MobileNetworkTypeTile;
 import com.android.systemui.quicksettings.MusicTile;
+import com.android.systemui.quicksettings.NetworkAdbTile;
 import com.android.systemui.quicksettings.NfcTile;
 import com.android.systemui.quicksettings.PreferencesTile;
 import com.android.systemui.quicksettings.ProfileTile;
@@ -119,16 +95,12 @@ import com.android.systemui.quicksettings.TorchTile;
 import com.android.systemui.quicksettings.UsbTetherTile;
 import com.android.systemui.quicksettings.UserTile;
 import com.android.systemui.quicksettings.VolumeTile;
-import com.android.systemui.quicksettings.WiFiADBTile;
 import com.android.systemui.quicksettings.WiFiDisplayTile;
 import com.android.systemui.quicksettings.WiFiTile;
 import com.android.systemui.quicksettings.WifiAPTile;
 import com.android.systemui.quicksettings.DesktopModeTile;
 import com.android.systemui.quicksettings.HybridTile;
-import com.android.systemui.quicksettings.RebootTile;
-
-import java.util.ArrayList;
-import java.util.HashMap;
+import com.android.systemui.quicksettings.ToggleHoloBamTile;
 import com.android.systemui.statusbar.BaseStatusBar;
 import com.android.systemui.R;
 
@@ -242,6 +214,8 @@ public class QuickSettingsController {
                 qs = new CameraTile(mContext, this, mHandler);
             } else if (tile.equals(TILE_RINGER)) {
                 qs = new RingerModeTile(mContext, this);
+            } else if (tile.equals(TILE_ROCKETLAUNCHER)) {
+                qs = new RocketLauncherTile(mContext, this);
             } else if (tile.equals(TILE_SYNC)) {
                 qs = new SyncTile(mContext, this);
             } else if (tile.equals(TILE_WIFIAP) && mobileDataSupported) {
@@ -275,6 +249,8 @@ public class QuickSettingsController {
                 qs = new DesktopModeTile(mContext, this, mHandler);
             } else if (tile.equals(TILE_HYBRID)) {
                 qs = new HybridTile(mContext, this, mHandler);
+            } else if (tile.equals(TILE_HOLOBAM)) {
+                qs = new ToggleHoloBamTile(mContext, this, mHandler);
             } else if (tile.equals(TILE_MUSIC)) {
                 qs = new MusicTile(mContext, this, mHandler);
             } else if (tile.equals(TILE_VOLUME)) {
@@ -283,18 +259,10 @@ public class QuickSettingsController {
                 qs = new LteTile(mContext, this);
             } else if (tile.equals(TILE_QUIETHOURS)) {
                 qs = new QuietHoursTile(mContext, this);
-            } else if (tile.equals(TILE_REBOOT)) {
-                qs = new RebootTile(mContext, this, mHandler);
-            } else if (tile.equals(TILE_HOLOBAM)) {
-                qs = new HolobamTile(mContext, this, mHandler);
-           } else if (tile.equals(TILE_NETWORKMODE) && mobileDataSupported) {
-                qs = new MobileNetworkTypeTile(mContext, this, mStatusBarService.mNetworkController);
-            } else if (tile.equals(TILE_BAMCONTROL)) {
-                qs = new BamcontrolTile(mContext, this);
-            } else if (tile.equals(TILE_WIFIADB)) {
+            } else if (tile.equals(TILE_NETWORKADB)) {
                 mTileStatusUris.add(Settings.Global.getUriFor(Settings.Global.ADB_ENABLED));
                 if (QSUtils.adbEnabled(resolver)) {
-                    qs = new WiFiADBTile(mContext, this, mHandler);
+                    qs = new NetworkAdbTile(mContext, this);
                 }
             }
             if (qs != null) {

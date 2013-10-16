@@ -33,6 +33,7 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.content.res.Resources.NotFoundException;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
@@ -190,8 +191,8 @@ public class KeyguardSelectorView extends LinearLayout implements KeyguardSecuri
                 switch (resId) {
                 case com.android.internal.R.drawable.ic_action_assist_generic:
                     Intent assistIntent =
-                    ((SearchManager) mContext.getSystemService(Context.SEARCH_SERVICE))
-                    .getAssistIntent(mContext, true, UserHandle.USER_CURRENT);
+                            ((SearchManager) mContext.getSystemService(Context.SEARCH_SERVICE))
+                            .getAssistIntent(mContext, true, UserHandle.USER_CURRENT);
                     if (assistIntent != null) {
                         mActivityLauncher.launchActivity(assistIntent, false, true, null, null);
                     } else {

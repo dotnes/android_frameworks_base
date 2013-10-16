@@ -379,9 +379,6 @@ public class Halo extends FrameLayout implements Ticker.TickerCallback, TabletTi
             preferences.edit().putBoolean(KEY_HALO_FIRST_RUN, false).apply();
         }
 
-        mKillX = mScreenWidth / 2;
-        mKillY = mIconHalfSize;
-
         if (!mFirstStart) {
             if (msavePositionY < 0) mEffect.setHaloY(0);
             float mTmpHaloY = (float) msavePositionY / mScreenWidth * (mScreenHeight);
@@ -1611,7 +1608,6 @@ public class Halo extends FrameLayout implements Ticker.TickerCallback, TabletTi
 
     // This is the android ticker callback
     public void updateTicker(StatusBarNotification notification, String text) {
-
         boolean allowed = false; // default off
         try {
             allowed = mNotificationManager.isPackageAllowedForHalo(notification.getPackageName());

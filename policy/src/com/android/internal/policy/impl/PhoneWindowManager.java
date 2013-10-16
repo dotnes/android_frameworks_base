@@ -47,7 +47,6 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.database.ContentObserver;
-import android.graphics.drawable.AnimationDrawable;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.hardware.input.InputManager;
@@ -100,7 +99,6 @@ import android.view.InputEventReceiver;
 import android.view.KeyCharacterMap;
 import android.view.KeyCharacterMap.FallbackAction;
 import android.view.KeyEvent;
-import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.View;
@@ -113,9 +111,7 @@ import android.view.accessibility.AccessibilityEvent;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.VolumePanel;
-import android.widget.ImageView;
 import android.widget.Toast;
-import android.widget.TextView;
 import android.media.IAudioService;
 import android.media.AudioService;
 import android.media.AudioManager;
@@ -1161,6 +1157,30 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     false, new ContentObserver(new Handler()) {
             @Override
             public void onChange(boolean selfChange) {
+
+                if (Settings.System.getInt(mContext.getContentResolver(),
+                    Settings.System.EXPANDED_DESKTOP_RESTART_LAUNCHER, 1) == 1) {
+                    // Restart default launcher activity
+                    final PackageManager mPm = mContext.getPackageManager();
+                    final ActivityManager am = (ActivityManager)mContext
+                            .getSystemService(Context.ACTIVITY_SERVICE);
+                    final Intent intent = new Intent(Intent.ACTION_MAIN);
+                    intent.addCategory(Intent.CATEGORY_HOME);
+                    final ResolveInfo res = mPm.resolveActivity(intent, 0);
+
+                    // Launcher is running task #1
+                    List<ActivityManager.RunningTaskInfo> runningTasks = am.getRunningTasks(1);
+                    if (runningTasks != null) {
+                        for (ActivityManager.RunningTaskInfo task : runningTasks) {
+                            String packageName = task.baseActivity.getPackageName();
+                            if (packageName.equals(res.activityInfo.packageName)) {
+                                closeApplication(packageName);
+                                break;
+                            }
+			}
+		    }
+		}
+
                 updateHybridLayout();
                 update(false);
                 updateHWOverlays();
@@ -5317,16 +5337,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     mBootMsgDialog.show();
                 }
                 mBootMsgDialog.setMessage(msg);
-                Log.d(TAG, "********** showBootMessage(" + msg +", " + always + ") updated ***********");
                 if (currentPackageName != null) {
                     mBootMsgDialog.setTitle(msg);
                     mBootMsgDialog.setMessage(currentPackageName);
-                    Log.d(TAG, "setTitle: " + msg + " setMessage: " + currentPackageName);
                 } else {
                     Log.d(TAG, "failed; CURRENT_PACKAGE_NAME == null");
                 }
                 if (msg.equals(mContext.getResources().getString(R.string.android_upgrading_starting_apps))) {
-                    Log.d(TAG, "starting apps so we use normal layout");
                     mBootMsgDialog.setTitle(R.string.android_upgrading_title);
                     mBootMsgDialog.setMessage(mContext.getResources().getString(R.string.android_upgrading_starting_apps));
                 } else {

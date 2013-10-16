@@ -6,12 +6,11 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.UserHandle;
+import android.provider.AlarmClock;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
-
-import android.provider.AlarmClock;
 
 import com.android.systemui.R;
 import com.android.systemui.statusbar.phone.QuickSettingsController;
@@ -19,7 +18,7 @@ import com.android.systemui.statusbar.phone.QuickSettingsContainerView;
 
 public class AlarmTile extends QuickSettingsTile {
 
-    public AlarmTile(Context context, 
+    public AlarmTile(Context context,
             QuickSettingsController qsc, Handler handler) {
         super(context, qsc);
 

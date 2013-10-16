@@ -678,16 +678,6 @@ public class TelephonyManager {
     }
 
     /**
-     * @hide
-     */
-    public void toggle2G(boolean twoGees) {
-        try {
-            getITelephony().toggle2G(twoGees);
-        } catch (RemoteException e) {
-        }
-    }
-
-    /**
      * {@hide}
      */
     public void toggleLTE(boolean on) {
@@ -1451,6 +1441,16 @@ public class TelephonyManager {
             getITelephony().setCellInfoListRate(rateInMillis);
         } catch (RemoteException ex) {
         } catch (NullPointerException ex) {
+        }
+    }
+
+    /**
+     * @hide
+     */
+    public void toggle2G(boolean twoGees) {
+        try {
+            getITelephony().toggle2G(twoGees);
+        } catch (RemoteException e) {
         }
     }
 }
