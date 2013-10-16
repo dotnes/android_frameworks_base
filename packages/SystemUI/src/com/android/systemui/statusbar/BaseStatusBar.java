@@ -681,12 +681,10 @@ public abstract class BaseStatusBar extends SystemUI implements
     }
 
     private boolean showPie() {
-        boolean expanded = Settings.System.getInt(mContext.getContentResolver(),
-                Settings.System.EXPANDED_DESKTOP_STATE, 0) == 1;
-        boolean navbarZero = Integer.parseInt(ExtendedPropertiesUtils
-                .getProperty("com.android.systemui.navbar.dpi", "100")) == 0;
+        boolean pie = Settings.System.getInt(mContext.getContentResolver(),
+                Settings.System.PIE_CONTROLS, 0) == 1;
 
-        return (expanded || navbarZero);
+        return (pie);
     }
 
     public void updatePieControls() {
