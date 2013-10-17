@@ -426,5 +426,4 @@
         <item>@drawable/ic_lock_reboot_recovery</item>
         <item>@drawable/ic_lock_reboot_bootloader</item>
     </array>
-
 </resources>
