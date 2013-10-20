@@ -79,18 +79,6 @@ public final class DisplayManager {
             "android.hardware.display.extra.REMOTE_DISPLAY_STATUS";
 
     /**
-     * @hide
-     */
-    public static final String ACTION_REMOTE_DISPLAY_STATUS_CHANGED =
-            "android.hardware.display.action.REMOTE_DISPLAY_STATUS_CHANGED";
-
-    /**
-     * @hide
-     */
-    public static final String EXTRA_REMOTE_DISPLAY_STATUS =
-            "android.hardware.display.extra.REMOTE_DISPLAY_STATUS";
-
-    /**
      * Display category: Presentation displays.
      * <p>
      * This category can be used to identify secondary displays that are suitable for
