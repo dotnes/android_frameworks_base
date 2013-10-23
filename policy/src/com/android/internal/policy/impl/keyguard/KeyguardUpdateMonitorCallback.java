@@ -131,20 +131,4 @@ class KeyguardUpdateMonitorCallback {
      */
     public void onMusicPlaybackStateChanged(int playbackState, long eventTime) { }
 
-    /**
-     * Called when the SIM state changes on subscription.
-     * @param simState
-     * @param subscription
-     */
-    void onSimStateChanged(IccCardConstants.State simState, int subscription) { }
-
-    /**
-     * Called when the carrier PLMN or SPN changes.
-     *
-     * @param plmn The operator name of the registered network.  May be null if it shouldn't
-     *   be displayed.
-     * @param spn The service provider name.  May be null if it shouldn't be displayed.
-     * @param subscription The subscription for which onRefreshCarrierInfo is meant
-     */
-    void onRefreshCarrierInfo(CharSequence plmn, CharSequence spn, int subscription) { }
 }

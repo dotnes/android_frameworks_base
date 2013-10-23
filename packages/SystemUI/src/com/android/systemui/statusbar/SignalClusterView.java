@@ -52,13 +52,10 @@ public class SignalClusterView
     private boolean mWifiVisible = false;
     private int mWifiStrengthId = 0, mWifiActivityId = 0;
     private boolean mMobileVisible = false;
-    private int mMobileStrengthId = 0, mMobileActivityId = 0;
-    private int mMobileTypeId = 0, mNoSimIconId = 0;
+    private int mMobileStrengthId = 0, mMobileActivityId = 0, mMobileTypeId = 0;
     private boolean mIsAirplaneMode = false;
     private int mAirplaneIconId = 0;
-    private boolean mEtherVisible = false;
-    private int mEtherIconId = 0;
-    private String mWifiDescription, mMobileDescription, mMobileTypeDescription, mEtherDescription;
+    private String mWifiDescription, mMobileDescription, mMobileTypeDescription;
     private static final int STYLE_HIDE = 0;
     private static final int STYLE_SHOW = 1;
     private static final int STYLE_SHOW_DBM = 2;
@@ -152,15 +149,13 @@ public class SignalClusterView
 
     @Override
     public void setMobileDataIndicators(boolean visible, int strengthIcon, int activityIcon,
-            int typeIcon, String contentDescription, String typeContentDescription,
-            int noSimIcon) {
+            int typeIcon, String contentDescription, String typeContentDescription) {
         mMobileVisible = visible;
         mMobileStrengthId = strengthIcon;
         mMobileActivityId = activityIcon;
         mMobileTypeId = typeIcon;
         mMobileDescription = contentDescription;
         mMobileTypeDescription = typeContentDescription;
-        mNoSimIconId = noSimIcon;
 
         apply();
     }
@@ -169,15 +164,6 @@ public class SignalClusterView
     public void setIsAirplaneMode(boolean is, int airplaneIconId) {
         mIsAirplaneMode = is;
         mAirplaneIconId = airplaneIconId;
-
-        apply();
-    }
-
-    @Override
-    public void setEtherIndicators(boolean visible, int etherIcon, String contentDescription) {
-        mEtherVisible = visible;
-        mEtherIconId = etherIcon;
-        mEtherDescription = contentDescription;
 
         apply();
     }
