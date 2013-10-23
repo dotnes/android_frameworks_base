@@ -127,6 +127,7 @@ import com.android.systemui.statusbar.NavigationBarView;
 import com.android.systemui.statusbar.NotificationData;
 import com.android.systemui.statusbar.NotificationData.Entry;
 import com.android.systemui.statusbar.SignalClusterView;
+import com.android.systemui.statusbar.SignalClusterTextView;
 import com.android.systemui.statusbar.StatusBarIconView;
 import com.android.internal.util.slim.ButtonConfig;
 import com.android.internal.util.slim.ButtonsConstants;
@@ -321,6 +322,8 @@ public class PhoneStatusBar extends BaseStatusBar {
     private boolean mCarrierLabelVisible = false;
     private int mCarrierLabelHeight;
     private int mNotificationHeaderHeight;
+    private SignalClusterView mSignalView;
+    private SignalClusterTextView mSignalTextView;
     private boolean mNotificationShortcutsHideCarrier;
 
     private boolean mShowCarrierInPanel = false;
@@ -831,7 +834,7 @@ public class PhoneStatusBar extends BaseStatusBar {
             mShowCarrierInPanel = (mCarrierLabel != null);
             if (DEBUG) Slog.v(TAG, "carrierlabel=" + mCarrierLabel + " show=" + mShowCarrierInPanel);
             if (mShowCarrierInPanel) {
-                mCarrierLabel.setVisibility(mCarrierLabelVisible ? View.VISIBLE : View.INVISIBLE);
+                mCarrierLabel.setVisibility(mCarrierLabelVisible ? View.VISIBLE : View.GONE);
 
                 // for mobile devices, we always show mobile connection info here (SPN/PLMN)
                 // for other devices, we show whatever network is connected
@@ -876,7 +879,7 @@ public class PhoneStatusBar extends BaseStatusBar {
             }
         }
 
-        mWifiLabel = (TextView)mStatusBarWindow.findViewById(R.id.wifi_text);
+ /*      mWifiLabel = (TextView)mStatusBarWindow.findViewById(R.id.wifi_text);
 
         if (mWifiLabel != null) {
             mNetworkController.addWifiLabelView(mWifiLabel);
@@ -900,13 +903,14 @@ public class PhoneStatusBar extends BaseStatusBar {
                         mWifiView.setVisibility(View.GONE);
                     }
                 }
-
+			});*/
+			
             mCarrierLabel = (TextView)mStatusBarWindow.findViewById(R.id.carrier_label);
             mShowCarrierInPanel = (mCarrierLabel != null);
             if (DEBUG) Slog.v(TAG, "carrierlabel=" + mCarrierLabel + " show=" +
                                                                   mShowCarrierInPanel);
             if (mShowCarrierInPanel) {
-                mCarrierLabel.setVisibility(mCarrierLabelVisible ? View.VISIBLE : View.INVISIBLE);
+                mCarrierLabel.setVisibility(mCarrierLabelVisible ? View.VISIBLE : View.GONE);
 
                 // for mobile devices, we always show mobile connection info here (SPN/PLMN)
                 // for other devices, we show whatever network is connected
@@ -923,8 +927,8 @@ public class PhoneStatusBar extends BaseStatusBar {
                         updateCarrierAndWifiLabelVisibility(false);
                     }
                 });
-            }
-        }
+            };
+        /*}*/
 
         // Set notification background
         setNotificationWallpaperHelper();

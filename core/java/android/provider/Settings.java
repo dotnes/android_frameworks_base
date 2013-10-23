@@ -3983,6 +3983,16 @@ public final class Settings {
          */
         public static final String STATUSBAR_BATTERY_ICON = "statusbar_battery_icon";
 
+		/**
+         * Whether to show the signal text or signal bars.
+         * default: 0
+         * 0: show signal bars
+         * 1: show signal text numbers
+         * 2: show signal text numbers w/small dBm appended
+         * @hide
+         */
+		public static final String STATUSBAR_SIGNAL_TEXT = "status_bar_signal_text";
+
         /**
          * Control the display of the action overflow button within app UI.
          * 0 = use system default
@@ -4880,13 +4890,6 @@ public final class Settings {
          * @hide
          */
         public static final String HIDE_STATUSBAR = "hide_statusbar";
-
-        /**
-         * Whether to show statusbar signal text
-         *
-         * @hide
-         */
-        public static final String STATUSBAR_SIGNAL_TEXT = "statusbar_signal_text";
 
         /**
          * statusbar signal text color
