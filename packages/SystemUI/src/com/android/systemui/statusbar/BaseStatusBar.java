@@ -33,7 +33,6 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Configuration;
@@ -2060,6 +2059,7 @@ public abstract class BaseStatusBar extends SystemUI implements
         lp.gravity = Gravity.TOP;// | Gravity.FILL_VERTICAL;
         lp.gravity |= position == AppSidebar.SIDEBAR_POSITION_LEFT ? Gravity.LEFT : Gravity.RIGHT;
         lp.setTitle("AppSidebar");
+
         return lp;
     }
 
@@ -2087,7 +2087,6 @@ public abstract class BaseStatusBar extends SystemUI implements
                 | WindowManager.LayoutParams.FLAG_SPLIT_TOUCH,
                 PixelFormat.TRANSLUCENT);
         lp.gravity = Gravity.TOP | Gravity.FILL_VERTICAL | Gravity.FILL_HORIZONTAL;
-        lp.screenOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR_PROTRAIT;
         lp.setTitle("ActiveDisplayView");
 
         return lp;
