@@ -137,15 +137,6 @@ public final class ClientOperation implements Operation, BaseStream {
     }
 
     /**
-     * Allows to set flag which will force GET to be always sent as single packet request with
-     * final flag set. This is to improve compatibility with some profiles, i.e. PBAP which
-     * require requests to be sent this way.
-     */
-    public void setGetFinalFlag(boolean flag) {
-        mGetFinalFlag = flag;
-    }
-
-    /**
      * Sends an ABORT message to the server. By calling this method, the
      * corresponding input and output streams will be closed along with this
      * object.
