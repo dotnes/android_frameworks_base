@@ -107,6 +107,7 @@ public class NetworkController extends BroadcastReceiver {
     String mContentDescriptionWimax;
     String mContentDescriptionCombinedSignal;
     String mContentDescriptionDataType;
+    String mContentDescriptionEther;
 
     // wifi
     protected WifiManager mWifiManager;
@@ -151,6 +152,11 @@ public class NetworkController extends BroadcastReceiver {
     private Locale mLocale = null;
     private Locale mLastLocale = null;
 
+    //ethernet
+    private boolean mEtherConnected = false;
+    private int mEtherIconId = 0;
+    private int mLastEtherIconId = 0;
+
     // our ui
     protected Context mContext;
     ArrayList<ImageView> mPhoneSignalIconViews = new ArrayList<ImageView>();
@@ -190,6 +196,7 @@ public class NetworkController extends BroadcastReceiver {
                 int typeIcon, String contentDescription, String typeContentDescription,
                 int noSimIcon);
         void setIsAirplaneMode(boolean is, int airplaneIcon);
+        void setEtherIndicators(boolean visible, int etherIcon, String contentDescription);
     }
 
     public interface NetworkSignalChangedCallback {
@@ -364,6 +371,12 @@ public class NetworkController extends BroadcastReceiver {
                 mWifiIconId,
                 mWifiActivityIconId,
                 mContentDescriptionWifi);
+
+        cluster.setEtherIndicators(
+                // only show ethernet in the cluster if connected
+                mEtherConnected,
+                mEtherIconId,
+                mContentDescriptionEther);
 
         if (mIsWimaxEnabled && mWimaxConnected) {
             // wimax is special
@@ -1126,6 +1139,16 @@ public class NetworkController extends BroadcastReceiver {
             mBluetoothTethered = false;
         }
 
+        if (info != null && info.getType() == ConnectivityManager.TYPE_ETHERNET) {
+            mEtherConnected = info.isConnected();
+            mEtherIconId = (mInetCondition == 1
+                    ? R.drawable.stat_sys_ether_fully
+                    : R.drawable.stat_sys_ether);
+        } else {
+            mEtherConnected = false;
+            mEtherIconId = 0;
+        }
+
         // We want to update all the icons, all at once, for any condition change
         updateDataNetType();
         updateWimaxIcons();
@@ -1136,9 +1159,7 @@ public class NetworkController extends BroadcastReceiver {
 
     // ===== Update the views =======================================================
 
-    public void refreshViews() {
-        Context context = mContext;
-
+    void refreshViews() {
         int combinedSignalIconId = 0;
         int combinedActivityIconId = 0;
         String combinedLabel = "";
@@ -1251,9 +1272,9 @@ public class NetworkController extends BroadcastReceiver {
                     R.string.accessibility_bluetooth_tether);
         }
 
-        final boolean ethernetConnected = (mConnectedNetworkType == ConnectivityManager.TYPE_ETHERNET);
-        if (ethernetConnected) {
-            combinedLabel = context.getString(R.string.ethernet_label);
+        mEtherConnected = (mConnectedNetworkType == ConnectivityManager.TYPE_ETHERNET);
+        if (mEtherConnected) {
+            mContentDescriptionEther = combinedLabel = mContext.getString(R.string.ethernet_label);
         }
 
         if (mAirplaneMode &&
@@ -1283,8 +1304,8 @@ public class NetworkController extends BroadcastReceiver {
                 mContentDescriptionCombinedSignal = mContentDescriptionPhoneSignal;
                 combinedSignalIconId = mDataSignalIconId;
             }
-        }
-        else if (!mDataConnected && !mWifiConnected && !mBluetoothTethered && !mWimaxConnected && !ethernetConnected) {
+        } else if (!mDataConnected && !mWifiConnected && !mBluetoothTethered
+                && !mWimaxConnected && !mEtherConnected) {
             // pretty much totally disconnected
 
             combinedLabel = mContext.getString(R.string.status_bar_settings_signal_meter_disconnected);
@@ -1347,6 +1368,7 @@ public class NetworkController extends BroadcastReceiver {
          || mLastDataTypeIconId             != mDataTypeIconId
          || mLastAirplaneMode               != mAirplaneMode
          || mLastLocale                     != mLocale
+         || mLastEtherIconId                != mEtherIconId
          || mLastSimIconId                  != mNoSimIconId)
         {
             // NB: the mLast*s will be updated later
@@ -1437,6 +1459,11 @@ public class NetworkController extends BroadcastReceiver {
                 v.setImageResource(combinedSignalIconId);
                 v.setContentDescription(mContentDescriptionCombinedSignal);
             }
+        }
+
+        // the ethernet icon
+        if (mLastEtherIconId != mEtherIconId) {
+            mLastEtherIconId = mEtherIconId;
         }
 
         // the data network type overlay
