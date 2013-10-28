@@ -394,7 +394,8 @@ public class ActivityManager {
             reader = null;
 		}
 
-        if (totalSize >= (512*1024*1024)) {
+        if (totalSize >= (512*1024*1024))
+	        || SystemProperties.getBoolean("ro.sys.force_full_hwa", false)) {
             return true;
         }
 
