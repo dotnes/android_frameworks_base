@@ -392,10 +392,12 @@ public class ActivityManager {
 			reader.readMemInfo();
 			totalSize = reader.getTotalSize();
             reader = null;
-		}
+	}
 
-        if (totalSize >= (512*1024*1024))
-	        || SystemProperties.getBoolean("ro.sys.force_full_hwa", false)) {
+        if (totalSize >= (512*1024*1024)
+                || SystemProperties.getBoolean("ro.sys.force_full_hwa", false)) {
+            // If the device has at least 512MB RAM available to the kernel,
+            // we can afford the overhead of graphics acceleration.
             return true;
         }
 
