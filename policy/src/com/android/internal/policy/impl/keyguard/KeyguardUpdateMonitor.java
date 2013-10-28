@@ -353,13 +353,11 @@ public class KeyguardUpdateMonitor {
                     state = IccCardConstants.State.PIN_REQUIRED;
                 } else if (IccCardConstants.INTENT_VALUE_LOCKED_ON_PUK.equals(lockedReason)) {
                     state = IccCardConstants.State.PUK_REQUIRED;
-                } else if (IccCardConstants.INTENT_VALUE_LOCKED_PERSO.equals(lockedReason)) {
-                    state = IccCardConstants.State.PERSO_LOCKED;
                 } else {
                     state = IccCardConstants.State.UNKNOWN;
                 }
-            } else if (IccCardConstants.INTENT_VALUE_ICC_CARD_IO_ERROR.equals(stateExtra)) {
-                state = IccCardConstants.State.CARD_IO_ERROR;
+            } else if (IccCardConstants.INTENT_VALUE_LOCKED_NETWORK.equals(stateExtra)) {
+                state = IccCardConstants.State.NETWORK_LOCKED;
             } else if (IccCardConstants.INTENT_VALUE_ICC_LOADED.equals(stateExtra)
                         || IccCardConstants.INTENT_VALUE_ICC_IMSI.equals(stateExtra)) {
                 // This is required because telephony doesn't return to "READY" after
@@ -753,15 +751,13 @@ public class KeyguardUpdateMonitor {
         final IccCardConstants.State state = simArgs.simState;
         final int subscription = simArgs.subscription;
 
-        Log.d(TAG, "handleSimStateChange: intentValue = " + simArgs + " "
-                + "state resolved to " + state.toString() + " "
-                + "subscription =" + subscription);
+        if (DEBUG) {
+            Log.d(TAG, "handleSimStateChange: intentValue = " + simArgs + " "
+                    + "state resolved to " + state.toString());
+        }
 
-        if (state != IccCardConstants.State.UNKNOWN && state != mSimState[subscription]) {
-            if (DEBUG_SIM_STATES) Log.v(TAG, "dispatching state: " + state
-                    + "subscription: " + subscription);
-
-            mSimState[subscription] = state;
+        if (state != IccCardConstants.State.UNKNOWN && state != mSimState) {
+            mSimState = state;
             for (int i = 0; i < mCallbacks.size(); i++) {
                 KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
                 if (cb != null) {
@@ -992,13 +988,7 @@ public class KeyguardUpdateMonitor {
      * through mHandler, this *must* be called from the UI thread.
      */
     public void reportSimUnlocked() {
-        reportSimUnlocked(MSimTelephonyManager.getDefault().getDefaultSubscription());
-    }
-
-    public void reportSimUnlocked(int subscription) {
-        if (DEBUG) Log.d(TAG, "reportSimUnlocked(" + subscription + ")");
-        mSimState[subscription] = IccCardConstants.State.READY;
-        handleSimStateChange(new SimArgs(mSimState[subscription], subscription));
+        handleSimStateChange(new SimArgs(IccCardConstants.State.READY));
     }
 
     public CharSequence getTelephonyPlmn() {

@@ -1,9 +1,6 @@
 /*
  * Copyright (C) 2011 The Android Open Source Project
  * This code has been modified. Portions copyright (C) 2012, ParanoidAndroid Project.
- * Copyright (c) 2012-2013 The Linux Foundation. All rights reserved.
- *
- * Not a Contribution.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,8 +52,7 @@ public class SignalClusterView
     private boolean mWifiVisible = false;
     private int mWifiStrengthId = 0, mWifiActivityId = 0;
     private boolean mMobileVisible = false;
-    private int mMobileStrengthId = 0, mMobileActivityId = 0;
-    private int mMobileTypeId = 0, mNoSimIconId = 0;
+    private int mMobileStrengthId = 0, mMobileActivityId = 0, mMobileTypeId = 0;
     private boolean mIsAirplaneMode = false;
     private int mAirplaneIconId = 0;
     private static final int STYLE_HIDE = 0;
@@ -72,7 +68,7 @@ public class SignalClusterView
     private String mWifiDescription, mMobileDescription, mMobileTypeDescription, mEtherDescription;
 
     ViewGroup mWifiGroup, mMobileGroup;
-    ImageView mWifi, mMobile, mWifiActivity, mMobileActivity, mMobileType, mAirplane, mEther, mNoSimSlot;
+    ImageView mWifi, mMobile, mWifiActivity, mMobileActivity, mMobileType, mAirplane, mEther;
     TextView mMobileText,mWiFiText;
     View mSpacer;
 
@@ -113,7 +109,6 @@ public class SignalClusterView
         mMobileActivity = (ImageView) findViewById(R.id.mobile_inout);
         mMobileType     = (ImageView) findViewById(R.id.mobile_type);
         mMobileText     = (TextView)  findViewById(R.id.signal_text);
-	mNoSimSlot      = (ImageView) findViewById(R.id.no_sim);
         mWiFiText       = (TextView)  findViewById(R.id.wifi_signal_text);
         mSpacer         =             findViewById(R.id.spacer);
         mAirplane       = (ImageView) findViewById(R.id.airplane);
@@ -136,7 +131,6 @@ public class SignalClusterView
         mMobileActivity = null;
         mMobileType     = null;
         mMobileText     = null;
-	mNoSimSlot      = null;
         mWiFiText       = null;
         mSpacer         = null;
         mAirplane       = null;
@@ -160,15 +154,13 @@ public class SignalClusterView
 
     @Override
     public void setMobileDataIndicators(boolean visible, int strengthIcon, int activityIcon,
-            int typeIcon, String contentDescription, String typeContentDescription,
-            int noSimIcon) {
+            int typeIcon, String contentDescription, String typeContentDescription) {
         mMobileVisible = visible;
         mMobileStrengthId = strengthIcon;
         mMobileActivityId = activityIcon;
         mMobileTypeId = typeIcon;
         mMobileDescription = contentDescription;
         mMobileTypeDescription = typeContentDescription;
-        mNoSimIconId = noSimIcon;
 
         apply();
     }
@@ -308,7 +300,6 @@ public class SignalClusterView
             } else{
                 mMobile.setVisibility(View.VISIBLE);
                 mMobileText.setVisibility(View.GONE);
-		mNoSimSlot.setImageResource(mNoSimIconId);
             }
         } else {
             mMobileGroup.setVisibility(View.GONE);
@@ -339,8 +330,7 @@ public class SignalClusterView
             mEther.setVisibility(View.GONE);
         }
 
-        if (mMobileVisible && mWifiVisible &&
-                ((mIsAirplaneMode) || (mNoSimIconId != 0))) {
+        if (mMobileVisible && mWifiVisible && mIsAirplaneMode) {
             mSpacer.setVisibility(View.INVISIBLE);
         } else {
             mSpacer.setVisibility(View.GONE);
