@@ -274,6 +274,7 @@ public class QuickSettingsController {
                 if (QSUtils.adbEnabled(resolver)) {
                     qs = new NetworkAdbTile(mContext, this);
                 }
+            }
             if (qs != null) {
                 qs.setupQuickSettingsTile(inflater, mContainerView);
                 mQuickSettingsTiles.add(qs);
