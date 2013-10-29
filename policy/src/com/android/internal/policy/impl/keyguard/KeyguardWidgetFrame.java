@@ -21,6 +21,7 @@ import android.animation.ObjectAnimator;
 import android.animation.PropertyValuesHolder;
 import android.appwidget.AppWidgetHostView;
 import android.appwidget.AppWidgetManager;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Canvas;
@@ -123,6 +124,8 @@ public class KeyguardWidgetFrame extends FrameLayout {
         mBackgroundDrawable = res.getDrawable(R.drawable.kg_widget_bg_padded);
         mGradientColor = res.getColor(com.android.internal.R.color.kg_widget_pager_gradient);
         mGradientPaint.setXfermode(sAddBlendMode);
+
+        setFrameColor();
     }
 
     @Override
@@ -213,6 +216,16 @@ public class KeyguardWidgetFrame extends FrameLayout {
         mLongPressHelper.cancelLongPress();
     }
 
+
+    private void setFrameColor() {
+        int color = Settings.System.getInt(mContext.getContentResolver(),
+                Settings.System.LOCKSCREEN_MISC_COLOR, -1);
+
+        if (color != -1 && mBackgroundDrawable != null) {
+            mBackgroundDrawable.setColorFilter(null);
+            mBackgroundDrawable.setColorFilter(color, PorterDuff.Mode.SRC_ATOP);
+        }
+    }
 
     private void drawGradientOverlay(Canvas c) {
         mGradientPaint.setShader(mForegroundGradient);
