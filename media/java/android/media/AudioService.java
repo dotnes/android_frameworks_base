@@ -123,6 +123,7 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
     private Context mContext;
     private ContentResolver mContentResolver;
     private boolean mVoiceCapable;
+    private boolean mSteVolumeSteps;
 
     /** The UI */
     private VolumePanel mVolumePanel;
@@ -230,6 +231,21 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
         15, // STREAM_DTMF
         15  // STREAM_TTS
     };
+
+   /** @hide Maximum volume index values for audio streams on STE devices */
+    private final int[] MAX_STREAM_VOLUME_STE = new int[] {
+        5, // STREAM_VOICE_CALL
+        7, // STREAM_SYSTEM
+        7, // STREAM_RING
+        15, // STREAM_MUSIC
+        7, // STREAM_ALARM
+        7, // STREAM_NOTIFICATION
+        15, // STREAM_BLUETOOTH_SCO
+        7, // STREAM_SYSTEM_ENFORCED
+        15, // STREAM_DTMF
+        15  // STREAM_TTS
+    };
+
     /* mStreamVolumeAlias[] indicates for each stream if it uses the volume settings
      * of another stream: This avoids multiplying the volume settings for hidden
      * stream types that follow other stream behavior for volume settings
@@ -482,10 +498,19 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
         Vibrator vibrator = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
         mHasVibrator = vibrator == null ? false : vibrator.hasVibrator();
 
-       // Intialized volume
-        MAX_STREAM_VOLUME[AudioSystem.STREAM_VOICE_CALL] = SystemProperties.getInt(
-            "ro.config.vc_call_vol_steps",
-           MAX_STREAM_VOLUME[AudioSystem.STREAM_VOICE_CALL]);
+        mSteVolumeSteps = mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_ste_volume_steps);
+
+        // Intialized volume
+        if (mSteVolumeSteps) {
+            MAX_STREAM_VOLUME_STE[AudioSystem.STREAM_VOICE_CALL] = SystemProperties.getInt(
+                "ro.config.vc_call_vol_steps",
+            MAX_STREAM_VOLUME_STE[AudioSystem.STREAM_VOICE_CALL]);
+        } else {
+            MAX_STREAM_VOLUME[AudioSystem.STREAM_VOICE_CALL] = SystemProperties.getInt(
+                "ro.config.vc_call_vol_steps",
+            MAX_STREAM_VOLUME[AudioSystem.STREAM_VOICE_CALL]);
+        }
 
         sSoundEffectVolumeDb = context.getResources().getInteger(
                 com.android.internal.R.integer.config_soundEffectVolumeDb);
@@ -604,8 +629,13 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
         mForceAnalogCarDock = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_forceAnalogCarDock);
 
-        mMainRemote = new RemotePlaybackState(-1, MAX_STREAM_VOLUME[AudioManager.STREAM_MUSIC],
-                MAX_STREAM_VOLUME[AudioManager.STREAM_MUSIC]);
+        if (mSteVolumeSteps) {
+            mMainRemote = new RemotePlaybackState(-1, MAX_STREAM_VOLUME_STE[AudioManager.STREAM_MUSIC],
+                    MAX_STREAM_VOLUME_STE[AudioManager.STREAM_MUSIC]);
+        } else {
+            mMainRemote = new RemotePlaybackState(-1, MAX_STREAM_VOLUME[AudioManager.STREAM_MUSIC],
+                    MAX_STREAM_VOLUME[AudioManager.STREAM_MUSIC]);
+        }
         mHasRemotePlayback = false;
         mMainRemoteIsActive = false;
         postReevaluateRemote();
@@ -2835,7 +2865,11 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
             mVolumeIndexSettingName = settingName;
 
             mStreamType = streamType;
-            mIndexMax = MAX_STREAM_VOLUME[streamType];
+            if (mSteVolumeSteps) {
+                mIndexMax = MAX_STREAM_VOLUME_STE[streamType];
+            } else {
+                mIndexMax = MAX_STREAM_VOLUME[streamType];
+            }
             AudioSystem.initStreamVolume(streamType, 0, mIndexMax);
             mIndexMax *= 10;
 

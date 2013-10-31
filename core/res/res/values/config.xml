@@ -1322,4 +1322,10 @@
 
          The default value is false which represents AOSP behavior. -->
     <bool name="config_smsUseExpectMore">false</bool>
+
+    <!-- Flag indicating whether the current device is a
+         STE device or not.
+
+         Is the current device is a STE device we use other volume steps -->
+    <bool name="config_ste_volume_steps">false</bool>
 </resources>
